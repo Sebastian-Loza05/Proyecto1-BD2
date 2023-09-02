@@ -4,7 +4,7 @@
 
 using namespace std;
 
-struct Record{
+struct Record1{
 
 };
 
@@ -23,8 +23,8 @@ public:
     return true;
   }
 
-  vector<Record> rangeSearch(){
-    vector<Record> res;
+  vector<Record1> rangeSearch(){
+    vector<Record1> res;
     //metodo.rangeSearch();
     return res;
   }
