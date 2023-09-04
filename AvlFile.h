@@ -1,6 +1,5 @@
 //Es la base del AvlFile, falta balanceo al insertar y el remove y tambien verificar y balancear en el archivo.
-//
-//Cambia tambien a que ahora el nombre del archivo que se usa sea un nombre por defecto y no que se pase por el constructor.
+
 #pragma once
 #include <fstream>
 #include <iostream>
@@ -10,7 +9,7 @@ using namespace std;
 
 struct Record
 {
-  int cod;
+    int cod;
 	char nombre[12];
 	int ciclo;
 	long left, right;
@@ -38,7 +37,7 @@ struct Record
 class AVLFile
 {
 private:
-    string filename;
+    string filename = "avl_tree.dat"; // Default filename
     long pos_root;
 public:
   AVLFile(){}
@@ -95,6 +94,16 @@ public:
     }
     file.close();
   }
+
+    void remove(int key) {
+        ofstream file_e(this->filename, ios::binary);
+        ifstream file_l(this->filename, ios::binary);
+        if (!file_l.is_open() || !file_e.is_open()) throw "No se pudo abrir";
+        pos_root = remove(pos_root, key, file_e, file_l);
+        file_e.close();
+        file_l.close();
+    }
+
 
 private:
   Record find(long pos_node, int key, ifstream &file){
@@ -170,4 +179,54 @@ private:
     display.push_back(record);
     inorder(record.right, display, file_l);
 	}
+
+
+    long remove(long pos_node, int key, ofstream &file_e, ifstream &file_l) {
+        if (pos_node == -1) {
+            cout << "No existe el registro buscado" << endl;
+            throw "Posicion invalida";
+        }
+        file_l.seekg(sizeof(Record) * (pos_node - 1), ios::beg);
+        Record record = Record();
+        file_l.read(reinterpret_cast<char*>(&record), sizeof(Record));
+
+        if (key < record.cod) {
+            record.left = remove(record.left, key, file_e, file_l);
+        } else if (key > record.cod) {
+            record.right = remove(record.right, key, file_e, file_l);
+        } else {
+
+            if (record.left == -1) {
+                long temp = record.right;
+                file_e.seekp(sizeof(Record) * (pos_node - 1), ios::beg);
+                file_e.write(reinterpret_cast<const char*>(&record), sizeof(Record));
+                return temp;
+            } else if (record.right == -1) {
+                long temp = record.left;
+                file_e.seekp(sizeof(Record) * (pos_node - 1), ios::beg);
+                file_e.write(reinterpret_cast<const char*>(&record), sizeof(Record));
+                return temp;
+            } else {
+                long inOrderSuccessor = findInOrderSuccessor(record.right, file_l);
+                record.cod = inOrderSuccessor;
+                record.right = remove(record.right, inOrderSuccessor, file_e, file_l);
+                file_e.seekp(sizeof(Record) * (pos_node - 1), ios::beg);
+                file_e.write(reinterpret_cast<const char*>(&record), sizeof(Record));
+            }
+        }
+
+        //FUNCION DE BALANCEO(POR HACER)
+    }
+
+    long findInOrderSuccessor(long pos_node, ifstream &file_l) {
+        file_l.seekg(sizeof(Record) * (pos_node - 1), ios::beg);
+        Record record = Record();
+        file_l.read(reinterpret_cast<char*>(&record), sizeof(Record));
+        while (record.left != -1) {
+            file_l.seekg(sizeof(Record) * (record.left - 1), ios::beg);
+            file_l.read(reinterpret_cast<char*>(&record), sizeof(Record));
+        }
+        return record.cod;
+    }
 };
+
