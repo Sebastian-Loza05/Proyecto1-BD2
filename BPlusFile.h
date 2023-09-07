@@ -10,7 +10,20 @@
 
 struct Bucket{
   
+  vector<Record1> records;
   long next;
+  int count;
+  int m;
+
+  void read(ifstream &file){
+    //count m records next
+    file.read((char*)(&this->count), sizeof(int));
+    file.read((char*)(&this->m), sizeof(int));
+    for (int i = 0; i < this->count; i++) {
+      file.read((char*)(&this->records[i]), sizeof(Record1));
+    }
+    file.read((char*)(&this->next), sizeof(long));
+  }
 };
 
 template<typename TK>
@@ -18,7 +31,24 @@ struct Node{
   TK* keys;
   long* children;
   int count;
-  bool leaf;
+  bool pre_leaf;
+
+  Node(int M){
+    this->keys = new TK[M];
+  }
+
+  void read(ifstream &file, int M){
+    //count leaf keys children
+    file.read((char*)(&this->count), sizeof(bool));
+    file.read((char*)(&this->pre_leaf), sizeof(int));
+    for (int i = 0; i < M; i++) {
+      file.read((char*)(&this->keys[i]),sizeof(TK));
+    }
+    for (int i = 0; i < M; i++) {
+      file.read((char*)(&this->children[i]),sizeof(long));
+    }
+
+  }
 };
 
 
