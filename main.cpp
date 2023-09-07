@@ -24,7 +24,7 @@ int main (int argc, char *argv[]) {
   else if(metodo == 2)
     MethodSelector<SequentialFile> method;
   else
-    MethodSelector<BPlusFile> method;
+    MethodSelector<BPlusFile<int>> method;
   
   return 0;
 }

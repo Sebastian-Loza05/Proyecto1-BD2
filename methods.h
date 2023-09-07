@@ -5,7 +5,7 @@
 using namespace std;
 
 struct Record1{
-
+  int key;
 };
 
 template<typename T>
