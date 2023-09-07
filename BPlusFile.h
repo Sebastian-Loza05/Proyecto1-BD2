@@ -80,7 +80,6 @@ struct Node{
 };
 
 
-using namespace std;
 
 template<typename TK>
 class BPlusFile{
@@ -131,6 +130,8 @@ public:
     data.seekg(pos, ios::beg);
     Bucket bucket(page_size);
     bucket.read(data);
+    data.close();
+    index.close();
     for (int i = 0; i < bucket.count; i++) {
       if(bucket.records[i].key == key)
         res.push_back(bucket.records[i]);
@@ -142,12 +143,101 @@ public:
     add(root, record);
   }
 
-  bool remove(Record1 record){
+  bool remove(TK key){
+    ifstream indexR(this->indexname, ios::binary);
+    if (!indexR.is_open()) throw ("No se puede abrir el archivo");
+    fstream indexW(this->indexname, ios::binary | ios::in | ios::out);
+    if (!indexW.is_open()) throw ("No se puede abrir el archivo");
 
+    ifstream dataR(this->filename, ios::binary);
+    if (!dataR.is_open()) throw ("No se puede abrir el archivo");
+    fstream dataW(this->filename, ios::binary | ios::in | ios::out);
+    if (!dataW.is_open()) throw ("No se puede abrir el archivo");
+
+    dataR.seekg(0, ios::end);
+    int tam1 = dataR.tellg();
+    if (tam1 == 0) {
+      return false;
+    }
+
+    indexR.seekg(0, ios::end);
+    int tam2 = indexR.tellg();
+    bool leaf = false;
+    if (tam2 == 0) {
+      leaf = true;
+    }
+
+    indexR.seekg(0, ios::beg);
+    dataR.seekg(0, ios::beg);
+
+    bool rpta = remove_recursive(root, key, -1, 0, leaf, indexR, indexW, dataR, dataW);
+    
+
+    indexR.close();
+    indexW.close();
+
+    dataR.close();
+    dataW.close();
+    
+    return rpta;
   }
   ~BPlusFile(){}
 
 private:
+
+  
+
+  bool remove_recursive(long pos_node, TK key, long pos_padre, int pos_child, bool leaf, ifstream &indexR, fstream &indexW, ifstream &dataR, fstream &dataW){
+    if (leaf) {
+      dataR.seekg(pos_node, ios::beg);
+      dataW.seekg(pos_node, ios::beg);
+      Bucket bucket(page_size);
+      bucket.read(dataR);
+
+      for (int i = 0; i < bucket.count; i++) {
+        if (bucket.records[i].key == key) {
+          delete_node(bucket, i, dataW);
+          if (bucket.count < (M-1)/2 && (pos_node != root || bucket.count < 1)) {
+            arreglar_node();
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+    else {
+
+      indexR.seekg(pos_node, ios::beg);
+      Node<TK> node(M);
+      node.read(indexR, M);
+
+      int bajada = -1;
+  
+      for (int i = 0; i < node.count; i++) {
+        //delete_node(); // Lo hizo sebas
+        if (key <= node.keys[i]){
+          bajada = i;
+          break;
+        }
+      }
+    
+      if (bajada == -1) bajada = node.count;
+      bool rpta;
+      if (node.pre_leaf) {
+        rpta = remove_recursive(node.children[bajada], key, pos_node, bajada, true, indexR, indexW, dataR, dataW);
+      }
+      else {
+        rpta = remove_recursive(node.children[bajada], key, pos_node, bajada, false, indexR, indexW, dataR, dataW);
+      }
+
+      if (node.count < (M-1)/2 && (pos_node != root || node.count < 1)) {
+        arreglar_node();
+        return true;
+      }
+
+      return rpta;
+    }
+  }
   long search_recursive(long pos_node, TK key, ifstream &index){
     if(pos_node == -1)
       return -1;
