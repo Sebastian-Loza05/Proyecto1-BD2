@@ -21,7 +21,7 @@ struct Bucket{
     records = vector<Record1>(this->m);
   }
 
-  void write(ofstream &file){
+  void write(fstream &file){
     file.write(reinterpret_cast<const char*>(&count), sizeof(int));
     file.write(reinterpret_cast<const char*>(&m), sizeof(int));
     for (int i = 0; i < m; i++) {
@@ -55,7 +55,7 @@ struct Node{
     pre_leaf = true;
   }
 
-  void write(ofstream &file, int M){
+  void write(fstream &file, int M){
     file.write(reinterpret_cast<char*>(&count), sizeof(count));
     file.write(reinterpret_cast<char*>(&pre_leaf), sizeof(pre_leaf));
     for (int i = 0; i < M-1; i++) {
@@ -123,11 +123,16 @@ public:
   vector<Record1> search(TK key){
     vector<Record1> res;
     ifstream index(this->indexname, ios::binary);
-    index.seekg(0, ios::beg);
-    long pos = search_recursive(root, key, index);
-    if(pos == -1)
-      return res;
     ifstream data(this->filename, ios::binary);
+    data.seekg(0, ios::end);
+    if(data.tellg() == 0)
+      return res;
+    index.seekg(0, ios::end);
+    long pos = 0;
+    if(index.tellg() > 0){
+      index.seekg(0, ios::beg);
+      pos = search_recursive(root, key, index);
+    }
     data.seekg(pos, ios::beg);
     Bucket bucket(page_size);
     bucket.read(data);
@@ -135,6 +140,8 @@ public:
       if(bucket.records[i].key == key)
         res.push_back(bucket.records[i]);
     }
+    data.close();
+    index.close();
     return res;
   }
   
@@ -149,8 +156,7 @@ public:
 
 private:
   long search_recursive(long pos_node, TK key, ifstream &index){
-    if(pos_node == -1)
-      return -1;
+    index.seekg(pos_node, ios::beg);
     Node<TK> node(M);
     node.read(index, M);
     int bajada = -1;
@@ -164,5 +170,13 @@ private:
     if(node.pre_leaf)
       return bajada;
     return search_recursive(node.children[bajada], key, index);
+  }
+
+  void delete_node(Bucket &bucket, int pos, fstream &dataW){
+    for (int i = pos; i < bucket.count - 1; i++) {
+      bucket.records[i] = bucket.records[i+1];
+    }
+    bucket.count--;
+    bucket.write(dataW);
   }
 };
