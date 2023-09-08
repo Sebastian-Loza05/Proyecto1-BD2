@@ -491,7 +491,7 @@ class BPlus{
   }
 
   void rotar_internos(Node<TK, TV>* node, Node<TK, TV>* node1, int index, bool derecha, Node<TK, TV>* padre){
-    if(derecha){
+    if(derecha){ // prestamista derecha 
       node->keys[node->count] = padre->keys[index];
       padre->keys[index] = node1->keys[0];
       for(int i = 0; i < node1->count-1;i++){
@@ -507,7 +507,7 @@ class BPlus{
       }
       return;
     }
-    else{
+    else{ // prestamista izquierda
       for(int i = node->count-1; i > -1; i--)
         node->keys[i+1] = node->keys[i];
       node->keys[0] = padre->keys[index-1];
