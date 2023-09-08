@@ -13,12 +13,14 @@ struct Bucket{
   int count;
   long next;
   int m;
+  long next_del;
 
   Bucket(int page_size){
     count = 0;
     page_size -= sizeof(long) - (2*sizeof(int));
     this->m = page_size / sizeof(Record1);
     records = vector<Record1>(this->m);
+    next_del = -1;
   }
 
   void write(fstream &file){
@@ -28,6 +30,7 @@ struct Bucket{
       file.write((char*)&records[i], sizeof(Record1));
     }
     file.write(reinterpret_cast<char*>(&next), sizeof(long));
+    file.write(reinterpret_cast<char*>(&next_del), sizeof(long));
   } 
 
   void read(ifstream &file){
@@ -38,6 +41,7 @@ struct Bucket{
       file.read((char*)(&this->records[i]), sizeof(Record1));
     }
     file.read((char*)(&this->next), sizeof(long));
+    file.read((char*)(&this->next_del), sizeof(long));
   }
 };
 
@@ -47,23 +51,26 @@ struct Node{
   long* children;
   int count;
   bool pre_leaf;
-  
+  long next_del;
+
   Node(int M){
     this->keys = new TK[M];
     this->children = new long[M];
     count = 0;
     pre_leaf = true;
+    next_del = -1;
   }
 
   void write(fstream &file, int M){
-    file.write(reinterpret_cast<char*>(&count), sizeof(count));
-    file.write(reinterpret_cast<char*>(&pre_leaf), sizeof(pre_leaf));
+    file.write(reinterpret_cast<const char*>(&count), sizeof(count));
+    file.write(reinterpret_cast<const char*>(&pre_leaf), sizeof(pre_leaf));
     for (int i = 0; i < M-1; i++) {
       file.write(reinterpret_cast<const char*>(&keys[i]), sizeof(TK));
     }
     for (int i = 0; i < M; i++) {
       file.write(reinterpret_cast<const char*>(&children[i]), sizeof(long));
     }
+    file.write(reinterpret_cast<char*>(&next_del), sizeof(long));
   }
 
   void read(ifstream &file, int M){
@@ -76,6 +83,7 @@ struct Node{
     for (int i = 0; i < M; i++) {
       file.read((char*)(&this->children[i]),sizeof(long));
     }
+    file.read((char*)(&this->next_del), sizeof(long));
   }
 };
 
@@ -107,7 +115,7 @@ public:
       page_size = static_cast<long>(p_size);
       */
     } else {
-      page_size = 4096;
+      page_size = 4092;
     }
     
     int page_s = page_size - sizeof(int) - sizeof(bool);
@@ -179,7 +187,6 @@ public:
 
     bool rpta = remove_recursive(root, key, -1, 0, leaf, indexR, indexW, dataR, dataW);
     
-
     indexR.close();
     indexW.close();
 
@@ -204,7 +211,7 @@ private:
       for (int i = 0; i < bucket.count; i++) {
         if (bucket.records[i].key == key) {
           delete_node(bucket, i, dataW);
-          if (bucket.count < (M-1)/2 && (pos_node != root || bucket.count < 1)) {
+          if (bucket.count < (M)/2 && (pos_node != root || bucket.count < 1)) {
             arreglar_node();
             return true;
           }
@@ -235,7 +242,7 @@ private:
       else {
         rpta = remove_recursive(node.children[bajada], key, pos_node, bajada, false, indexR, indexW, dataR, dataW);
       }
-      if (node.count < (M-1)/2 && (pos_node != root || node.count < 1)) {
+      if (node.count < (M)/2 && (pos_node != root || node.count < 1)) {
         arreglar_node();
         return true;
       }
@@ -330,6 +337,10 @@ private:
     indexR.seekg(pos_padre, ios::beg);
     padre.read(indexR, M);
 
+    long last_next_del;
+    dataR.seekg(0, ios::beg);
+    dataR.read(reinterpret_cast<char*>(&last_next_del), sizeof(long));
+
     if(left != -1){
       Bucket node_l(page_size);
       dataR.seekg(left, ios::beg);
@@ -348,6 +359,17 @@ private:
         padre.children[i] = padre.children[i+1];
       }
       //falta escribir en arcchivo
+      dataW.seekg(0, ios::beg);
+      dataW.write(reinterpret_cast<const char*>(&pos_node), sizeof(long));
+      node.next_del = last_next_del;
+
+      //Reescritura de nodos actualizados.
+      indexW.seekg(pos_padre, ios::beg);
+      padre.write(indexW, M);
+      dataW.seekg(pos_node, ios::beg);
+      node.write(dataW);
+      dataW.seekg(left, ios::beg);
+      node_l.write(dataW);
       return;
     }
     Bucket node_r(page_size);
@@ -366,7 +388,19 @@ private:
     for (int i = pos_child+1; i < padre.count+1; i++) {
       padre.children[i] = padre.children[i+1];
     }
-    //falta esccribir en archivo;
+
+    //Actualizacion del header
+    dataW.seekg(0, ios::beg);
+    dataW.write(reinterpret_cast<const char*>(&right), sizeof(long));
+    node_r.next_del = last_next_del;
+
+    //Reescritura de nodos actualizados.
+    indexW.seekg(pos_padre, ios::beg);
+    padre.write(indexW, M);
+    dataW.seekg(pos_node, ios::beg);
+    node.write(dataW);
+    dataW.seekg(right, ios::beg);
+    node_r.write(dataW);
     return;
   }
 
@@ -378,6 +412,10 @@ private:
     Node<TK> node(M);
     indexR.seekg(pos_node, ios::beg);
     node.read(indexR, M);
+
+    long last_next_del;
+    indexR.seekg(0, ios::beg);
+    indexR.read(reinterpret_cast<char*>(&last_next_del), sizeof(long));
 
     if(left != -1){
       Node<TK> node_l(M);
@@ -401,7 +439,20 @@ private:
       for (int i = pos_child; i < padre.count+1; i++) {
         padre.children[i] = padre.children[i+1];
       }
-      //escribir en archivo.
+    //Escritura en archivo;
+    
+    //Actualizacion del header
+      indexW.seekg(0, ios::beg);
+      indexW.write(reinterpret_cast<const char*>(&pos_node), sizeof(long));
+      node.next_del = last_next_del;
+
+      //Reescritura de nodos actualizados.
+      indexW.seekg(pos_padre, ios::beg);
+      padre.write(indexW, M);
+      indexW.seekg(pos_node, ios::beg);
+      node.write(indexW, M);
+      indexW.seekg(left, ios::beg);
+      node_l.write(indexW, M);
       return;
     }
 
@@ -426,8 +477,119 @@ private:
     for (int i = pos_child+1; i < padre.count+1; i++) {
       padre.children[i] = padre.children[i+1];
     }
-    //falta esccribir en archivo;
+    //Escritura en archivo;
+    
+    //Actualizacion del header
+    indexW.seekg(0, ios::beg);
+    indexW.write(reinterpret_cast<const char*>(&right), sizeof(long));
+    node_r.next_del = last_next_del;
+
+    //Reescritura de nodos actualizados.
+    indexW.seekg(pos_padre, ios::beg);
+    padre.write(indexW, M);
+    indexW.seekg(pos_node, ios::beg);
+    node.write(indexW, M);
+    indexW.seekg(right, ios::beg);
+    node_r.write(indexW, M);
     return;
+  }
+
+  void rotar_internos(long pos_node, long pos_node_prest, long pos_node_padre, int index, bool right, ifstream &indexR, fstream &indexW){
+    // Lectura
+    // Nodo que incumple
+    indexR.seekg(pos_node);
+    Node<TK> node(M);
+    node.read(indexR, M);
+
+    // Nodo prestamista
+    indexR.seekg(pos_node_prest);
+    Node<TK> node_prest(M);
+    node.read(indexR, M);
+
+    // Nodo padre 
+    indexR.seekg(pos_node_padre);
+    Node<TK> node_padre(M);
+    node.read(indexR, M);
+    if (right) {
+
+      node.keys[node.count] = node_padre.keys[index];
+      node_padre.keys[index] = node_prest.keys[0];
+      for (int i = 0; i < node_prest.count-1; i++) {
+        node_prest.keys[i] = node_prest.keys[i+1];
+      }
+      node_prest.count--;
+      node.count++;
+      // arreglando punteros
+      node.children[node.count] = node_prest.children[0];
+      for (int i = 0; i < node_prest.count+1; i++) {
+        node_prest.children[i] = node_prest.children[i+1];
+      }
+      
+    }
+    else {
+      for (int i = node.count-1; i > -1; i--) {
+        node.keys[i+1] = node.keys[i];
+      }
+      node.keys[0] = node_padre.keys[index-1];
+      node_prest.count--;
+      node.count++;
+      
+      for (int i = node.count-1; i > -1 ; i--) {
+        node.children[i+1] = node_prest.children[i];
+      }
+      node.children[0] = node_prest.children[node_prest.count+1];
+    }
+    // Escritura
+    indexW.seekg(pos_node);
+    node.write(indexW, M);
+
+    indexW.seekg(pos_node_prest);
+    node_prest.write(indexW, M);
+
+    indexW.seekg(pos_node_padre);
+    node_padre.write(indexW, M);
+  }
+ 
+  void rotar_hojas(long pos_bucket, long pos_bucket_prest, long pos_node_padre, int index, bool right,ifstream &indexR, fstream &indexW, ifstream &dataR, fstream &dataW){
+    indexR.seekg(pos_node_padre);
+    Node<TK> node_padre;
+    node_padre.read(indexR, M);
+
+    dataR.seekg(pos_bucket);
+    Bucket bucket(page_size);
+    bucket.read(dataR);
+
+    dataR.seekg(pos_bucket_prest);
+    Bucket bucket_prest(page_size);
+    bucket_prest.read(dataR);
+
+    if (right) {
+      bucket.records[bucket.count] = bucket_prest.records[0];
+      node_padre.keys[index] = bucket_prest.records[0].key;
+      for (int i = 0; i < bucket_prest.count-1; i++) {
+        bucket_prest.records[i] = bucket_prest.records[i+1];
+      }
+      bucket_prest.count--;
+      bucket.count++;
+    }
+    else{
+      for (int i = bucket.count; i > -1; i--) {
+        bucket.records[i+1] = bucket.records[i];
+      }
+      bucket.records[0] = bucket_prest.records[bucket_prest.count-1];
+      bucket_prest.count--;
+      node_padre.keys[index-1] = bucket_prest.records[bucket_prest.count-1].key;
+      bucket.count++;
+    }
+    indexW.seekg(pos_node_padre);
+    node_padre.write(indexW, M);
+
+    dataW.seekg(pos_bucket);
+    bucket.write(dataW);
+
+    dataW.seekg(pos_bucket_prest);
+    bucket_prest.write(dataW);
+
   }
 
   long search_recursive(long pos_node, TK key, ifstream &index){
