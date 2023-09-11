@@ -17,10 +17,7 @@ class BPlus{
   explicit BPlus(int M):root(nullptr), M(M){}
 
   void insert(TK key, TV value){
-    int bajada = 0;
-    queue<Node<TK, TV>* > nodos_hijos;
-    stack<Node<TK, TV>* > nodos;
-    insert_recursive(root, nullptr, key, value, bajada, nodos, nodos_hijos, true);
+    insert_rec(root, nullptr, key, value);
   }
 
   void remove(TK key, TV value){
@@ -128,58 +125,7 @@ class BPlus{
     return search_rec(node->children[bajada],key);
   }
 
-  void insertar(Node<TK,TV>* &node, TK key, TV value){
-    Casilla<TK, TV> c_key;
-    if (node == nullptr) {
-      node = new Node<TK, TV> (M+1,true);  
-      c_key = Casilla<TK, TV>(key);
-      node->keys[0] = c_key;
-      node->count++;
-      this->root = node;
-      return;
-    }
-
-    if (node->leaf) 
-      c_key = Casilla<TK, TV> (key, value);
-    else
-      c_key = Casilla<TK, TV> (key);
-
-    for (int i = 0; i < node->count; i++) {
-      if (node->keys[i] == key) 
-        return;
-      else if (node->keys[i] > c_key) {
-        Casilla<TK, TV> antiguo = node->keys[i];
-        node->keys[i] = c_key;
-        c_key = antiguo;
-      }
-    }
-    node->keys[node->count] = c_key;
-    node->count++;
-    return;
-  }
-
-  void anclar(Node<TK, TV>* node1, Node<TK, TV>* node2, Node<TK, TV>* padre, TK key){
-    bool finded = false; 
-    int i;
-    Node<TK, TV> *temp1;
-    for (i = 0; i < padre->count; i++) {
-      if (finded) {
-        temp1 = padre->children[i];
-        padre->children[i] = node2;
-        node2 = temp1;
-      }
-      else if (padre->keys[i] == key) {
-        finded = true;
-        padre->children[i] = node1;
-      }
-    }
-    
-    padre->children[padre->count] = node2;
-    delete temp1;
-    return;
-  }
-
-  void insert_rec(Node<TK, TV>* node, Node<TK, TV>* padre, TK key, TK value){
+  void insert_rec(Node<TK, TV>* node, Node<TK, TV>* padre, TK key, TV value){
     if(node == nullptr){
       Node<TK, TV>* new_node;
       Casilla<TK, TV> c_key;
@@ -191,9 +137,10 @@ class BPlus{
       return;
     }
     else if(node->leaf){
-      insertar(node, key, value);
-      if(node->count == M)
-        split_node(node, padre);
+      insertar(node, key, &value);
+      if(node->count == M){
+        split(node, padre);
+      }
       return;
     }
     int bajada = -1;
@@ -205,8 +152,40 @@ class BPlus{
     }
     if(bajada == -1) bajada = node->count;
     insert_rec(node->children[bajada], node, key, value);
-    if(node->count == M)
-      split_node(node, padre);
+    node->print();
+    if(node->count == M){
+      split(node, padre);
+    }
+  }
+
+  void insertar(Node<TK,TV>* &node, TK key, TV* value){
+    Casilla<TK, TV> c_key;
+    if(node == nullptr) {
+      node = new Node<TK, TV> (M+1,false);  
+      c_key = Casilla<TK, TV>(key);
+      node->keys[0] = c_key;
+      node->count++;
+      this->root = node;
+      return;
+    }
+
+    if (node->leaf) 
+      c_key = Casilla<TK, TV> (key, *value);
+    else
+      c_key = Casilla<TK, TV> (key);
+
+    for (int i = 0; i < node->count; i++) {
+      if ( key == node->keys[i]) 
+        return;
+      else if (node->keys[i] > c_key) {
+        Casilla<TK, TV> antiguo = node->keys[i];
+        node->keys[i] = c_key;
+        c_key = antiguo;
+      }
+    }
+    node->keys[node->count] = c_key;
+    node->count++;
+    return;
   }
 
   void split(Node<TK, TV>* node, Node<TK, TV>* padre){
@@ -223,7 +202,7 @@ class BPlus{
       new_node1 = new Node<TK, TV>(M+1, false);
       new_node2 = new Node<TK, TV>(M+1, false);
     }
-
+    bool split_root = false;
     for (int i = 0; i < node->count; i++) {
       if(i < (M-1)/2){
         new_node1->keys[new_node1->count] = node->keys[i];
@@ -232,9 +211,10 @@ class BPlus{
       else if(i == (M-1)/2){
         medio = node->keys[i].key;
         insertar(padre, medio, node->keys[i].value);
-        if(node->leaf)
+        if(node->leaf){
           new_node1->keys[new_node1->count] = node->keys[i];
-        new_node1->count++;
+          new_node1->count++;
+        }
       }
       else{
         new_node2->keys[new_node2->count] = node->keys[i];
@@ -242,16 +222,61 @@ class BPlus{
       }
     }
     anclar(new_node1, new_node2, padre, medio);
+    if(!node->leaf){
+      ordenar_punteros(new_node1, new_node2, node);
+      cout<<"nodo:"<<endl;
+      node->print();
+      for (int i = 0; i < padre->count+1; i++) {
+        node->children[i]->print();
+      }
+      cout<<"fin"<<endl;
+    }
+
+    cout<<"padre:"<<endl;
+    padre->print();
+    for (int i = 0; i < padre->count+1; i++) {
+      padre->children[i]->print();
+    }
+    cout<<"fin"<<endl;
     return;
   }
 
-  void organizar_punteros(Node<TK, TV>* node1, Node<TK, TV>* node2, Node<TK, TV>* node){
+  void anclar(Node<TK, TV>* node1, Node<TK, TV>* node2, Node<TK, TV>* padre, TK key){
+    bool finded = false; 
+    int i;
+    Node<TK, TV> *temp1;
+    // padre->print();
+    // node1->print();
+    // node2->print();
+    for (i = 0; i < padre->count; i++) {
+      if (finded) {
+        temp1 = padre->children[i];
+        padre->children[i] = node2;
+        node2 = temp1;
+      }
+      else if ( key == padre->keys[i]) {
+        finded = true;
+        padre->children[i] = node1;
+      }
+    }
+    padre->children[padre->count] = node2;
+    cout<<"padre:"<<endl;
+    padre->print();
+    for (int i = 0; i < padre->count+1; i++) {
+      padre->children[i]->print();
+    }
+    cout<<"fin"<<endl;
+    return;
+  }
+
+  void ordenar_punteros(Node<TK, TV>* node1, Node<TK, TV>* node2, Node<TK, TV>* node){
     for (int i = 0; i < node->count; i++) {
       if(i <= node1->count)
         node1->children[i] = node->children[i];
       else
         node2->children[i-node1->count-1] = node->children[i];
     }
+    return;
   }
 
 
