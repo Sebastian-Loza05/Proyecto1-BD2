@@ -6,13 +6,10 @@ using namespace std;
 template<typename TK, typename TV>
 struct Casilla{
   TK key;
-  forward_list<TV>* values;
+  TV *value;
   Casilla()=default;
-  explicit Casilla(TK key):key(key), values(nullptr){};
-  Casilla(TK key, TV value):key(key){
-    values = new forward_list<TV>;
-    values->push_back(value);
-  };
+  explicit Casilla(TK key):key(key), value(nullptr){};
+  Casilla(TK key, TV value):key(key), value(value){}
   bool operator<(const Casilla<TK, TV> &otro){
     return this->key < otro.key;
   }
@@ -67,9 +64,9 @@ bool operator==(TK otro, const Casilla<TK, TV> &casilla){
 template<typename TK, typename TV>
 ostream& operator << (ostream& os, const Casilla<TK, TV>& casilla){
   os << casilla.key;
-  if(casilla.values != nullptr){
-    os<<":"<<endl;
-    casilla.values->mostrar();
+  if(casilla.value != nullptr){
+    os<<":";
+    os<<casilla.value<<endl;
   }
   return os;
 }
@@ -83,9 +80,9 @@ struct Node{
   bool leaf;
 
   Node(int M, bool hoja):count(0), leaf(hoja){
-    keys = new Casilla<TK, TV>[M-1];
+    keys = new Casilla<TK, TV>[M];
     if (!hoja){
-      children = new Node<TK,TV>*[M];
+      children = new Node<TK,TV>*[M+1];
       for (int i = 0; i < M; i++) {
         children[i] = nullptr;
       }

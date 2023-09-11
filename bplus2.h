@@ -131,7 +131,7 @@ class BPlus{
     if(node == nullptr){
       Node<TK, TV>* new_node;
       Casilla<TK, TV> c_key;
-      new_node = new Node<TK, TV>(M, true);
+      new_node = new Node<TK, TV>(M+1, true);
       c_key = Casilla<TK, TV>(key, value);
       new_node->keys[new_node->count] = c_key;
       new_node->count++;
@@ -152,9 +152,57 @@ class BPlus{
       }
     }
     if(bajada == -1) bajada = node->count;
-
-
+    insert_rec(node->children[bajada], node, key, value);
+    if(node->count == M)
+      split_node(node, padre);
   }
+
+  void split(Node<TK, TV>* node, Node<TK, TV>* padre){
+    Node<TK, TV>* new_node1;
+    Node<TK, TV>* new_node2;
+    TK medio;
+    if(node->leaf){
+      new_node1 = new Node<TK, TV>(M+1, true);
+      new_node2 = new Node<TK, TV>(M+1, true);
+      new_node1->next = new_node2;
+      new_node2->next = node->next;
+    }
+    else{
+      new_node1 = new Node<TK, TV>(M+1, false);
+      new_node2 = new Node<TK, TV>(M+1, false);
+    }
+
+    for (int i = 0; i < node->count; i++) {
+      if(i < (M-1)/2){
+        new_node1->keys[new_node1->count] = node->keys[i];
+        new_node1->count++;
+      }
+      else if(i == (M-1)/2){
+        medio = node->keys[i].key;
+        insertar(padre, medio, node->keys[i].value);
+        if(node->leaf)
+          new_node1->keys[new_node1->count] = node->keys[i];
+        new_node1->count++;
+      }
+      else{
+        new_node2->keys[new_node2->count] = node->keys[i];
+        new_node2->count++;
+      }
+    }
+    anclar(new_node1, new_node2, padre, medio);
+    return;
+  }
+
+  void organizar_punteros(Node<TK, TV>* node1, Node<TK, TV>* node2, Node<TK, TV>* node){
+    for (int i = 0; i < node->count; i++) {
+      if(i <= node1->count)
+        node1->children[i] = node->children[i];
+      else
+        node2->children[i-node1->count-1] = node->children[i];
+    }
+  }
+
+
   void remove2(Node<TK, TV>* node,TK key, TV value, Node<TK, TV>* padre,int child_index){
     if(node == nullptr){
       return;
@@ -185,23 +233,11 @@ class BPlus{
   }
 
   void delete_node(Node<TK, TV>* node,TK key, TV value, Node<TK, TV>* padre,int indice,int child_index){
-    if(node->leaf){
-      int values_size = node->keys[indice].values->size();
-      if(values_size > 1){
-        for (int i = 0; i < values_size; i++) {
-          if((*(node->keys[indice].values))[i] == value){
-            node->keys[indice].values->remove(i);
-            break;
-          }
-        }
-        return;
-      }
-      for(int i = indice; i < node->count - 1; i++){
-        node->keys[i] = node->keys[i+1];
-      }
-      node->count--;
-      return;
+    for(int i = indice; i < node->count - 1; i++){
+      node->keys[i] = node->keys[i+1];
     }
+    node->count--;
+    return;
   }
 
   void arreglar_node(Node<TK, TV>* node,Node<TK, TV>* padre,int child_index, bool hoja){
@@ -311,21 +347,19 @@ class BPlus{
       }
       return;
     }
-    else{ // prestamista izquierda
-      for(int i = node->count-1; i > -1; i--)
-        node->keys[i+1] = node->keys[i];
-      node->keys[0] = padre->keys[index-1];
-      padre->keys[index-1] = node1->keys[node1->count-1];
-      node1->count--;
-      node->count++;
-      if(node->leaf) return;
-      //arreglar punteros
-      for(int i = node->count-1; i > -1;i--){
-        node->children[i+1] = node1->children[i];
-      }
-      node->children[0] = node1->children[node1->count+1];
-
+    for(int i = node->count-1; i > -1; i--)
+      node->keys[i+1] = node->keys[i];
+    node->keys[0] = padre->keys[index-1];
+    padre->keys[index-1] = node1->keys[node1->count-1];
+    node1->count--;
+    node->count++;
+    if(node->leaf) return;
+    //arreglar punteros
+    for(int i = node->count-1; i > -1;i--){
+      node->children[i+1] = node1->children[i];
     }
+    node->children[0] = node1->children[node1->count+1];
+    return;
   }
 
   void rotar_hojas(Node<TK, TV>* node, Node<TK, TV>* node1, int index, bool derecha, Node<TK, TV>* padre){
@@ -339,14 +373,13 @@ class BPlus{
       node->count++;
       return;
     }
-    else{
-      for(int i = node->count-1; i > -1; i--)
-        node->keys[i+1] = node->keys[i];
-      node->keys[0] = node1->keys[node1->count-1];
-      node1->count--;
-      padre->keys[index-1] = node1->keys[node1->count-1];
-      node->count++;
-      return;
-    }
+
+    for(int i = node->count-1; i > -1; i--)
+      node->keys[i+1] = node->keys[i];
+    node->keys[0] = node1->keys[node1->count-1];
+    node1->count--;
+    padre->keys[index-1] = node1->keys[node1->count-1];
+    node->count++;
+    return;
   }
 };
