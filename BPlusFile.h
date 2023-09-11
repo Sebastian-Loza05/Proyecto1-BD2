@@ -122,6 +122,12 @@ public:
     this->M  = (page_s + sizeof(TK))/(4+sizeof(TK)) ;
     ofstream index(this->indexname, ios::binary | ios::app);
     ofstream file(this->filename, ios::binary | ios::app);
+    index.seekp(0,ios::end);
+    int tam = index.tellp();
+    if (tam == 0) {
+      long value = -1;
+      index.write(reinterpret_cast<char*>(&value), sizeof(long));
+    }
     
     index.close();
     file.close();
@@ -171,14 +177,14 @@ public:
 
     dataR.seekg(0, ios::end);
     int tam1 = dataR.tellg();
-    if (tam1 == 0) {
+    if (tam1 == 4) {
       return false;
     }
 
     indexR.seekg(0, ios::end);
     int tam2 = indexR.tellg();
     bool leaf = false;
-    if (tam2 == 0) {
+    if (tam2 == 4) {
       leaf = true;
     }
 
