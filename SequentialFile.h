@@ -186,5 +186,106 @@ public:
     mainFile.close();
   }
 
+    vector<Registro> search(int key) {
+        vector<Registro> result;
+        ifstream mainFile(mainFilename, ios::binary);
+        if (!mainFile.is_open()) throw runtime_error("No se pudo abrir el archivo main");
+
+        int inicio = 0;
+        mainFile.seekg(0, ios::end);
+        int fin = ((int)mainFile.tellg() - inicio) / sizeof(Registro) - 1;
+        mainFile.seekg(0, ios::beg);
+
+        Registro record;
+        Registro PrevRecord;
+
+        while (inicio <= fin) {
+            int medio = (inicio + fin) / 2;
+            mainFile.seekg(medio * sizeof(Registro) + sizeof(int) + sizeof(bool));
+            mainFile.read((char*)&record, sizeof(Registro));
+
+            if (record.id == key) {
+                result.push_back(record);
+                return result;
+            } else if (record.id < key) {
+                inicio = medio + 1;
+                if (key - record.id < key - PrevRecord.id) {
+                    PrevRecord = record;
+                }
+            } else {
+                fin = medio - 1;
+            }
+        }
+
+        while(!PrevRecord.isMain){
+            ifstream auxFile(auxFilename, ios::binary);
+            if (!auxFile.is_open()) throw runtime_error("No se pudo abrir el archivo auxiliar");
+            auxFile.seekg(PrevRecord.nextPF * sizeof(Registro));
+            auxFile.read((char*)&PrevRecord, sizeof(Registro));
+            if (PrevRecord.id == key) {
+                result.push_back(PrevRecord);
+                return result;
+            }
+        }
+
+        return result;
+    }
+
+    vector<Registro> rangeSearch(int beginkey, int endkey) {
+        vector<Registro> result;
+        ifstream mainFile(mainFilename, ios::binary);
+        if (!mainFile.is_open()) {
+            throw runtime_error("No se pudo abrir el archivo main");
+        }
+
+        Registro record;
+        int inicio = 0;
+        mainFile.seekg(0, ios::end);
+        int fin = ((int)mainFile.tellg() - inicio) / sizeof(Registro) - 1;
+        mainFile.seekg(0, ios::beg);
+
+        while (inicio <= fin) {
+            int medio = (inicio + fin) / 2;
+            mainFile.seekg(medio * sizeof(Registro) + sizeof(int) + sizeof(bool));
+            mainFile.read((char*)&record, sizeof(Registro));
+
+            if (record.id >= beginkey) {
+                fin = medio - 1; 
+            } else {
+                inicio = medio + 1; 
+            }
+        }
+
+        
+        bool found = false;
+
+        while (record.id <= endkey) {
+            if (found && record.id < beginkey) {
+                break; 
+            }
+
+            if (record.id >= beginkey) {
+                result.push_back(record);
+                found = true; 
+            }
+
+            if (record.isMain) {
+                mainFile.seekg(record.nextPF * sizeof(Registro)  + sizeof(int) + sizeof(bool));
+                mainFile.read(reinterpret_cast<char*>(&record), sizeof(Registro));
+            } else {
+                ifstream auxFile(auxFilename, ios::binary);
+                if (!auxFile.is_open()) {
+                    throw runtime_error("No se pudo abrir el archivo auxiliar");
+                }
+
+                auxFile.seekg(record.nextPF * sizeof(Registro));
+                auxFile.read(reinterpret_cast<char*>(&record), sizeof(Registro));
+            }
+        }
+
+        return result;
+    }
+
+
   ~SequentialFile(){}
 };
