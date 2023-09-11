@@ -57,6 +57,7 @@ class BPlus{
     while (!queueq.empty())
     {
       Node<TK, TV> *node = queueq.front();
+      cout<<"count: "<<node->count;
       cout<<"| ";
       for(int i = 0; i < node->count; i++)
         cout<<node->keys[i]<<", ";
@@ -74,6 +75,10 @@ class BPlus{
         }
       }
     }
+  }
+  
+  void print(){
+    printBPlusNode(root,0);
   }
 
   forward_list<Casilla<TK, TV>>* range_search(TK begin, TK end){
@@ -110,6 +115,22 @@ class BPlus{
   }
 
   private:
+  void printBPlusNode(Node<TK, TV>* node, int depth) {
+    if (node == nullptr) return;
+
+    std::cout << "Profundidad " << depth << ": ";
+    for (int i = 0; i < node->count; i++) {
+      std::cout << node->keys[i] << " ";
+    }  
+    
+    std::cout << std::endl;
+    if(!node->leaf){
+      for (int i = 0; i < node->count+1; i++) {
+        printBPlusNode(node->children[i], depth + 1);
+      }
+    }
+  }
+
   Node<TK, TV>* search_rec(Node<TK, TV>* node, TK key){
     if (node == nullptr)return nullptr;
     else if(node->leaf)
@@ -224,20 +245,7 @@ class BPlus{
     anclar(new_node1, new_node2, padre, medio);
     if(!node->leaf){
       ordenar_punteros(new_node1, new_node2, node);
-      cout<<"nodo:"<<endl;
-      node->print();
-      for (int i = 0; i < padre->count+1; i++) {
-        node->children[i]->print();
-      }
-      cout<<"fin"<<endl;
     }
-
-    cout<<"padre:"<<endl;
-    padre->print();
-    for (int i = 0; i < padre->count+1; i++) {
-      padre->children[i]->print();
-    }
-    cout<<"fin"<<endl;
     return;
   }
 
@@ -260,23 +268,30 @@ class BPlus{
       }
     }
     padre->children[padre->count] = node2;
-    cout<<"padre:"<<endl;
-    padre->print();
-    for (int i = 0; i < padre->count+1; i++) {
-      padre->children[i]->print();
-    }
-    cout<<"fin"<<endl;
     return;
   }
 
   void ordenar_punteros(Node<TK, TV>* node1, Node<TK, TV>* node2, Node<TK, TV>* node){
-    for (int i = 0; i < node->count; i++) {
+    for (int i = 0; i < node->count+1; i++) {
       if(i <= node1->count)
         node1->children[i] = node->children[i];
       else
         node2->children[i-node1->count-1] = node->children[i];
     }
-    return;
+    // cout<<"nodo1:"<<endl;
+    // node1->print();
+    // for (int i = 0; i < node1->count+1; i++) {
+    //   node1->children[i]->print();
+    // }
+    // cout<<"fin"<<endl;
+    //
+    // cout<<"nodo2:"<<endl;
+    // node2->print();
+    // for (int i = 0; i < node2->count+1; i++) {
+    //   node2->children[i]->print();
+    // }
+    // cout<<"fin"<<endl;
+    // return;
   }
 
 
