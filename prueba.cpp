@@ -27,7 +27,7 @@ int main() {
       bplus.insert(random_int, random_str); // Insertar los valores aleatorios en Bplus
       // bplus.print();
       bplus.displayTree();
-      cin >> c;
+      // cin >> c;
     }
     return 0;
 }
