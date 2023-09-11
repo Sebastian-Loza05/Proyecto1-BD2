@@ -55,7 +55,7 @@ struct Node{
 
   Node(int M){
     this->keys = new TK[M];
-    this->children = new long[M];
+    this->children = new long[M+1];
     count = 0;
     pre_leaf = true;
     next_del = -1;
@@ -133,6 +133,8 @@ public:
     file.close();
   }
 
+  
+
   vector<Record1> search(TK key){
     vector<Record1> res;
     ifstream index(this->indexname, ios::binary);
@@ -163,6 +165,19 @@ public:
   bool add(Record1 record){
     add(root, record);
   }
+  
+  void insertar(long pos_node, bool leaf, TK key, Record1 value, fstream index, fstream data){
+    if (leaf) {
+      long value;
+      data.read(reinterpret_cast<char*>(&value), sizeof(long));
+      Bucket node(page_size);
+      data.seekg(pos_node, ios::beg);
+      node.read(data);
+      
+    }
+
+  }
+  
 
   bool remove(TK key){
     ifstream indexR(this->indexname, ios::binary);
