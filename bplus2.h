@@ -48,7 +48,7 @@ class BPlus{
     }
     cout<<endl;
   }
-  
+
   void displayTree(){
     queue<Node<TK, TV>*> queueq;
     queueq.push(this->root);
@@ -75,6 +75,10 @@ class BPlus{
       }
       cout << endl;
     }
+  }
+  
+  void print(){
+    printBPlusNode(root,0);
   }
 
   forward_list<Casilla<TK, TV>>* range_search(TK begin, TK end){
@@ -111,6 +115,22 @@ class BPlus{
   }
 
   private:
+  void printBPlusNode(Node<TK, TV>* node, int depth) {
+    if (node == nullptr) return;
+
+    std::cout << "Profundidad " << depth << ": ";
+    for (int i = 0; i < node->count; i++) {
+      std::cout << node->keys[i] << " ";
+    }  
+    
+    std::cout << std::endl;
+    if(!node->leaf){
+      for (int i = 0; i < node->count+1; i++) {
+        printBPlusNode(node->children[i], depth + 1);
+      }
+    }
+  }
+
   Node<TK, TV>* search_rec(Node<TK, TV>* node, TK key){
     if (node == nullptr)return nullptr;
     else if(node->leaf)
@@ -222,43 +242,10 @@ class BPlus{
         new_node2->count++;
       }
     }
-    // cout << "----Padre prev: " << endl;
-    // padre->print();
-    // new_node1->print();
-    // new_node2->print();
     anclar(new_node1, new_node2, padre, medio);
-    // cout << "------||----" << endl;
-    // // displayTree();
-    // cout << "-----||-----" << endl;
-    // // cout << "asdasd____: " << endl;
-    // // node->print();
-    // cout << "Desp: " << endl;
-    // cout << "Padre: " << endl;
-    // padre->print();
-    // cout << "Hijos padre: " << endl;
-    // for (int i = 0; i < padre->count+1; i++) {
-    //   padre->children[i]->print();
-    // }
-    // cout << "-> Node 1: " << endl;
-    // new_node1->print();
-    //
-    // cout << "-> Node 2: " << endl;
-    // new_node2->print();
-    // cout << endl << endl;
     if(!node->leaf){
       ordenar_punteros(new_node1, new_node2, node);
-      // cout << "---" << endl;
-      // cout << "Hijos node1: " << endl; 
-      // for (int i = 0; i < new_node1->count+1; i++) {
-      //   new_node1->children[i]->print();
-      // }
-      // cout << "---" << endl;
-      // cout << "Hijos node2: " << endl; 
-      // for (int i = 0; i < new_node2->count+1; i++) {
-      //   new_node2->children[i]->print();
-      // }
     }
-
     return;
   }
 
@@ -281,12 +268,6 @@ class BPlus{
       }
     }
     padre->children[padre->count] = node2;
-    // cout<<"padre:"<<endl;
-    // padre->print();
-    // for (int i = 0; i < padre->count+1; i++) {
-    //   padre->children[i]->print();
-    // }
-    // cout<<"fin"<<endl;
     return;
   }
 
@@ -297,7 +278,6 @@ class BPlus{
       else
         node2->children[i-node1->count-1] = node->children[i];
     }
-    return;
   }
 
 

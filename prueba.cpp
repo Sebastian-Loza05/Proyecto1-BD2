@@ -25,7 +25,7 @@ int main() {
       print_vec(valores);
       std::string random_str = "String_" + std::to_string(i); // Generar una cadena aleatoria
       bplus.insert(random_int, random_str); // Insertar los valores aleatorios en Bplus
-      bplus.displayTree();
+      bplus.print();
       cin >> c;
     }
     return 0;
