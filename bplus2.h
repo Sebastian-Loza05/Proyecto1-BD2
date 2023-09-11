@@ -48,31 +48,32 @@ class BPlus{
     }
     cout<<endl;
   }
-
+  
   void displayTree(){
     queue<Node<TK, TV>*> queueq;
     queueq.push(this->root);
     stack<int> niveles;
     niveles.push(1);
+    int i, j, n;
     while (!queueq.empty())
     {
-      Node<TK, TV> *node = queueq.front();
-      cout<<"| ";
-      for(int i = 0; i < node->count; i++)
-        cout<<node->keys[i]<<", ";
-      cout<<"| ";
-      niveles.top()--;
-      if(niveles.top() == 0){
-        niveles.pop();
-        cout<<endl;
-      }
+      n = queueq.size();
+      for (i = 0; i < n; i++) {
+        Node<TK, TV> *node = queueq.front();
+        cout << "<";
+        for ( j = 0; j < node->count; j++) {
+          cout << node->keys[j] << ",";
+        }
+      cout << "> ";
       queueq.pop();
-      if(node->children != nullptr){
-        niveles.push(node->count+1);
-        for(int i = 0; i < node->count+1; i++){
-          queueq.push(node->children[i]);
+      if (!node->leaf) {
+        queueq.push(node->children[0]);
+        for (int j = 1; j <= node->count; j++) {
+          queueq.push(node->children[j]);
         }
       }
+      }
+      cout << endl;
     }
   }
 
@@ -152,7 +153,7 @@ class BPlus{
     }
     if(bajada == -1) bajada = node->count;
     insert_rec(node->children[bajada], node, key, value);
-    node->print();
+    // node->print();
     if(node->count == M){
       split(node, padre);
     }
@@ -221,23 +222,43 @@ class BPlus{
         new_node2->count++;
       }
     }
+    // cout << "----Padre prev: " << endl;
+    // padre->print();
+    // new_node1->print();
+    // new_node2->print();
     anclar(new_node1, new_node2, padre, medio);
+    // cout << "------||----" << endl;
+    // // displayTree();
+    // cout << "-----||-----" << endl;
+    // // cout << "asdasd____: " << endl;
+    // // node->print();
+    // cout << "Desp: " << endl;
+    // cout << "Padre: " << endl;
+    // padre->print();
+    // cout << "Hijos padre: " << endl;
+    // for (int i = 0; i < padre->count+1; i++) {
+    //   padre->children[i]->print();
+    // }
+    // cout << "-> Node 1: " << endl;
+    // new_node1->print();
+    //
+    // cout << "-> Node 2: " << endl;
+    // new_node2->print();
+    // cout << endl << endl;
     if(!node->leaf){
       ordenar_punteros(new_node1, new_node2, node);
-      cout<<"nodo:"<<endl;
-      node->print();
-      for (int i = 0; i < padre->count+1; i++) {
-        node->children[i]->print();
-      }
-      cout<<"fin"<<endl;
+      // cout << "---" << endl;
+      // cout << "Hijos node1: " << endl; 
+      // for (int i = 0; i < new_node1->count+1; i++) {
+      //   new_node1->children[i]->print();
+      // }
+      // cout << "---" << endl;
+      // cout << "Hijos node2: " << endl; 
+      // for (int i = 0; i < new_node2->count+1; i++) {
+      //   new_node2->children[i]->print();
+      // }
     }
 
-    cout<<"padre:"<<endl;
-    padre->print();
-    for (int i = 0; i < padre->count+1; i++) {
-      padre->children[i]->print();
-    }
-    cout<<"fin"<<endl;
     return;
   }
 
@@ -260,17 +281,17 @@ class BPlus{
       }
     }
     padre->children[padre->count] = node2;
-    cout<<"padre:"<<endl;
-    padre->print();
-    for (int i = 0; i < padre->count+1; i++) {
-      padre->children[i]->print();
-    }
-    cout<<"fin"<<endl;
+    // cout<<"padre:"<<endl;
+    // padre->print();
+    // for (int i = 0; i < padre->count+1; i++) {
+    //   padre->children[i]->print();
+    // }
+    // cout<<"fin"<<endl;
     return;
   }
 
   void ordenar_punteros(Node<TK, TV>* node1, Node<TK, TV>* node2, Node<TK, TV>* node){
-    for (int i = 0; i < node->count; i++) {
+    for (int i = 0; i < node->count+1; i++) {
       if(i <= node1->count)
         node1->children[i] = node->children[i];
       else
