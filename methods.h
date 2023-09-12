@@ -22,6 +22,8 @@ struct Record1{
     this->cantidad = cantidad_;
   };
 
+  Record1(){};
+
   void print(){
     cout << key << "\t" << nombre << "\t" << producto << "\t" << marca << "\t" << precio << "\t" << cantidad << endl;
   }

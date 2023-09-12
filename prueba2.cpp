@@ -1,5 +1,4 @@
-// #include "BPlusFile.h"
-#include "methods.h"
+#include "BPlusFile.h"
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -7,6 +6,7 @@
 
 #include <cstring>
 void ingreso(){
+  BPlusFile<char*> bplus;
   ifstream archivo("datos.csv");
   
   if (!archivo.is_open()) {
@@ -56,6 +56,8 @@ void ingreso(){
     record.print();
     string asd;
     cin >> asd;
+    bool asd__ = bplus.add(record);
+
 
     // for (const string& valor: campos){
     //   cout << valor << "\t";

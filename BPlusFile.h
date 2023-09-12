@@ -4,7 +4,7 @@
 #include <memory>
 #include <sys/utsname.h>
 // #include "methods.h"
-#include "structs.h"
+#include "methods.h"
 #include <unistd.h>
 #include <vector>
 //Si usas windows descomenta la linea de abajo y comenta la de arriba.
@@ -102,6 +102,40 @@ class BPlusFile{
   long root;
 
 public:
+  BPlusFile():root(-1){
+    this->filename = "bplus_datos.dat";
+    this->indexname = "bplus_index.dat";
+
+    //definicion del page_size dependiendo del sistema operativo y la maquina.
+    struct utsname unameData;
+    if (uname(&unameData) == 0) {
+      page_size = sysconf(_SC_PAGESIZE);
+      //Si usas windows descomenta estas lineas de abajo y comenta la de arriba.
+      /*
+      SYSTEM_INFO system_info;
+      GetSystemInfo(&system_info);
+      DWORD p_size = system_info.dwPageSize;
+      page_size = static_cast<long>(p_size);
+      */
+    } else {
+      page_size = 4092;
+    }
+    
+    int page_s = page_size - sizeof(int) - sizeof(bool);
+    this->M  = (page_s + sizeof(TK))/(4+sizeof(TK)) ;
+    ofstream index(this->indexname, ios::binary | ios::app);
+    ofstream file(this->filename, ios::binary | ios::app);
+    index.seekp(0,ios::end);
+    int tam = index.tellp();
+    if (tam == 0) {
+      long value = -1;
+      index.write(reinterpret_cast<char*>(&value), sizeof(long));
+      file.write(reinterpret_cast<char*>(&value), sizeof(long));
+    }
+    
+    index.close();
+    file.close();
+  }
   BPlusFile(TK _index_atribute):root(-1), index_atribute(_index_atribute){
     this->filename = "bplus_datos.dat";
     this->indexname = "bplus_index.dat";
@@ -251,7 +285,7 @@ private:
     return correcto;
   }
 
-  bool insertar(long &pos_node, bool leaf, TK key, Record1 value, fstream index, fstream data){
+  bool insertar(long &pos_node, bool leaf, TK key, Record1 value, fstream &index, fstream &data){
     if (pos_node == -1) {  
       pos_node = 4;
       if (leaf) {
@@ -303,7 +337,7 @@ private:
     index.seekg(pos_node, ios::beg);
     node.read(index, M);
 
-    long temp;
+    TK temp;
     for (int i = 0; i < node.count; i++) {
       if (key < node.keys[i]) {
         temp = node.keys[i];
@@ -370,14 +404,14 @@ private:
       }
       else if(i == (M-1)/2){
         medio = node.keys[i];
-        insertar(pos_padre, false, medio, Record1());
+        insertar(pos_padre, false, medio, Record1(),index, data);
       }
       else{
         node2.keys[node2.count] = node.keys[i];
         node2.count++;
       }
       ordenar_punteros(node1, node2, pos_node, index);
-      anclar_interno(node1, node2, pos_padre, medio, index);
+      anclar_internos(node1, node2, pos_padre, medio, index);
     }
   }
 
