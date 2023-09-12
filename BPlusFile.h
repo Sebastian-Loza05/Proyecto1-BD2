@@ -35,8 +35,8 @@ struct Bucket{
     for (int i = 0; i < m; i++) {
       file.write((char*)&records[i], sizeof(Record1));
     }
-    file.write(reinterpret_cast<char*>(&next), sizeof(long));
-    file.write(reinterpret_cast<char*>(&next_del), sizeof(long));
+    file.write(reinterpret_cast<const char*>(&next), sizeof(long));
+    file.write(reinterpret_cast<const char*>(&next_del), sizeof(long));
   } 
 
   void read(fstream &file){
@@ -49,7 +49,18 @@ struct Bucket{
     file.read((char*)(&this->next), sizeof(long));
     file.read((char*)(&this->next_del), sizeof(long));
   }
+
 };
+
+ostream& operator<<(ostream& os, Bucket buck){
+  os<<"count: "<<buck.count<<endl;
+  os<<"next: "<<buck.next<<endl;
+  os<<"next_del: "<<buck.next_del<<endl;
+  for (int i = 0; i < buck.count; i++) {
+    os<<"keys: "<<buck.records[i].key;
+  }
+  return os;
+}
 
 template<typename TK>
 struct Node{
@@ -227,14 +238,14 @@ public:
 
     data.seekg(0, ios::end);
     int tam1 = data.tellg();
-    if (tam1 == 4) {
+    if (tam1 == sizeof(long)) {
       return false;
     }
 
     index.seekg(0, ios::end);
     int tam2 = index.tellg();
     bool leaf = false;
-    if (tam2 == 4) {
+    if (tam2 == sizeof(long)) {
       leaf = true;
     }
 
@@ -252,16 +263,24 @@ public:
   void toString(){
     fstream data(this->filename, ios::binary | ios::in | ios::out);
     fstream index(this->filename, ios::binary | ios::in | ios::out);
-    Node<TK> temp1(M);
-    Bucket temp(page_size);
-    index.seekg(root, ios::beg);
-    temp1.read(index, M);
-    while (!temp1.pre_leaf){
-      index.seekg(temp1.children[0], ios::beg);
+    if(!root_hoja){
+      Node<TK> temp1(M);
+      index.seekg(root, ios::beg);
       temp1.read(index, M);
+      while (!temp1.pre_leaf){
+        index.seekg(temp1.children[0], ios::beg);
+        temp1.read(index, M);
+      }
+      data.seekg(temp1.children[0], ios::beg);
     }
-    data.seekg(temp1.children[0], ios::beg);
+    else{
+      data.seekg(4, ios::beg);
+    }
+    Bucket temp(page_size);
     temp.read(data);
+    cout<<temp<<endl;
+    cout<<temp.next<<endl;
+    return;
     while(temp.next != -1){
       cout<< "<";
       for(int j = 0; j < temp.count; j++ )
@@ -277,6 +296,7 @@ public:
     fstream index(this->indexname, ios::binary | ios::in | ios::out);
     fstream data(this->filename, ios::binary | ios::in | ios::out);
     if(!root_hoja){
+      cout<<"asnfa"<<endl;
       queue<long> queueq;
       queueq.push(this->root);
       stack<int> niveles;
@@ -303,8 +323,8 @@ public:
         cout << endl;
       }
     }
+    cout<<"asnfa"<<endl;
     toString();
-    
   }
   
   ~BPlusFile(){}
@@ -316,8 +336,9 @@ private:
       Bucket node(page_size);
       node.records[0] = value;
       node.count++;
-      this->root = 4;
-      data.seekp(4, ios::beg);
+      this->root = sizeof(long);
+      cout<<node<<endl;
+      data.seekp(sizeof(long), ios::beg);
       node.write(data);
       root_hoja = true;
       return true;
@@ -359,20 +380,20 @@ private:
 
   bool insertar(long &pos_node, bool leaf, TK key, Record1 value, fstream &index, fstream &data){
     if (pos_node == -1) {  
-      pos_node = 4;
-      if (leaf) {
-        Bucket node(page_size);
-        node.records.push_back(value);
-        node.count++;
-        data.seekp(4, ios::beg);
-        node.write(data);
-        return true;
-      }
+      pos_node = sizeof(long);
+      // if (leaf) {
+      //   Bucket node(page_size);
+      //   node.records.push_back(value);
+      //   node.count++;
+      //   data.seekp(sizeof(long), ios::beg);
+      //   node.write(data);
+      //   return true;
+      // }
       // Si es nodo interno 
       Node<TK> node(M);
       node.keys[0] = key;
       node.count++;
-      index.seekp(4, ios::beg);
+      index.seekp(sizeof(long), ios::beg);
       node.write(index, M);  
       return true;
     }
@@ -494,12 +515,9 @@ private:
     data.read((char*)(&value), sizeof(long));
     int tam;
     if (value == -1) {
-      data.seekg(0, ios::end);
-      tam = data.tellg();
-
       // INSERTACION
-      
       data.seekp(0, ios::end);
+      tam = data.tellp();
       bucket.write(data);
       return  tam;
     }
@@ -524,12 +542,10 @@ private:
     int indice, tam;
     // No hay  header
     if (value == -1) {
-      index.seekg(0, ios::end);
-      tam = index.tellg();
-
       // INSERTACION
 
       index.seekp(0, ios::end);
+      tam = index.tellp();
       node.write(index, M);
       return tam;
     }
@@ -691,8 +707,18 @@ private:
       index.seekg(node.children[0], ios::beg);
       Node<TK> nuevo_padre(M);
       nuevo_padre.read(index, M);
-      index.seekg(4, ios::beg);
+      index.seekp(sizeof(long), ios::beg);
       nuevo_padre.write(index, M);
+      //actualizar next_del
+      long value;
+      index.seekg(0, ios::beg);
+      index.read((char*)(&value), sizeof(long)) ;
+      nuevo_padre.next_del = value;
+      index.seekp(node.children[0], ios::beg);
+      nuevo_padre.write(index, M);
+      index.seekp(0, ios::beg);
+      index.write(reinterpret_cast<char*>(&node.children[0]), sizeof(long));
+
       return;
     }
 
@@ -918,17 +944,17 @@ private:
   void rotar_internos(long pos_node, long pos_node_prest, long pos_node_padre, int index1, bool right, fstream &index){
     // Lectura
     // Nodo que incumple
-    index.seekg(pos_node);
+    index.seekg(pos_node, ios::beg);
     Node<TK> node(M);
     node.read(index, M);
 
     // Nodo prestamista
-    index.seekg(pos_node_prest);
+    index.seekg(pos_node_prest, ios::beg);
     Node<TK> node_prest(M);
     node.read(index, M);
 
     // Nodo padre 
-    index.seekg(pos_node_padre);
+    index.seekg(pos_node_padre, ios::beg);
     Node<TK> node_padre(M);
     node.read(index, M);
     if (right) {
@@ -961,27 +987,27 @@ private:
       node.children[0] = node_prest.children[node_prest.count+1];
     }
     // Escritura
-    index.seekp(pos_node);
+    index.seekp(pos_node, ios::beg);
     node.write(index, M);
 
-    index.seekp(pos_node_prest);
+    index.seekp(pos_node_prest, ios::beg);
 
     node_prest.write(index, M);
 
-    index.seekp(pos_node_padre);
+    index.seekp(pos_node_padre, ios::beg);
     node_padre.write(index, M);
   }
  
   void rotar_hojas(long pos_bucket, long pos_bucket_prest, long pos_node_padre, int index1, bool right,fstream &index, fstream &data){
-    index.seekg(pos_node_padre);
+    index.seekg(pos_node_padre, ios::beg);
     Node<TK> node_padre;
     node_padre.read(index, M);
 
-    data.seekp(pos_bucket);
+    data.seekp(pos_bucket, ios::beg);
     Bucket bucket(page_size);
     bucket.read(data);
 
-    data.seekg(pos_bucket_prest);
+    data.seekg(pos_bucket_prest, ios::beg);
     Bucket bucket_prest(page_size);
     bucket_prest.read(data);
 
@@ -1003,13 +1029,13 @@ private:
       node_padre.keys[index1-1] = bucket_prest.records[bucket_prest.count-1].key;
       bucket.count++;
     }
-    index.seekp(pos_node_padre);
+    index.seekp(pos_node_padre, ios::beg);
     node_padre.write(index, M);
 
-    data.seekp(pos_bucket);
+    data.seekp(pos_bucket, ios::beg);
     bucket.write(data);
 
-    data.seekp(pos_bucket_prest);
+    data.seekp(pos_bucket_prest, ios::beg);
     bucket_prest.write(data);
   }
 
