@@ -214,22 +214,62 @@ public:
     return rpta;
   }
 
+  void toString(){
+    fstream data(this->filename, ios::binary | ios::in | ios::out);
+    fstream index(this->filename, ios::binary | ios::in | ios::out);
+    Node<TK> temp1(M);
+    Bucket temp(page_size);
+    index.seekg(root, ios::beg);
+    temp1.read(index, M);
+    while (!temp1.pre_leaf){
+      index.seekg(temp1.children[0], ios::beg);
+      temp1.read(index, M);
+    }
+    data.seekg(temp1.children[0], ios::beg);
+    temp.read(data);
+    while(temp.next != -1){
+      cout<< "<";
+      for(int j = 0; j < temp.count; j++ )
+        cout << temp.records[j].key << ",";
+      cout << "> ";
+      data.seekg(temp.next, ios::beg);
+      temp.read(data);
+    }
+    cout<<endl;
+  }
+
   void displayTree(){
     fstream index(this->indexname, ios::binary | ios::in | ios::out);
     fstream data(this->filename, ios::binary | ios::in | ios::out);
-
-    queue<long> queueq;
-    queueq.push(this->root);
-    stack<int> niveles;
-    niveles.push(1);
-    int i, j, n;
-    while (!queueq.empty()) {
-      n = queueq.size();
-      for (i = 0; i < n; i++) {
-        long pos_node = queueq.front();
-        
+    if(!root_hoja){
+      queue<long> queueq;
+      queueq.push(this->root);
+      stack<int> niveles;
+      niveles.push(1);
+      int i, j, n;
+      while (!queueq.empty()) {
+        n = queueq.size();
+        for (i = 0; i < n; i++) {
+          long pos_node = queueq.front();
+          index.seekg(pos_node, ios::beg);
+          Node<TK> node(M);
+          node.read(index, M);
+          cout<< "<";
+          for(j = 0; j < node.count; j++ )
+            cout << node.keys[j] << ",";
+          cout << "> ";
+          queueq.pop();
+          if(!node.pre_leaf){
+            queueq.push(node.children[0]);
+            for(int j = 1; j <= node.count; j++)
+              queueq.push(node.children[j]);
+          }
+        }
+        cout << endl;
       }
     }
+    toString();
+    
   }
   
   ~BPlusFile(){}
