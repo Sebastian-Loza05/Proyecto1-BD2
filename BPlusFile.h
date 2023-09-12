@@ -136,42 +136,9 @@ public:
       page_size = 4092;
     }
     
-    int page_s = page_size - sizeof(int) - sizeof(bool);
-    this->M  = (page_s + sizeof(TK))/(4+sizeof(TK)) ;
-    ofstream index(this->indexname, ios::binary | ios::app);
-    ofstream file(this->filename, ios::binary | ios::app);
-    index.seekp(0,ios::end);
-    int tam = index.tellp();
-    if (tam == 0) {
-      long value = -1;
-      index.write(reinterpret_cast<char*>(&value), sizeof(long));
-      file.write(reinterpret_cast<char*>(&value), sizeof(long));
-    }
-    
-    index.close();
-    file.close();
-  }
-  BPlusFile(TK _index_atribute):root(-1), index_atribute(_index_atribute){
-    this->filename = "bplus_datos.dat";
-    this->indexname = "bplus_index.dat";
-
-    //definicion del page_size dependiendo del sistema operativo y la maquina.
-    struct utsname unameData;
-    if (uname(&unameData) == 0) {
-      page_size = sysconf(_SC_PAGESIZE);
-      //Si usas windows descomenta estas lineas de abajo y comenta la de arriba.
-      /*
-      SYSTEM_INFO system_info;
-      GetSystemInfo(&system_info);
-      DWORD p_size = system_info.dwPageSize;
-      page_size = static_cast<long>(p_size);
-      */
-    } else {
-      page_size = 4092;
-    }
-    
-    int page_s = page_size - sizeof(int) - sizeof(bool);
-    this->M  = (page_s + sizeof(TK))/(4+sizeof(TK)) ;
+    int page_s = page_size - sizeof(long) - sizeof(bool) - sizeof(int) + sizeof(TK);
+    int X  = (page_s)/(sizeof(TK) - sizeof(long)) ;
+    this->M = X-1;
     ofstream index(this->indexname, ios::binary | ios::app);
     ofstream file(this->filename, ios::binary | ios::app);
     index.seekp(0,ios::end);
@@ -186,19 +153,61 @@ public:
     file.close();
   }
 
-  
-
-  vector<Record1> search(TK key){
-    vector<Record1> res;
+  vector<Record1> search_range(TK min, TK max){
     fstream index(this->indexname, ios::binary | ios::in | ios::out);
-    fstream data(this->indexname, ios::binary | ios::in | ios::out);
+    if (!index.is_open()) throw ("No se puede abrir el archivo");
+
+    fstream data(this->filename, ios::binary | ios::in | ios::out);
+    if (!data.is_open()) throw ("No se puede abrir el archivo");
+    vector<Record1> res;
+
     data.seekg(0, ios::end);
     if(data.tellg() == 0)
+      // data vacia
       return res;
+
+    long pos = sizeof(long);
+  
     index.seekg(0, ios::end);
-    long pos = 0;
-    if(index.tellg() > 0){
-      index.seekg(0, ios::beg);
+    if (index.tellg()) {
+      index.seekg(sizeof(long), ios::beg);
+      pos = search_recursive(root, min, index);
+    }
+
+    long next_exist = pos;
+    Bucket bucket(page_size);
+    
+    while (next_exist != -1) {
+      data.seekg(next_exist, ios::beg);
+      bucket.read(data);
+      for (int i = 0; i < bucket.count; i++) {
+        if (min <= bucket.records[i].key && bucket.records[i].key <= max) {
+          res.push_back(bucket.records[i]);
+        }
+      }
+      next_exist = bucket.next;
+    }
+
+    index.close();
+    data.close();
+
+    return res;
+
+  } 
+
+  Record1 search(TK key){
+    Record1 res;
+    fstream index(this->indexname, ios::binary | ios::in | ios::out);
+    fstream data(this->indexname, ios::binary | ios::in | ios::out);
+    data.seekg(sizeof(long), ios::end);
+    if(data.tellg() == sizeof(long))
+      return res;
+
+    index.seekg(0, ios::end);
+    long pos = sizeof(long);
+    // Existen Nodos y no solo hojas
+    if(index.tellg() > sizeof(long)){
+      index.seekg(sizeof(long), ios::beg);
       pos = search_recursive(root, key, index);
     }
     data.seekg(pos, ios::beg);
@@ -208,7 +217,7 @@ public:
     index.close();
     for (int i = 0; i < bucket.count; i++) {
       if(bucket.records[i].key == key)
-        res.push_back(bucket.records[i]);
+        res = bucket.records[i];
     }
     data.close();
     index.close();
