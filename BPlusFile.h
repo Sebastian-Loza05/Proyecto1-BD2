@@ -168,16 +168,73 @@ public:
     add_recursive(root, record);
   }
   
-  void insertar(long pos_node, bool leaf, TK key, Record1 value, fstream index, fstream data){
+  bool insertar(long &pos_node, bool leaf, TK key, Record1 value, fstream index, fstream data){
+    if (pos_node == -1) {  
+      pos_node = 4;
+      if (leaf) {
+        Bucket node(page_size);
+        node.records.push_back(value);
+        node.count++;
+        data.seekp(4, ios::beg);
+        node.write(data);
+        return true;
+      }
+      // Si es nodo interno 
+      Node<TK> node(M);
+      node.keys[0] = key;
+      node.count++;
+      index.seekp(4, ios::beg);
+      node.write(index, M);  
+      return true;
+    }
+
     if (leaf) {
-      long value;
-      data.read(reinterpret_cast<char*>(&value), sizeof(long));
       Bucket node(page_size);
       data.seekg(pos_node, ios::beg);
       node.read(data);
+      Record1 temp;
+      for (int i = 0; i < node.count; i++) {
+        if (key == node.records[i].key) {
+          return false;
+        }
+        else if (key < node.records[i].key) {
+          temp = node.records[i];
+          node.records[i] = value;
+          value = temp;
+          key = temp.key;
+        }
+      }
+
+      node.records[node.count] = value;
+      node.count++;
+
+      // Escribiendo valores;
       
+      data.seekp(pos_node, ios::beg);
+      node.write(data);
+      return true;
+    }
+    // Si no es hoja 
+
+    Node<TK> node(M);
+    index.seekg(pos_node, ios::beg);
+    node.read(index, M);
+
+    long temp;
+    for (int i = 0; i < node.count; i++) {
+      if (key < node.keys[i]) {
+        temp = node.keys[i];
+        node.keys[i] = key;
+        key = temp;
+      }
     }
 
+    node.keys[node.count] = key;
+    node.count++;
+
+    index.seekp(pos_node, ios::beg);
+    node.write(index, M);    
+    return true;
   }
   
 
@@ -225,7 +282,7 @@ private:
       node.write(data);
       return true;
     }
-    if(leaf){
+    if(leaf){ 
       insertar(pos_node, pos_padre, key, value, true, index, data);
       Bucket node(page_size);
       data.seekg(pos_node, ios::beg);
@@ -240,7 +297,7 @@ private:
       data.seekg(pos_node, ios::beg);
       data.seekp(pos_node, ios::beg);
       Bucket bucket(page_size);
-      bucket.read(data);
+      bucket.read(data);  
 
       for (int i = 0; i < bucket.count; i++) {
         if (bucket.records[i].key == key) {
@@ -642,5 +699,126 @@ private:
     if(node.pre_leaf)
       return bajada;
     return search_recursive(node.children[bajada], key, index);
+  }
+
+  int write_DataDel(Bucket bucket, fstream& data ){
+    long value;
+    data.seekg(0, ios::beg);
+    data.read((char*)(&value), sizeof(long));
+    int tam;
+    if (value == -1) {
+      data.seekg(0, ios::end);
+      tam = data.tellg();
+
+      // INSERTACION
+      
+      data.seekp(0, ios::end);
+      bucket.write(data);
+      return  tam;
+    }
+    // Existe header
+    Bucket temp(page_size);
+    data.seekg(value, ios::beg);
+    tam = value;
+    temp.read(data);
+    long new_value = temp.next_del;
+    data.seekp(0, ios::beg);
+    data.write(reinterpret_cast<char*>(&new_value), sizeof(long));
+
+    data.seekp(value, ios::beg);
+    bucket.write(data);
+    return tam;
+  }
+
+  int write_IndexDel(Node<TK>node, fstream& index){
+    long value;
+    index.seekg(0, ios::beg);
+    index.read((char*)(&value), sizeof(long)) ;
+    int indice, tam;
+    // No hay  header
+    if (value == -1) {
+      index.seekg(0, ios::end);
+      tam = index.tellg();
+
+      // INSERTACION
+
+      index.seekp(0, ios::end);
+      node.write(index, M);
+      return tam;
+    }
+    // Existe header
+    Node<TK> temp(M);
+    index.seekg(value, ios::beg);
+    tam = value;
+    temp.read(index, M);
+    long new_value = temp.next_del;
+    index.seekp(0, ios::beg);
+    index.write(reinterpret_cast<char*>(&new_value), sizeof(long));
+
+    index.seekp(value, ios::beg);
+    node.write(index, M);
+
+    return tam;
+  }
+  
+  void anclar_internos(Node<TK> node1, Node<TK> node2, long pos_node, TK medio, fstream& index){
+    index.seekg(pos_node, ios::beg);
+    Node<TK> node(M);
+    node.read(index, M);
+    bool finded = false;
+    long temp, act;
+    int i = 0;
+    for (i = 0 ; i < node.count; i++) {
+      if (finded) {
+        act = temp;
+        temp = node.children[i];
+        node.children[i] = act;
+      }
+      else if ( medio == node.keys[i]) {
+        finded = true;
+        node.children[i] = write_IndexDel(node1, index);
+        i++;
+        temp = node.children[i];
+        node.children[i] = write_IndexDel(node2, index);
+      }
+    }
+    node.children[node.count] = temp;
+    index.seekp(pos_node, ios::beg);
+    node.write(index, M);
+    return;
+  }
+  // unir los buckets
+  void anclar_hojas(Bucket b1, Bucket b2, long pos_node, TK medio, fstream& index, fstream& data){
+    index.seekg(pos_node, ios::beg);
+    Node<TK> node(M);
+    node.read(index, M);
+    if (pos_node == root) {
+      node.pre_leaf = true;  
+    }
+    bool finded = false;
+    long temp, act;
+    int i = 0;
+    for (int i = 0; i < node.count; i++) {
+      if (finded) {
+        act = temp;
+        temp = node.children[i];
+        node.children[i] = act;
+      }
+      else if (medio == node.keys[i]) {
+        finded = true;
+        long next_ = write_DataDel(b2, data);
+        node.children[i+1] = next_;
+        b1.next = next_;
+        // node.children[i]
+        data.seekp(node.children[i], ios::beg);
+        b2.write(data);
+        i++;
+        temp = node.children[i];
+      }
+    }
+    node.children[node.count] = temp;
+    index.seekp(pos_node, ios::beg);
+    node.write(index, M);
+    return;
   }
 };
