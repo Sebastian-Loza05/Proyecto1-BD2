@@ -250,6 +250,7 @@ class BPlus{
   }
 
   void anclar(Node<TK, TV>* node1, Node<TK, TV>* node2, Node<TK, TV>* padre, TK key){
+        // node.children[i] =/*   */
     bool finded = false; 
     int i;
     Node<TK, TV> *temp1;
