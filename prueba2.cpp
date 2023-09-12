@@ -57,8 +57,9 @@ void ingreso(){
     string asd;
     cin >> asd;
     bool asd__ = bplus.add(record);
-
-
+    cout << "Asda" << endl;
+    bplus.displayTree();
+    cout << "Asda" << endl;
     // for (const string& valor: campos){
     //   cout << valor << "\t";
     // }
