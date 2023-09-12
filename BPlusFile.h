@@ -5,8 +5,10 @@
 #include <sys/utsname.h>
 // #include "methods.h"
 #include "structs.h"
-#include <unistd.h>
 #include <vector>
+#include <queue>
+#include <stack>
+#include <unistd.h>
 //Si usas windows descomenta la linea de abajo y comenta la de arriba.
 // #include <windows.h>
 
@@ -100,6 +102,7 @@ class BPlusFile{
   int M;
   TK index_atribute;
   long root;
+  bool root_hoja;
 
 public:
   BPlusFile(TK _index_atribute):root(-1), index_atribute(_index_atribute){
@@ -167,7 +170,15 @@ public:
   }
   
   bool add(Record1 record){
-    add_recursive(root, record);
+    fstream index(this->indexname, ios::binary | ios::in | ios::out);
+    if (!index.is_open()) throw ("No se puede abrir el archivo");
+
+    fstream data(this->filename, ios::binary | ios::in | ios::out);
+    if (!data.is_open()) throw ("No se puede abrir el archivo");
+
+    if(root_hoja)
+      return add_recursive(root, -1, record.key, record, true, index, data);
+    return add_recursive(root, -1, record.key, record, false, index, data);
   }
   
   
@@ -202,6 +213,25 @@ public:
     
     return rpta;
   }
+
+  void displayTree(){
+    fstream index(this->indexname, ios::binary | ios::in | ios::out);
+    fstream data(this->filename, ios::binary | ios::in | ios::out);
+
+    queue<long> queueq;
+    queueq.push(this->root);
+    stack<int> niveles;
+    niveles.push(1);
+    int i, j, n;
+    while (!queueq.empty()) {
+      n = queueq.size();
+      for (i = 0; i < n; i++) {
+        long pos_node = queueq.front();
+        
+      }
+    }
+  }
+  
   ~BPlusFile(){}
 
 private:
@@ -214,6 +244,7 @@ private:
       this->root = 4;
       data.seekp(4, ios::beg);
       node.write(data);
+      root_hoja = true;
       return true;
     }
     if(leaf){
@@ -321,6 +352,7 @@ private:
   }
 
   void split_hoja(long pos_node, long pos_padre, fstream &index, fstream &data){
+    root_hoja = false;
     Bucket node1(page_size);
     Bucket node2(page_size);
 
