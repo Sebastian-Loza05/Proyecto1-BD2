@@ -3,8 +3,10 @@
 #include <fstream>
 #include <memory>
 #include <sys/utsname.h>
-#include "methods.h"
+// #include "methods.h"
+#include "structs.h"
 #include <unistd.h>
+#include <vector>
 //Si usas windows descomenta la linea de abajo y comenta la de arriba.
 // #include <windows.h>
 
@@ -65,10 +67,10 @@ struct Node{
   void write(fstream &file, int M){
     file.write(reinterpret_cast<const char*>(&count), sizeof(count));
     file.write(reinterpret_cast<const char*>(&pre_leaf), sizeof(pre_leaf));
-    for (int i = 0; i < M-1; i++) {
+    for (int i = 0; i < M; i++) {
       file.write(reinterpret_cast<const char*>(&keys[i]), sizeof(TK));
     }
-    for (int i = 0; i < M; i++) {
+    for (int i = 0; i < M+1; i++) {
       file.write(reinterpret_cast<const char*>(&children[i]), sizeof(long));
     }
     file.write(reinterpret_cast<char*>(&next_del), sizeof(long));
@@ -78,10 +80,10 @@ struct Node{
     //count leaf keys children
     file.read((char*)(&this->count), sizeof(bool));
     file.read((char*)(&this->pre_leaf), sizeof(int));
-    for (int i = 0; i < M; i++) {
+    for (int i = 0; i < this->count; i++) {
       file.read((char*)(&this->keys[i]),sizeof(TK));
     }
-    for (int i = 0; i < M; i++) {
+    for (int i = 0; i < this->count+1; i++) {
       file.read((char*)(&this->children[i]),sizeof(long));
     }
     file.read((char*)(&this->next_del), sizeof(long));
@@ -102,7 +104,7 @@ class BPlusFile{
 public:
   BPlusFile(TK _index_atribute):root(-1), index_atribute(_index_atribute){
     this->filename = "bplus_datos.dat";
-    this->indexname = "index.dat";
+    this->indexname = "bplus_index.dat";
 
     //definicion del page_size dependiendo del sistema operativo y la maquina.
     struct utsname unameData;
@@ -226,13 +228,112 @@ private:
       return true;
     }
     if(leaf){
-      insertar(pos_node, pos_padre, key, value, true, index, data);
+      bool correcto = insertar(pos_node, true, key, value, index, data);
       Bucket node(page_size);
       data.seekg(pos_node, ios::beg);
       node.read(data);
       if(node.count == M)
-        split(pos_node, pos_padre, true, index, data);
+        split_hoja(pos_node, pos_padre, index, data);
+      return correcto;
     }
+    index.seekg(pos_node, ios::beg);
+    Node<TK> node(M);
+    node.read(index, M);
+
+    int bajada = -1;
+    for(int i = 0; i < node.count; i++){
+      if(key <= node.keys[i]){
+        bajada = i;
+        break;
+      }
+    }
+    if(bajada == -1) bajada = node.count;
+    bool correcto;
+    if(node.pre_leaf)
+      correcto = add_recursive(node.children[bajada], pos_node, key, value, true, index, data);
+    else
+      correcto = add_recursive(node.children[bajada], pos_node, key, value, false, index, data);
+
+    index.seekg(pos_node, ios::beg);
+    node.read(index, M);
+
+    if(node.count == M)
+      split_interno(pos_node, pos_padre, index, data);
+    return correcto;
+  }
+
+  void split_hoja(long pos_node, long pos_padre, fstream &index, fstream &data){
+    Bucket node1(page_size);
+    Bucket node2(page_size);
+
+    data.seekg(pos_node, ios::beg);
+    Bucket node(page_size);
+    node.read(data);
+    
+    node2.next = node.next;
+    TK medio;
+
+    for (int i = 0; i < node.count; i++) {
+      if(i < (node.m-1)/2){
+        node1.records[node1.count] = node.records[i];
+        node1.count++;
+      }
+      else if(i == (node.m-1)/2){
+        medio = node.records[i].key;
+        insertar(pos_padre, true, medio, node.records[i], index, data);
+        node1.records[node1.count] = node.records[i];
+        node1.count++;
+      }
+      else{
+        node2.records[node2.count] = node.records[i];
+        node2.count++;
+      }
+    }
+    anclar_hojas(node1, node2, pos_padre, medio, index, data);
+  }
+
+  void split_interno(long pos_node, long pos_padre, fstream &index, fstream &data){
+    Node<TK> node1(M);
+    Node<TK> node2(M);
+
+    index.seekg(pos_node, ios::beg);
+    Node<TK> node(M);
+    node.read(index, M);
+    
+    if(node.pre_leaf){
+      node1.pre_leaf = true;
+      node2.pre_leaf = true;
+    }
+    TK medio;
+    for (int i = 0; i < node.count; i++) {
+      if(i < (M-1)/2){
+        node1.keys[node1.count] = node.keys[i];
+        node1.count++;
+      }
+      else if(i == (M-1)/2){
+        medio = node.keys[i];
+        insertar(pos_padre, false, medio, Record1());
+      }
+      else{
+        node2.keys[node2.count] = node.keys[i];
+        node2.count++;
+      }
+      ordenar_punteros(node1, node2, pos_node, index);
+      anclar_interno(node1, node2, pos_padre, medio, index);
+    }
+  }
+
+  void ordenar_punteros(Node<TK> node1, Node<TK> node2, long pos_node, fstream &index){
+    index.seekg(pos_node, ios::beg);
+    Node<TK> node(M);
+    node.read(index, M);
+    for (int i = 0; i < node.count; i++) {
+      if(i <= node1.count)
+        node1.children[i] = node.children[i];
+      else
+        node2.children[i - node1.count - 1] = node.children[i];
+    }
+    return;
   }
 
   bool remove_recursive(long pos_node, TK key, long pos_padre, int pos_child, bool leaf, fstream &index, fstream &data){
@@ -624,7 +725,6 @@ private:
 
     data.seekp(pos_bucket_prest);
     bucket_prest.write(data);
-
   }
 
   long search_recursive(long pos_node, TK key, fstream &index){

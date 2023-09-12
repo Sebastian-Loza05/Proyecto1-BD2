@@ -2,7 +2,7 @@
 #include <queue>
 #include <stack>
 #include <forward_list>
-#include "structs.h"
+#include "structs1.h"
 
 using namespace std;
 

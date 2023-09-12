@@ -6,6 +6,8 @@ using namespace std;
 
 struct Record1{
   int key;
+
+  Record1(){}
 };
 
 template<typename T>
