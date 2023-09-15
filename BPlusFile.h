@@ -22,16 +22,17 @@ struct Bucket{
 
   Bucket(int page_size){
     count = 0;
-    page_size -= sizeof(long) - (2*sizeof(int));
-    this->m = page_size / sizeof(Record1);
+    page_size -= (sizeof(long) + (2*sizeof(int)));
+    // this->m = page_size / sizeof(Record1);
+    this->m = 4;
     records = vector<Record1>(this->m);
     next_del = -1;
     next = -1;
   }
 
   void write(fstream &file){
-    file.write(reinterpret_cast<const char*>(&count), sizeof(int));
-    file.write(reinterpret_cast<const char*>(&m), sizeof(int));
+    file.write(reinterpret_cast<char*>(&count), sizeof(int));
+    file.write(reinterpret_cast<char*>(&m), sizeof(int));
     for (int i = 0; i < m; i++) {
       file.write((char*)&records[i], sizeof(Record1));
     }
@@ -40,10 +41,9 @@ struct Bucket{
   } 
 
   void read(fstream &file){
-    //count m records next
     file.read((char*)(&this->count), sizeof(int));
     file.read((char*)(&this->m), sizeof(int));
-    for (int i = 0; i < this->count; i++) {
+    for (int i = 0; i < this->m; i++) {
       file.read((char*)(&this->records[i]), sizeof(Record1));
     }
     file.read((char*)(&this->next), sizeof(long));
@@ -52,12 +52,15 @@ struct Bucket{
 
 };
 
+
 ostream& operator<<(ostream& os, Bucket buck){
   os<<"count: "<<buck.count<<endl;
   os<<"next: "<<buck.next<<endl;
+  os<<"m: "<<buck.m<<endl;
   os<<"next_del: "<<buck.next_del<<endl;
+  os<<"keys: "<<endl; 
   for (int i = 0; i < buck.count; i++) {
-    os<<"keys: "<<buck.records[i].key;
+    os<<buck.records[i].key<<", ";
   }
   return os;
 }
@@ -74,34 +77,51 @@ struct Node{
     this->keys = new TK[M];
     this->children = new long[M+1];
     count = 0;
-    pre_leaf = true;
+    pre_leaf = false;
     next_del = -1;
   }
 
   void write(fstream &file, int M){
-    file.write(reinterpret_cast<const char*>(&count), sizeof(count));
-    file.write(reinterpret_cast<const char*>(&pre_leaf), sizeof(pre_leaf));
+    file.write(reinterpret_cast<const char*>(&count), sizeof(int));
+    file.write(reinterpret_cast<const char*>(&pre_leaf), sizeof(bool));
     for (int i = 0; i < M; i++) {
       file.write(reinterpret_cast<const char*>(&keys[i]), sizeof(TK));
     }
     for (int i = 0; i < M+1; i++) {
       file.write(reinterpret_cast<const char*>(&children[i]), sizeof(long));
     }
-    file.write(reinterpret_cast<char*>(&next_del), sizeof(long));
+    file.write(reinterpret_cast<const char*>(&next_del), sizeof(long));
   }
 
   void read(fstream &file, int M){
     //count leaf keys children
-    file.read((char*)(&this->count), sizeof(bool));
-    file.read((char*)(&this->pre_leaf), sizeof(int));
-    for (int i = 0; i < this->count; i++) {
+    file.read((char*)(&this->count), sizeof(int));
+    file.read((char*)(&this->pre_leaf), sizeof(bool));
+    for (int i = 0; i < M; i++) {
       file.read((char*)(&this->keys[i]),sizeof(TK));
     }
-    for (int i = 0; i < this->count+1; i++) {
+    for (int i = 0; i < M+1; i++) {
       file.read((char*)(&this->children[i]),sizeof(long));
     }
     file.read((char*)(&this->next_del), sizeof(long));
   }
+
+  void print(){
+    cout<<"count: "<<count<<endl;
+    cout<<"pre_leaf: "<<pre_leaf<<endl;
+    cout<<"next_del: "<<next_del<<endl;
+    cout<<"keys: "; 
+    for (int i = 0; i < count; i++) {
+      cout<<keys[i]<<", ";
+    }
+    cout<<endl;
+    cout<<"children: "; 
+    for (int i = 0; i < count+1; i++) {
+      cout<<children[i]<<", ";
+    }
+    cout<<endl;
+  }
+
 };
 
 
@@ -137,8 +157,9 @@ public:
     }
     
     int page_s = page_size - sizeof(long) - sizeof(bool) - sizeof(int) + sizeof(TK);
-    int X  = (page_s)/(sizeof(TK) - sizeof(long)) ;
-    this->M = X-1;
+    int X  = (page_s)/(sizeof(TK) + sizeof(long)) ;
+    // this->M = X-1;
+    this->M = 4;
     ofstream index(this->indexname, ios::binary | ios::app);
     ofstream file(this->filename, ios::binary | ios::app);
     index.seekp(0,ios::end);
@@ -271,7 +292,7 @@ public:
 
   void toString(){
     fstream data(this->filename, ios::binary | ios::in | ios::out);
-    fstream index(this->filename, ios::binary | ios::in | ios::out);
+    fstream index(this->indexname, ios::binary | ios::in | ios::out);
     if(!root_hoja){
       Node<TK> temp1(M);
       index.seekg(root, ios::beg);
@@ -283,13 +304,10 @@ public:
       data.seekg(temp1.children[0], ios::beg);
     }
     else{
-      data.seekg(4, ios::beg);
+      data.seekg(sizeof(long), ios::beg);
     }
     Bucket temp(page_size);
     temp.read(data);
-    cout<<temp<<endl;
-    cout<<temp.next<<endl;
-    return;
     while(temp.next != -1){
       cout<< "<";
       for(int j = 0; j < temp.count; j++ )
@@ -298,6 +316,10 @@ public:
       data.seekg(temp.next, ios::beg);
       temp.read(data);
     }
+    cout<< "<";
+    for(int j = 0; j < temp.count; j++ )
+      cout << temp.records[j].key << ",";
+    cout << "> ";
     cout<<endl;
   }
 
@@ -305,7 +327,6 @@ public:
     fstream index(this->indexname, ios::binary | ios::in | ios::out);
     fstream data(this->filename, ios::binary | ios::in | ios::out);
     if(!root_hoja){
-      cout<<"asnfa"<<endl;
       queue<long> queueq;
       queueq.push(this->root);
       stack<int> niveles;
@@ -332,7 +353,6 @@ public:
         cout << endl;
       }
     }
-    cout<<"asnfa"<<endl;
     toString();
   }
   
@@ -346,7 +366,7 @@ private:
       node.records[0] = value;
       node.count++;
       this->root = sizeof(long);
-      cout<<node<<endl;
+      // cout<<node<<endl;
       data.seekp(sizeof(long), ios::beg);
       node.write(data);
       root_hoja = true;
@@ -357,7 +377,7 @@ private:
       Bucket node(page_size);
       data.seekg(pos_node, ios::beg);
       node.read(data);
-      if(node.count == M)
+      if(node.count == node.m)
         split_hoja(pos_node, pos_padre, index, data);
       return correcto;
     }
@@ -390,20 +410,19 @@ private:
   bool insertar(long &pos_node, bool leaf, TK key, Record1 value, fstream &index, fstream &data){
     if (pos_node == -1) {  
       pos_node = sizeof(long);
-      // if (leaf) {
-      //   Bucket node(page_size);
-      //   node.records.push_back(value);
-      //   node.count++;
-      //   data.seekp(sizeof(long), ios::beg);
-      //   node.write(data);
-      //   return true;
-      // }
       // Si es nodo interno 
       Node<TK> node(M);
+      if(leaf)
+        node.pre_leaf = true;
       node.keys[0] = key;
       node.count++;
       index.seekp(sizeof(long), ios::beg);
       node.write(index, M);  
+
+      Node<TK> n1(M);
+      index.seekg(sizeof(long), ios::beg);
+      n1.read(index, M);
+      cout<<endl;
       return true;
     }
 
@@ -457,6 +476,7 @@ private:
   }
 
   void split_hoja(long pos_node, long pos_padre, fstream &index, fstream &data){
+    cout<<"llego a split en hoja"<<endl;
     root_hoja = false;
     Bucket node1(page_size);
     Bucket node2(page_size);
@@ -475,7 +495,7 @@ private:
       }
       else if(i == (node.m-1)/2){
         medio = node.records[i].key;
-        insertar(pos_padre, true, medio, node.records[i], index, data);
+        insertar(pos_padre, false, medio, node.records[i], index, data);
         node1.records[node1.count] = node.records[i];
         node1.count++;
       }
@@ -513,9 +533,9 @@ private:
         node2.keys[node2.count] = node.keys[i];
         node2.count++;
       }
-      ordenar_punteros(node1, node2, pos_node, index);
-      anclar_internos(node1, node2, pos_padre, medio, index);
     }
+    ordenar_punteros(node1, node2, node, index);
+    anclar_internos(node1, node2, pos_padre, medio, index);
   }
 
   int write_DataDel(Bucket bucket, fstream& data ){
@@ -577,6 +597,7 @@ private:
     index.seekg(pos_node, ios::beg);
     Node<TK> node(M);
     node.read(index, M);
+    node.pre_leaf = false;
     bool finded = false;
     long temp, act;
     int i = 0;
@@ -589,9 +610,10 @@ private:
       else if ( medio == node.keys[i]) {
         finded = true;
         node.children[i] = write_IndexDel(node1, index);
-        i++;
+        ++i;
         temp = node.children[i];
         node.children[i] = write_IndexDel(node2, index);
+        if(i==node.count) temp = node.children[i];
       }
     }
     node.children[node.count] = temp;
@@ -607,38 +629,46 @@ private:
     if (pos_node == root) {
       node.pre_leaf = true;  
     }
-    bool finded = false;
-    long temp, act;
-    int i = 0;
-    for (int i = 0; i < node.count; i++) {
-      if (finded) {
-        act = temp;
-        temp = node.children[i];
-        node.children[i] = act;
-      }
-      else if (medio == node.keys[i]) {
-        finded = true;
-        long next_ = write_DataDel(b2, data);
-        node.children[i+1] = next_;
-        b1.next = next_;
-        // node.children[i]
-        data.seekp(node.children[i], ios::beg);
-        b2.write(data);
-        i++;
-        temp = node.children[i];
-      }
+
+    if(node.count == 1){
+      node.children[0] = sizeof(long);
+      long next_ = write_DataDel(b2, data);
+      data.seekp(sizeof(long), ios::beg);
+      node.children[1] = next_;
+      b1.next = next_;
+      b1.write(data);
     }
-    node.children[node.count] = temp;
+    else{
+      bool finded = false;
+      long temp, act;
+      int i = 0;
+      for (int i = 0; i < node.count; i++) {
+        if (finded) {
+          act = temp;
+          temp = node.children[i];
+          node.children[i] = act;
+        }
+        else if (medio == node.keys[i]) {
+          finded = true;
+          long next_ = write_DataDel(b2, data);
+          temp = node.children[i+1];
+          node.children[i+1] = next_;
+          b1.next = next_;
+          data.seekp(node.children[i], ios::beg);
+          b1.write(data);
+          i++;
+          if(i==node.count) temp = node.children[i];
+        }
+      }
+      node.children[node.count] = temp;
+    }
     index.seekp(pos_node, ios::beg);
     node.write(index, M);
     return;
   }
 
-  void ordenar_punteros(Node<TK> node1, Node<TK> node2, long pos_node, fstream &index){
-    index.seekg(pos_node, ios::beg);
-    Node<TK> node(M);
-    node.read(index, M);
-    for (int i = 0; i < node.count; i++) {
+  void ordenar_punteros(Node<TK> &node1, Node<TK> &node2, Node<TK> node, fstream &index){
+    for (int i = 0; i < node.count+1; i++) {
       if(i <= node1.count)
         node1.children[i] = node.children[i];
       else
