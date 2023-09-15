@@ -7,6 +7,9 @@
 #include <cstring>
 void ingreso(){
   BPlusFile<long> bplus;
+  bplus.displayTree();
+  return;
+
   ifstream archivo("datos.csv");
   
   if (!archivo.is_open()) {
@@ -57,7 +60,6 @@ void ingreso(){
     //   cin >> asd;
     bool asd__ = bplus.add(record);
     // cout << "Asda" << endl;
-    bplus.displayTree();
     // cout << "Asda" << endl;
     // for (const string& valor: campos){
     //   cout << valor << "\t";
@@ -65,9 +67,10 @@ void ingreso(){
     // cout << endl;
     cout<<"counter: "<<counter<<endl;
     counter++;
-    if(counter == 20000)break;
+    if(counter == 200000)break;
     campos.clear();
   }
+  bplus.displayTree();
 
   archivo.close();
 
