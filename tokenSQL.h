@@ -95,16 +95,10 @@ public:
     }
 
     startLexema();
-    if (isdigit(c) || isalpha(c)) {
+    if (isalpha(c)) {
       c = nextChar();
-      while (isdigit(c) || isalpha(c)) {
+      while (isalpha(c)) {
         c = nextChar();
-      }
-      if(c == ':'){
-        rollBack();
-        string a = getLexema();
-        c = nextChar();
-        return new Token(Token::LABEL, a);
       }
 
       rollBack();
