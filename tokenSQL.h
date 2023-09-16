@@ -18,8 +18,8 @@ using namespace std;
 
 class Token {
 public:
-  enum Type { PUSH, JMPEQ, JMPGT, JMPGE, JMPLT, JMPLE, SKIP, POP, DUP, SWAP, ADD, SUB, MUL, DIV, STORE, LOAD, GOTO, ID, LABEL, NUM, EOL, CADENA, ERR, END};
-  static const char* token_names[24]; 
+  enum Type { SELECT, CREATE, TABLE, FROM, ALL, WHERE, DELETE, EQUAL, BETWEEN, AND, INSERT, INTO, VALUES, FILE, LPARENT, RPARENT, INDEX, USING, BPLUS, AVL, SEQUENTIAL, END, ERR, SEMICOLON, COLON, ID};
+  static const char* token_names[26]; 
   Type type;
   string lexema;
   Token(Type type):type(type) { lexema = ""; }
@@ -30,7 +30,7 @@ public:
 
 };
 
-const char* Token::token_names[24] = { "PUSH", "JMPEQ", "JMPGT", "JMPLT", "JMPGE", "JMPLE", "SKIP", "POP", "DUP", "SWAP", "ADD", "SUB", "MUL", "DIV", "STORE", "LOAD", "GOTO", "ID", "LABEL", "NUM", "EOL", "CADENA", "ERR", "END"};
+const char* Token::token_names[26] = {"SELECT", "CREATE", "TABLE", "FROM", "ALL", "WHERE", "DELETE", "EQUAL", "BETWEEN", "AND", "INSERT", "INTO", "VALUES", "FILE", "LPARENT", "RPARENT", "INDEX", "USING", "BPLUS", "AVL", "SEQUENTIAL", "END", "ERR", "SEMICOLON", "COLON", "ID"};
 
 
 // Modificar
