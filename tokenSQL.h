@@ -22,18 +22,16 @@ public:
   static const char* token_names[24]; 
   Type type;
   string lexema;
-  Token(Type);
+  Token(Type type):type(type) { lexema = ""; }
   Token(Type, char c);
-  Token(Type, const string source);
+  Token(Type type, const string source):type(type) {
+    lexema = source;
+  }
+
 };
 
 const char* Token::token_names[24] = { "PUSH", "JMPEQ", "JMPGT", "JMPLT", "JMPGE", "JMPLE", "SKIP", "POP", "DUP", "SWAP", "ADD", "SUB", "MUL", "DIV", "STORE", "LOAD", "GOTO", "ID", "LABEL", "NUM", "EOL", "CADENA", "ERR", "END"};
-Token::Token(Type type):type(type) { lexema = ""; }
 
-
-Token::Token(Type type, const string source):type(type) {
-  lexema = source;
-}
 
 // Modificar
 std::ostream& operator << ( std::ostream& outs, const Token & tok )
