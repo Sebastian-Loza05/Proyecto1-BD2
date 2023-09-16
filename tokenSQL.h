@@ -1,3 +1,4 @@
+#include <cctype>
 #include <sstream>
 #include <iostream>
 #include <stdlib.h>
@@ -18,8 +19,8 @@ using namespace std;
 
 class Token {
 public:
-  enum Type { SELECT, CREATE, TABLE, FROM, ALL, WHERE, DELETE, EQUAL, BETWEEN, AND, INSERT, INTO, VALUES, FILE, LPARENT, RPARENT, INDEX, USING, BPLUS, AVL, SEQUENTIAL, END, ERR, SEMICOLON, COLON, ID, EOL};
-  static const char* token_names[27]; 
+  enum Type { SELECT, CREATE, TABLE, FROM, ALL, WHERE, DELETE, EQUAL, BETWEEN, AND, INSERT, INTO, VALUES, FILE, LPARENT, RPARENT, INDEX, USING, BPLUS, AVL, SEQUENTIAL, END, ERR, SEMICOLON, COLON, ID, EOL, NUM, VALUE, QUOTE};
+  static const char* token_names[30]; 
   Type type;
   string lexema;
   Token(Type type):type(type) { lexema = ""; }
@@ -30,7 +31,7 @@ public:
 
 };
 
-const char* Token::token_names[27] = {"SELECT", "CREATE", "TABLE", "FROM", "ALL", "WHERE", "DELETE", "EQUAL", "BETWEEN", "AND", "INSERT", "INTO", "VALUES", "FILE", "LPARENT", "RPARENT", "INDEX", "USING", "BPLUS", "AVL", "SEQUENTIAL", "END", "ERR", "SEMICOLON", "COLON", "ID", "EOL"};
+const char* Token::token_names[30] = {"SELECT", "CREATE", "TABLE", "FROM", "ALL", "WHERE", "DELETE", "EQUAL", "BETWEEN", "AND", "INSERT", "INTO", "VALUES", "FILE", "LPARENT", "RPARENT", "INDEX", "USING", "BPLUS", "AVL", "SEQUENTIAL", "END", "ERR", "SEMICOLON", "COLON", "ID", "EOL", "NUM", "VALUE", "QUOTE"};
 
 
 // Modificar
@@ -56,7 +57,6 @@ public:
     palabras.insert(make_pair("CREATE", Token::CREATE)); 
     palabras.insert(make_pair("TABLE", Token::TABLE));
     palabras.insert(make_pair("FROM", Token::FROM));
-    palabras.insert(make_pair("ALL", Token::ALL));
     palabras.insert(make_pair("WHERE", Token::WHERE));
     palabras.insert(make_pair("DELETE", Token::DELETE));
     palabras.insert(make_pair("EQUAL", Token::EQUAL));
@@ -66,25 +66,17 @@ public:
     palabras.insert(make_pair("INTO", Token::INTO));
     palabras.insert(make_pair("VALUES", Token::VALUES));
     palabras.insert(make_pair("FILE", Token::FILE));
-    palabras.insert(make_pair("LPARENT", Token::LPARENT));
-    palabras.insert(make_pair("RPARENT", Token::RPARENT));
     palabras.insert(make_pair("INDEX", Token::INDEX));
     palabras.insert(make_pair("USING", Token::USING));
     palabras.insert(make_pair("BPLUS", Token::BPLUS));
     palabras.insert(make_pair("AVL", Token::AVL));
     palabras.insert(make_pair("SEQUENTIAL", Token::SEQUENTIAL));
-    palabras.insert(make_pair("END", Token::END));
-    palabras.insert(make_pair("ERR", Token::ERR));
-    palabras.insert(make_pair("SEMICOLON", Token::SEMICOLON));
-    palabras.insert(make_pair("COLON", Token::COLON));
-    palabras.insert(make_pair("ID", Token::ID));
-
   }
 
   Token::Type search(string lexema){
     auto it = palabras.find(lexema);
     if(it != palabras.end()) return it->second;
-    return Token::CADENA;
+    return Token::VALUE;
   }
 };
 
@@ -93,6 +85,7 @@ class Scanner {
 public:
   Scanner(string _input) :input(_input),first(0),current(0) { };
   Token* nextToken() {
+
     Token* token;
     char c;
     c = nextChar();
@@ -104,20 +97,13 @@ public:
       rollBack();
       return new Token(Token::EOL);
     }
-
     startLexema();
+
     if (isdigit(c) || isalpha(c)) {
       c = nextChar();
       while (isdigit(c) || isalpha(c)) {
         c = nextChar();
       }
-      if(c == ':'){
-        rollBack();
-        string a = getLexema();
-        c = nextChar();
-        return new Token(Token::LABEL, a);
-      }
-
       rollBack();
       string lexema = getLexema();
       if(current == input.length()){
@@ -126,18 +112,31 @@ public:
         current++;
       }
       Token::Type ktype = palabras.search(lexema);
-      if(ktype != Token::CADENA){
+      if(ktype != Token::VALUE){
         return new Token(ktype);
       }
 
       if(isNumber(getLexema()))
         return new Token(Token::NUM, getLexema());
 
-      return new Token(Token::ID, getLexema());
-        
-    } else if (c == '\0') {
+      return new Token(Token::ID, getLexema());    
+    }
+    else if (c == '\0') {
       return new Token(Token::END);
-    } else {
+    }
+    else if (strchr("()=,;*\"",c)){
+      switch (c) {
+        case '(': return new Token(Token::RPARENT);
+        case ')': return new Token(Token::LPARENT);
+        case '=': return new Token(Token::EQUAL);
+        case ',': return new Token(Token::COLON);
+        case ';': return new Token(Token::SEMICOLON);
+        case '*': return new Token(Token::ALL);
+        case '"': return new Token(Token::QUOTE);
+        default: cout << "No deberia llegar aca" << endl;
+      }
+    }
+    else {
       return new Token(Token::ERR,getLexema());
     }
     return NULL;
@@ -180,32 +179,3 @@ private:
 
 
 // ---------------------------------------------------
-
-int main(int argc, const char* argv[]) {
-  
-  if (argc != 2) {
-    cout << "File missing" << endl;
-    exit(1);
-  }
-  std::ifstream t(argv[1]);
-  std::stringstream buffer;
-  buffer << t.rdbuf();
-
-
-  // Cambiar:
-  // input es ahora el nombre de archivo con las instruccion de la SM
-  
-
-  Scanner scanner(buffer.str());
-  Token* tk = scanner.nextToken();
-  while (tk->type != Token::END) {
-    cout << tk << endl;
-    delete tk;
-    tk =  scanner.nextToken();
-  }
-  cout << tk << endl;
-  delete tk;
-
-}
-
-

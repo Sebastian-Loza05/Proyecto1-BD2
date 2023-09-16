@@ -1,0 +1,9 @@
+SELECT * FROM TABLE pipipi;
+
+CREATE TABLE Customer FROM FILE "CS V" USING INDEX HASH("DNI");
+
+SELECT key,value FROM Customer WHERE key = 1;
+
+INSERT INTO Customer VALUES (key,value,value);
+
+SELECT * FROM Customer WHERE DNI BETWEEN 1 AND y;
