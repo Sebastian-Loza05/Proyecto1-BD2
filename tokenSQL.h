@@ -18,8 +18,8 @@ using namespace std;
 
 class Token {
 public:
-  enum Type { SELECT, CREATE, TABLE, FROM, ALL, WHERE, DELETE, EQUAL, BETWEEN, AND, INSERT, INTO, VALUES, FILE, LPARENT, RPARENT, INDEX, USING, BPLUS, AVL, SEQUENTIAL, END, ERR, SEMICOLON, COLON, ID};
-  static const char* token_names[26]; 
+  enum Type { SELECT, CREATE, TABLE, FROM, ALL, WHERE, DELETE, EQUAL, BETWEEN, AND, INSERT, INTO, VALUES, FILE, LPARENT, RPARENT, INDEX, USING, BPLUS, AVL, SEQUENTIAL, END, ERR, SEMICOLON, COLON, ID, EOL};
+  static const char* token_names[27]; 
   Type type;
   string lexema;
   Token(Type type):type(type) { lexema = ""; }
@@ -30,7 +30,7 @@ public:
 
 };
 
-const char* Token::token_names[26] = {"SELECT", "CREATE", "TABLE", "FROM", "ALL", "WHERE", "DELETE", "EQUAL", "BETWEEN", "AND", "INSERT", "INTO", "VALUES", "FILE", "LPARENT", "RPARENT", "INDEX", "USING", "BPLUS", "AVL", "SEQUENTIAL", "END", "ERR", "SEMICOLON", "COLON", "ID"};
+const char* Token::token_names[27] = {"SELECT", "CREATE", "TABLE", "FROM", "ALL", "WHERE", "DELETE", "EQUAL", "BETWEEN", "AND", "INSERT", "INTO", "VALUES", "FILE", "LPARENT", "RPARENT", "INDEX", "USING", "BPLUS", "AVL", "SEQUENTIAL", "END", "ERR", "SEMICOLON", "COLON", "ID", "EOL"};
 
 
 // Modificar
@@ -51,23 +51,34 @@ class PalabrasReservadas {
 
 public:
   PalabrasReservadas(){
-    palabras.insert(make_pair("push", Token::PUSH));
-    palabras.insert(make_pair("jmpeq", Token::JMPEQ));
-    palabras.insert(make_pair("jmpgt", Token::JMPGT));
-    palabras.insert(make_pair("jmpge", Token::JMPGE));
-    palabras.insert(make_pair("jmplt", Token::JMPLT));
-    palabras.insert(make_pair("jmple", Token::JMPLE));
-    palabras.insert(make_pair("skip", Token::SKIP));
-    palabras.insert(make_pair("pop", Token::POP));
-    palabras.insert(make_pair("dup", Token::DUP));
-    palabras.insert(make_pair("swap", Token::SWAP));
-    palabras.insert(make_pair("add", Token::ADD));
-    palabras.insert(make_pair("sub", Token::SUB));
-    palabras.insert(make_pair("mul", Token::MUL));
-    palabras.insert(make_pair("div", Token::DIV));
-    palabras.insert(make_pair("store", Token::STORE));
-    palabras.insert(make_pair("load", Token::LOAD));  
-    palabras.insert(make_pair("goto", Token::GOTO));  
+
+    palabras.insert(make_pair("SELECT", Token::SELECT));
+    palabras.insert(make_pair("CREATE", Token::CREATE)); 
+    palabras.insert(make_pair("TABLE", Token::TABLE));
+    palabras.insert(make_pair("FROM", Token::FROM));
+    palabras.insert(make_pair("ALL", Token::ALL));
+    palabras.insert(make_pair("WHERE", Token::WHERE));
+    palabras.insert(make_pair("DELETE", Token::DELETE));
+    palabras.insert(make_pair("EQUAL", Token::EQUAL));
+    palabras.insert(make_pair("BETWEEN", Token::BETWEEN));
+    palabras.insert(make_pair("AND", Token::AND));
+    palabras.insert(make_pair("INSERT", Token::INSERT));
+    palabras.insert(make_pair("INTO", Token::INTO));
+    palabras.insert(make_pair("VALUES", Token::VALUES));
+    palabras.insert(make_pair("FILE", Token::FILE));
+    palabras.insert(make_pair("LPARENT", Token::LPARENT));
+    palabras.insert(make_pair("RPARENT", Token::RPARENT));
+    palabras.insert(make_pair("INDEX", Token::INDEX));
+    palabras.insert(make_pair("USING", Token::USING));
+    palabras.insert(make_pair("BPLUS", Token::BPLUS));
+    palabras.insert(make_pair("AVL", Token::AVL));
+    palabras.insert(make_pair("SEQUENTIAL", Token::SEQUENTIAL));
+    palabras.insert(make_pair("END", Token::END));
+    palabras.insert(make_pair("ERR", Token::ERR));
+    palabras.insert(make_pair("SEMICOLON", Token::SEMICOLON));
+    palabras.insert(make_pair("COLON", Token::COLON));
+    palabras.insert(make_pair("ID", Token::ID));
+
   }
 
   Token::Type search(string lexema){
