@@ -82,113 +82,91 @@ public:
 
 class Scanner {
 public:
-  Scanner(string input);
-  Token* nextToken();
-  ~Scanner();  
+  Scanner(string _input) :input(_input),first(0),current(0) { };
+  Token* nextToken() {
+    Token* token;
+    char c;
+    c = nextChar();
+    while (c == ' ' || c == '\t' ) c = nextChar();
+    if(c == '\n'){
+      c = nextChar();
+      while(c == '\n')
+        c = nextChar();
+      rollBack();
+      return new Token(Token::EOL);
+    }
+
+    startLexema();
+    if (isdigit(c) || isalpha(c)) {
+      c = nextChar();
+      while (isdigit(c) || isalpha(c)) {
+        c = nextChar();
+      }
+      if(c == ':'){
+        rollBack();
+        string a = getLexema();
+        c = nextChar();
+        return new Token(Token::LABEL, a);
+      }
+
+      rollBack();
+      string lexema = getLexema();
+      if(current == input.length()){
+        current-=2;
+        lexema = getLexema();
+        current++;
+      }
+      Token::Type ktype = palabras.search(lexema);
+      if(ktype != Token::CADENA){
+        return new Token(ktype);
+      }
+
+      if(isNumber(getLexema()))
+        return new Token(Token::NUM, getLexema());
+
+      return new Token(Token::ID, getLexema());
+        
+    } else if (c == '\0') {
+      return new Token(Token::END);
+    } else {
+      return new Token(Token::ERR,getLexema());
+    }
+    return NULL;
+  };
+  ~Scanner(){};  
 private:
   string input;
   PalabrasReservadas palabras;
   int first, current;
   int state;
-  bool isNumber(const string& s);
-  char nextChar();
-  void rollBack();
-  void startLexema();
-  void incrStartLexema();
-  string getLexema();
+  bool isNumber(const string& s) {
+    for (char c : s) {
+      if (!isdigit(c)) {
+        return false;
+      }
+    }
+    return true;
+  };
+  char nextChar() {
+    int c = input[current];
+    if (c != '\0') current++;
+    return c;
+  };
+  void rollBack() { // retract
+    if (input[current] != '\0')
+      current--;
+  };
+  void startLexema() {
+    first = current-1;  
+    return;
+  };
+  void incrStartLexema() {
+    first++;
+  };
+  string getLexema() {
+    return input.substr(first,current-first);
+  };
 };
-
-
-Scanner::Scanner(string _input):input(_input),first(0),current(0) { }
-
-Token* Scanner::nextToken() {
-  Token* token;
-  char c;
-  c = nextChar();
-  while (c == ' ' || c == '\t' ) c = nextChar();
-  if(c == '\n'){
-    c = nextChar();
-    while(c == '\n')
-      c = nextChar();
-    rollBack();
-    return new Token(Token::EOL);
-  }
-
-  startLexema();
-  if (isdigit(c) || isalpha(c)) {
-    c = nextChar();
-    while (isdigit(c) || isalpha(c)) {
-      c = nextChar();
-    }
-    if(c == ':'){
-      rollBack();
-      string a = getLexema();
-      c = nextChar();
-      return new Token(Token::LABEL, a);
-    }
-
-    rollBack();
-    string lexema = getLexema();
-    if(current == input.length()){
-      current-=2;
-      lexema = getLexema();
-      current++;
-    }
-    Token::Type ktype = palabras.search(lexema);
-    if(ktype != Token::CADENA){
-      return new Token(ktype);
-    }
-
-    if(isNumber(getLexema()))
-      return new Token(Token::NUM, getLexema());
-
-    return new Token(Token::ID, getLexema());
-      
-  } else if (c == '\0') {
-    return new Token(Token::END);
-  } else {
-    return new Token(Token::ERR,getLexema());
-  }
-  return NULL;
-}
-
-Scanner::~Scanner() { }
-
-bool Scanner::isNumber(const string& s){
-  for (char c : s) {
-    if (!isdigit(c)) {
-      return false;
-    }
-  }
-  return true;
-}
-
-char Scanner::nextChar() {
-  int c = input[current];
-  if (c != '\0') current++;
-  return c;
-}
-
-void Scanner::rollBack() { // retract
-  if (input[current] != '\0')
-    current--;
-}
-
-void Scanner::startLexema() {
-  first = current-1;  
-  return;
-}
-
-void Scanner::incrStartLexema() {
-  first++;
-}
-
-
-string Scanner::getLexema() {
-  return input.substr(first,current-first);
-}
-
-
 
 
 
