@@ -19,8 +19,10 @@ struct MiTupla {
     }
 };
 
-bool operator<=(char a, char b) {
-    return a <= b;
+bool operator<(char *numero, const char* a) {
+  // Realiza la comparaciasdón personalizada aquí
+  // En este ejemplo, se compara la longitud de la cadena con el número
+  return true;
 }
 int main(){
   // MiTupla miTupla("asd", 42, 3.14, "Hola");

@@ -19,8 +19,8 @@ using namespace std;
 
 class Token {
 public:
-  enum Type { SELECT, CREATE, TABLE, FROM, ALL, WHERE, DELETE, EQUAL, BETWEEN, AND, INSERT, INTO, VALUES, FILE, LPARENT, RPARENT, INDEX, USING, BPLUS, AVL, SEQUENTIAL, END, ERR, SEMICOLON, COLON, ID, EOL, NUM, VALUE, QUOTE};
-  static const char* token_names[30]; 
+  enum Type { SELECT, CREATE, TABLE, FROM, ALL, WHERE, DELETE, EQUAL, BETWEEN, AND, INSERT, INTO, VALUES, FILE, LPARENT, RPARENT, INDEX, USING, BPLUS, AVL, SEQUENTIAL, END, ERR, SEMICOLON, COLON, ID, EOL, NUM, VALUE, QUOTE, FILENAME};
+  static const char* token_names[31]; 
   Type type;
   string lexema;
   Token(Type type):type(type) { lexema = ""; }
@@ -31,7 +31,7 @@ public:
 
 };
 
-const char* Token::token_names[30] = {"SELECT", "CREATE", "TABLE", "FROM", "ALL", "WHERE", "DELETE", "EQUAL", "BETWEEN", "AND", "INSERT", "INTO", "VALUES", "FILE", "LPARENT", "RPARENT", "INDEX", "USING", "BPLUS", "AVL", "SEQUENTIAL", "END", "ERR", "SEMICOLON", "COLON", "ID", "EOL", "NUM", "VALUE", "QUOTE"};
+const char* Token::token_names[31] = {"SELECT", "CREATE", "TABLE", "FROM", "ALL", "WHERE", "DELETE", "EQUAL", "BETWEEN", "AND", "INSERT", "INTO", "VALUES", "FILE", "LPARENT", "RPARENT", "INDEX", "USING", "BPLUS", "AVL", "SEQUENTIAL", "END", "ERR", "SEMICOLON", "COLON", "ID", "EOL", "NUM", "VALUE", "QUOTE", "FILENAME"};
 
 
 // Modificar
@@ -95,12 +95,24 @@ public:
       while(c == '\n')
         c = nextChar();
     }
+    // : \\ / . 
     startLexema();
     if (isdigit(c) || isalpha(c)) {
       c = nextChar();
       while (isalpha(c) || isdigit(c)) {
         c = nextChar();
       }
+
+      if (c == ':') {
+        c = nextChar();
+        while (strchr("\\.:",c) || isalpha(c)) {
+          c = nextChar();
+        }
+        rollBack();
+        string a = getLexema();
+        return new Token(Token::FILENAME,a);
+      }
+
       rollBack();
       string lexema = getLexema();
       if(current == input.length()){
@@ -120,6 +132,15 @@ public:
     }
     else if (c == '\0') {
       return new Token(Token::END);
+    }
+    else if (c == '/' || c == '~'){
+        c = nextChar();
+        while (strchr("~/.",c) || isalpha(c)) {
+          c = nextChar();
+        }
+        rollBack();
+        string a = getLexema();
+        return new Token(Token::FILENAME,a);
     }
     else if (strchr("()=,;*\"",c)){
       switch (c) {
