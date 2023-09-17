@@ -94,8 +94,6 @@ public:
       c = nextChar();
       while(c == '\n')
         c = nextChar();
-      rollBack();
-      return new Token(Token::EOL);
     }
     startLexema();
     if (isdigit(c) || isalpha(c)) {
