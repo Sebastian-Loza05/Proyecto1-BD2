@@ -7,8 +7,8 @@
 #include <cstring>
 void ingreso(){
   BPlusFile<long> bplus;
-  bplus.displayTree();
-  return;
+  // bplus.displayTree();
+
 
   ifstream archivo("datos.csv");
   
@@ -67,6 +67,8 @@ void ingreso(){
     // cout << endl;
     cout<<"counter: "<<counter<<endl;
     counter++;
+  bplus.displayTree();
+    cin >> asd;
     if(counter == 200000)break;
     campos.clear();
   }

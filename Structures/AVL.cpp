@@ -2,7 +2,7 @@
 #include <fstream>
 #include <functional>
 #include <vector>
-#include "Structures/AVL.h"
+#include "AVL.h"
 
 using namespace std;
 
