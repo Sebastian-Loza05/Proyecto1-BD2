@@ -35,6 +35,14 @@ public:
   }
 
 private:
+  void mostrar(){
+    cout<<"Atributos: "<<endl;
+    for (auto const &v: atributos){
+      cout<<v<<", ";
+    }
+    cout<<endl;
+  }
+
   bool match(Token::Type ttype) {
     if (check(ttype)) {
       advance();
@@ -74,33 +82,73 @@ private:
       if(match(Token::ID))
         parseExpression();
       else if(match(Token::ALL))
-        parseTable();
+        parseTable(nullptr);
       else
         cout<< "Error esperaba los atributos"<<endl;
       return;
+    }
+    else if(match(Token::CREATE)){
+      if(match(Token::TABLE)){
+        Token* temp = previous; 
+        if(match(Token::ID))
+          parseTable(temp);
+      }
     }
     cout<< "Error esperaba una sentencia SQL." <<endl;
   }
   void parseExpression(){
     atributos.push_back(previous->lexema);
-    if(match(Token::COLON))
+    if(match(Token::COLON)){
+      advance();
       parseExpression();
+    }
     else
-      parseTable();
+      parseTable(nullptr);
   }
   
-  void parseTable(){
+  void parseTable(Token* temp){
     if(match(Token::FROM)){
       if(match(Token::ID)){
         if(match(Token::SEMICOLON)){
-          //funcion para mostrar toda la tabla;
+          cout<<"Mostrar tabla"<<endl;
           return;
         }
         parseCondition();
+        return;
       }
-      cout<< "Se esperaba el nombre de una tabla." <<endl;
+      else if(temp!=nullptr && match(Token::FILE)){
+        parseFile();
+        return;
+      }
+      cout<< "Error de sintaxis." <<endl;
+      return;
     }
+    cout<<"Error de sintaxis"<<endl;
   }
+
+  void parseFile(){
+    string filename = "";
+    if(match(Token::QUOTE)){
+      if(match(Token::FILENAME)){
+        filename = previous->lexema;
+        if(match(Token::QUOTE)){
+          parseIndex(filename);
+          return;
+        }
+        cout<<"Se esperaba \""<<endl;
+        return;
+      }
+      cout<<"Se esperaba el nombre del archivo"<<endl;
+      return;
+    }
+    cout<<"Se esperaba \""<<endl;
+    return;
+  }
+
+  void parseIndex(string filename){
+
+  }
+
   void parseCondition(){
     if (match(Token::WHERE)){
       if(match(Token::ID)){
@@ -116,18 +164,19 @@ private:
 
   void parseCondition2(){
     if(match(Token::EQUAL)){
-      if(match(Token::ID)){
+      bool v = parseEqual();
+      if(v){
         if(match(Token::SEMICOLON)){
-          //codigo
+          cout<<"Busqueda unitaria"<<endl;
           return;
         }
         cout<<"Sintaxis incorrecta"<<endl;
         return;
       }
-      cout<<"Sintaxis incorrecta"<<endl;
       return;
     }
     else if(match(Token::BETWEEN)){
+      cout<<"Between"<<endl;
       parse_range();
     }
     else
@@ -135,12 +184,31 @@ private:
     return;
   }
 
+  bool parseEqual(){
+    if(match(Token::NUM)){
+      return true;
+    }
+    else if(match(Token::QUOTE)){
+      if(match(Token::ID)){
+        if(!match(Token::QUOTE)){
+          cout<<"Error de sintaxis, esperaba un \""<<endl;
+          return false;
+        }
+        return true;
+      }
+      cout<<"Sintaxis incorrecta"<<endl;
+      return false;
+    }
+    cout<<"Sintaxis incorrecta"<<endl;
+    return false;
+  }
+
   void parse_range(){
     if(match(Token::NUM)){
       if(match(Token::AND)){
         if(match(Token::NUM)){
           if(match(Token::SEMICOLON)){
-            //codigo
+            cout<<"Busqueda por rango"<<endl;
             return;
           }
           cout<<"Sintaxis Incorrecta"<<endl;
