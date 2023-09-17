@@ -285,6 +285,63 @@ public:
         main.close();
     }
 
+ void remove(T key){
+        merge(mainFilename,auxFilename);
+
+        fstream mainFile(mainFilename, ios::binary| ios::in | ios::out);
+        if (!mainFile.is_open()) {
+            throw runtime_error("No se pudo abrir el archivo main");
+        }
+
+        int inicio = 0;
+        mainFile.seekg(0, ios::end);
+        int fin = ((int)mainFile.tellg() - inicio) / sizeof(Registro) - 1;
+        mainFile.seekg(0, ios::beg);
+
+        Registro record;
+        Registro PrevRecord;
+        int pos;
+        while (inicio <= fin) {
+            int medio = (inicio + fin) / 2;
+            mainFile.seekg(medio * sizeof(Registro) + sizeof(int) + sizeof(bool));
+            mainFile.read((char*)&record, sizeof(Registro));
+
+            if (record.id == key) {
+                pos = medio;
+                break;
+            } else if (record.id < key) {
+                inicio = medio + 1;
+                if (key - record.id < key - PrevRecord.id) {
+                    PrevRecord = record;
+                }
+            } else {
+                fin = medio - 1;
+            }
+
+            pos = medio;
+        }
+
+
+        Registro prevrecord;
+        mainFile.seekg((pos-1) * sizeof(Registro) + sizeof(int) + sizeof(bool));
+        mainFile.read((char*) &prevrecord, sizeof(Registro));
+
+        Registro rmrecord;
+        mainFile.seekg(pos * sizeof(Registro) + sizeof(int) + sizeof(bool));
+        mainFile.read((char*) &rmrecord, sizeof(Registro));
+
+        prevrecord.nextPF = rmrecord.nextPF;
+        rmrecord.nextPF = -2;
+
+        mainFile.seekp((pos-1) * sizeof(Registro) + sizeof(int) + sizeof(bool));
+        mainFile.write((char*) &prevrecord, sizeof(Registro));
+
+        mainFile.seekp(pos * sizeof(Registro) + sizeof(int) + sizeof(bool));
+        mainFile.write((char*) &rmrecord, sizeof(Registro));
+
+        mainFile.close();
+    }
+
     vector<Registro> search(int key) {
         vector<Registro> result;
         ifstream mainFile(mainFilename, ios::binary);
