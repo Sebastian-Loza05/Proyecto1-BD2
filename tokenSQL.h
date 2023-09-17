@@ -76,6 +76,7 @@ public:
   Token::Type search(string lexema){
     auto it = palabras.find(lexema);
     if(it != palabras.end()) return it->second;
+    cout << lexema << endl;
     return Token::VALUE;
   }
 };
@@ -103,6 +104,7 @@ public:
         c = nextChar();
       }
 
+
       if (c == ':') {
         c = nextChar();
         while (strchr("\\.:",c) || isalpha(c)) {
@@ -115,11 +117,14 @@ public:
 
       rollBack();
       string lexema = getLexema();
+      // cout << "lex: " << lexema << endl;
       if(current == input.length()){
-        current-=2;
+        current-=1;
         lexema = getLexema();
         current++;
+        // cout << "lex1: " << lexema << endl;
       }
+      // cout << "lex1: " << lexema << endl;
       Token::Type ktype = palabras.search(lexema);
       if(ktype != Token::VALUE){
         return new Token(ktype);
