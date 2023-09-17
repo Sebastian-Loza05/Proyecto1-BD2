@@ -186,6 +186,105 @@ public:
     mainFile.close();
   }
 
+    void merge(string &mainFilename, string &auxFilename) {
+        ofstream outputFile("merge.dat", ios::binary);
+        if (!outputFile.is_open()) {
+            throw runtime_error("No se pudo abrir el archivo de salida");
+        }
+
+
+        ifstream mainFile(mainFilename, ios::binary);
+        if (!mainFile.is_open()) {
+            throw runtime_error("No se pudo abrir el archivo main");
+        }
+
+        ifstream auxFile(auxFilename, ios::binary);
+        if (!auxFile.is_open()) {
+            throw runtime_error("No se pudo abrir el archivo auxiliar");
+        }
+
+        int HnextPF;
+        bool HisMain;
+        mainFile.read((char*)&HnextPF, sizeof(int));
+        mainFile.read((char*)&HisMain, sizeof(bool));
+
+        outputFile.write((char*)&HnextPF, sizeof(int));
+        outputFile.write((char*)&HisMain, sizeof(bool));
+
+        int nextPos = HnextPF;
+        bool Whcfile = HisMain;
+        int contador = 0;
+        while(nextPos != -1){
+            Registro record;
+            Registro temp;
+            if (Whcfile){ //Verificar en que archivo se debe ingresar
+                mainFile.seekg(nextPos * sizeof(Registro) + sizeof(int) + sizeof(bool)); //Ir a la poscicion del siguiente registro en el main
+                mainFile.read((char*) &record, sizeof(Registro)); //almacenarlo en record
+
+                if (!record.isMain){
+                    temp = record;
+                    temp.isMain = true;
+                    contador++;
+                    if (record.nextPF == -1){contador = -1;}
+                    temp.nextPF = contador;
+                    outputFile.write((char*) &temp, sizeof(Registro));
+                }
+                else{
+                    contador++;
+                    if (record.nextPF == -1){contador = -1;}
+                    int tempnext = record.nextPF;
+                    record.nextPF = contador;
+                    outputFile.write((char*) &record, sizeof(Registro)); //escribirlo en output
+                    record.nextPF = tempnext;
+                }
+            }
+            else {
+                auxFile.seekg(nextPos * sizeof(Registro));
+                auxFile.read((char*) &record, sizeof(Registro));
+
+                if (!record.isMain){
+                    temp = record;
+                    temp.isMain = true;
+                    contador++;
+                    if (record.nextPF == -1){contador = -1;}
+                    temp.nextPF = contador;
+                    outputFile.write((char*) &temp, sizeof(Registro));
+                }
+                else {
+                    contador++;
+                    if (record.nextPF == -1){contador = -1;}
+                    int tempnext = record.nextPF;
+                    record.nextPF = contador;
+                    outputFile.write((char*) &record, sizeof(Registro));
+                    record.nextPF = tempnext;
+                }
+            }
+            nextPos = record.nextPF;
+            Whcfile = record.isMain;
+
+
+        }
+        mainFile.close();
+        auxFile.close();
+        outputFile.close();
+
+        std::remove(mainFilename.c_str());
+        std::remove(auxFilename.c_str());
+        std::rename("merge.dat", mainFilename.c_str());
+
+        ofstream main(mainFilename, ios::binary | ios::in | ios::out);
+        if (!main.is_open()) {
+            throw runtime_error("No se pudo abrir el archivo de salida");
+        }
+
+        HnextPF = 0;
+        HisMain = 1;
+        main.write((char*)&HnextPF, sizeof(int));
+        main.write((char*)&HisMain, sizeof(bool));
+
+        main.close();
+    }
+
     vector<Registro> search(int key) {
         vector<Registro> result;
         ifstream mainFile(mainFilename, ios::binary);
