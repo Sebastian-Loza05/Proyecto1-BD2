@@ -117,14 +117,11 @@ public:
 
       rollBack();
       string lexema = getLexema();
-      // cout << "lex: " << lexema << endl;
       if(current == input.length()){
         current-=1;
         lexema = getLexema();
         current++;
-        // cout << "lex1: " << lexema << endl;
       }
-      // cout << "lex1: " << lexema << endl;
       Token::Type ktype = palabras.search(lexema);
       if(ktype != Token::VALUE){
         return new Token(ktype);
