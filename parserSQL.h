@@ -146,7 +146,37 @@ private:
   }
 
   void parseIndex(string filename){
-
+    if(match(Token::USING)){
+      if(match(Token::INDEX))
+        parseIndexType();
+    }
+    cout<<"Sintaxis incorrecta"<<endl;
+    return;
+  }
+  
+  void parseIndexType(){
+    if(match(Token::BPLUS)){
+      if(match(Token::SEMICOLON)){
+        cout<<"Se crea tabla con index bplus"<<endl;
+      }
+      cout<<"Se esperaba un ;"<<endl;
+      return;
+    }
+    else if(match(Token::AVL)){
+      if(match(Token::SEMICOLON)){
+        cout<<"Se crea tabla con index avl"<<endl;
+      }
+      cout<<"Se esperaba un ;"<<endl;
+      return;
+    }
+    else if(match(Token::SEQUENTIAL)){
+      if(match(Token::SEMICOLON)){
+        cout<<"Se crea tabla con index sequential"<<endl;
+      }
+      cout<<"Se esperaba un ;"<<endl;
+      return;
+    }
+    return;
   }
 
   void parseCondition(){
