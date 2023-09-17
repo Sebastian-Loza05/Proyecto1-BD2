@@ -96,10 +96,9 @@ public:
         c = nextChar();
     }
     startLexema();
-
     if (isdigit(c) || isalpha(c)) {
       c = nextChar();
-      while (isdigit(c) || isalpha(c)) {
+      while (isalpha(c)) {
         c = nextChar();
       }
       rollBack();
