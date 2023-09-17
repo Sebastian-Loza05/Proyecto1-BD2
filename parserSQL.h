@@ -90,9 +90,15 @@ private:
     else if(match(Token::CREATE)){
       if(match(Token::TABLE)){
         Token* temp = previous; 
-        if(match(Token::ID))
+        if(match(Token::ID)){
           parseTable(temp);
+          return;
+        }
+        cout<<"Se esperaba un nombre de tabla"<<endl;
+        return;
       }
+      cout<<"Error de sintaxis"<<endl;
+      return;
     }
     cout<< "Error esperaba una sentencia SQL." <<endl;
   }
@@ -147,8 +153,12 @@ private:
 
   void parseIndex(string filename){
     if(match(Token::USING)){
-      if(match(Token::INDEX))
+      if(match(Token::INDEX)){
         parseIndexType();
+        return;
+      }
+      cout<<"Sintaxis incorrecta"<<endl;
+      return;
     }
     cout<<"Sintaxis incorrecta"<<endl;
     return;
@@ -156,26 +166,32 @@ private:
   
   void parseIndexType(){
     if(match(Token::BPLUS)){
+      // cout<<current<<endl;
       if(match(Token::SEMICOLON)){
         cout<<"Se crea tabla con index bplus"<<endl;
+        return;
       }
       cout<<"Se esperaba un ;"<<endl;
       return;
     }
     else if(match(Token::AVL)){
+      cout<<current<<endl;
       if(match(Token::SEMICOLON)){
         cout<<"Se crea tabla con index avl"<<endl;
+        return;
       }
       cout<<"Se esperaba un ;"<<endl;
       return;
     }
     else if(match(Token::SEQUENTIAL)){
+      cout<<current<<endl;
       if(match(Token::SEMICOLON)){
         cout<<"Se crea tabla con index sequential"<<endl;
       }
       cout<<"Se esperaba un ;"<<endl;
       return;
     }
+    cout<<"Se esperaba index para hashear"<<endl;
     return;
   }
 
