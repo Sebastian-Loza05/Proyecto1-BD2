@@ -1,13 +1,13 @@
-#include "BPlusFile.h"
-#include "tokenSQL.h"
-#include <fstream>
+#include <iostream>
+#include <typeinfo>
 #include <sstream>
-#include <string>
-#include <vector>
+// #include "BPlusFile.h"
+// #include "SequentialFile.h"
+#include "Structures/AVLFile.h"
 
-#include <cstring>
-void ingreso(){
-  BPlusFile<char*, 20> bplus;
+using namespace std;
+
+void ingreso(MethodSelector *method){
   // BPlusFile<long , sizeof(long)> bplus;
   ifstream archivo("datos.csv");
   
@@ -56,12 +56,13 @@ void ingreso(){
     precio = stof(campos[4]);
     cantidad = stoi(campos[5]);
 
-    Record1 record(key,nombre,producto,marca,precio,cantidad);
-    record.print();
+    method->display_all();
+    Record record(key,nombre,producto,marca,precio,cantidad);
+    // record.print();
     string asd;
     // if (counter > 96)
     //   cin >> asd;
-    bool asd__ = bplus.add(record);
+    bool asd__ = method->add(record);
     // cout << "Asda" << endl;
     // cout << "Asda" << endl;
     // for (const string& valor: campos){
@@ -70,24 +71,42 @@ void ingreso(){
     // cout << endl;
     cout<<"counter: "<<counter<<endl;
     counter++;
-    bplus.displayTree();
+    cout << "------" << endl;
+    method->display();
+    cout << "------" << endl;
+    
+    // bplus.displayTree();
     //
     cin >> asd;
     if(counter == 200000)break;
     campos.clear();
   }
-  bplus.displayTree();
+  // bplus.displayTree();
 
   archivo.close();
 
   return;
 }
 
-int main(){
+int main (int argc, char *argv[]) {
 
-  ingreso();
+  //Se pedira escoger con que metodo se trabajara(pensando en la UI).
+  int metodo;
+  do{
+    cout<<"1.- AvlFile."<<endl;
+    cout<<"2.- Sequential File."<<endl;
+    cout<<"3.- Bplus File."<<endl;
+    cout<<"Ingrese el metodo a utilizar: ";
+    cin>>metodo;
+  } while ( metodo < 1 || metodo > 3 );
   
+  MethodSelector *method = nullptr;
 
-
+  if (metodo == 1) {
+    method = new AVLFile<char*>(); // STRUCT 1
+  }
+  
+  ingreso(method);
+  
   return 0;
 }

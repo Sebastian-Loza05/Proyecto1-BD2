@@ -1,4 +1,7 @@
 #pragma once
+#include "Structures/Record.h"
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <fstream>
 #include <memory>
@@ -36,6 +39,8 @@ struct Bucket{
     file.write(reinterpret_cast<char*>(&m), sizeof(int));
     for (int i = 0; i < m; i++) {
       file.write((char*)&records[i], sizeof(Record1));
+      // cout << "-----WRITE----"<< endl;
+      // records[i].print();
     }
     file.write(reinterpret_cast<const char*>(&next), sizeof(long));
     file.write(reinterpret_cast<const char*>(&next_del), sizeof(long));
@@ -45,7 +50,8 @@ struct Bucket{
     file.read((char*)(&this->count), sizeof(int));
     file.read((char*)(&this->m), sizeof(int));
     for (int i = 0; i < this->m; i++) {
-      file.read((char*)(&this->records[i]), sizeof(Record1));
+      file.read(reinterpret_cast<char* >(&this->records[i]), sizeof(Record1));
+      // file.read((char*)(&this->records[i]), sizeof(Record1));
     }
     file.read((char*)(&this->next), sizeof(long));
     file.read((char*)(&this->next_del), sizeof(long));
@@ -66,7 +72,7 @@ ostream& operator<<(ostream& os, Bucket buck){
   return os;
 }
 
-template<typename TK>
+template<typename TK, size_t n>
 struct Node{
   TK* keys;
   long* children;
@@ -75,7 +81,8 @@ struct Node{
   long next_del;
 
   Node(int M){
-    this->keys = new TK[M];
+    inicializarKeys(this->keys, M, n);
+
     this->children = new long[M+1];
     count = 0;
     pre_leaf = false;
@@ -83,10 +90,11 @@ struct Node{
   }
 
   void write(fstream &file, int M){
+
     file.write(reinterpret_cast<const char*>(&count), sizeof(int));
     file.write(reinterpret_cast<const char*>(&pre_leaf), sizeof(bool));
     for (int i = 0; i < M; i++) {
-      file.write(reinterpret_cast<const char*>(&keys[i]), sizeof(TK));
+      escribirN(file, keys[i], n);
     }
     for (int i = 0; i < M+1; i++) {
       file.write(reinterpret_cast<const char*>(&children[i]), sizeof(long));
@@ -95,11 +103,10 @@ struct Node{
   }
 
   void read(fstream &file, int M){
-    //count leaf keys children
     file.read((char*)(&this->count), sizeof(int));
     file.read((char*)(&this->pre_leaf), sizeof(bool));
     for (int i = 0; i < M; i++) {
-      file.read((char*)(&this->keys[i]),sizeof(TK));
+      leerN(file, keys[i], n);
     }
     for (int i = 0; i < M+1; i++) {
       file.read((char*)(&this->children[i]),sizeof(long));
@@ -127,7 +134,7 @@ struct Node{
 
 
 
-template<typename TK>
+template<typename TK, size_t N>
 class BPlusFile{
   string filename;
   string indexname;
@@ -157,34 +164,54 @@ public:
       page_size = 4092;
     }
     
-    int page_s = page_size - sizeof(long) - sizeof(bool) - sizeof(int) + sizeof(TK);
-    int X  = (page_s)/(sizeof(TK) + sizeof(long)) ;
+    int page_s = page_size - sizeof(long) - sizeof(bool) - sizeof(int) + N;
+    int X  = (page_s)/(N + sizeof(long)) ;
     this->M = X-1;
     // this->M = 4;
     ofstream index(this->indexname, ios::binary | ios::app);
     ofstream file(this->filename, ios::binary | ios::app);
     file.seekp(0,ios::end);
-    int tam = index.tellp();
-    cout<<"tam: "<<tam<<endl;
-    if (tam == 0) {
-      root = -1;
-      long value = -1;
+    index.seekp(0,ios::end);
+    int tam1 = file.tellp();
+    int tam2 = index.tellp();
+
+    long value = -1;
+    if (tam2 == 0) {      
       index.write(reinterpret_cast<char*>(&value), sizeof(long));
+    }
+    cout<<"tam: "<<tam1<<endl;
+    if (tam1 == 0) {
+      root = -1;
       file.write(reinterpret_cast<char*>(&value), sizeof(long));
     }
     else{
       fstream index1(this->indexname, ios::binary | ios::in | ios::out);
-      Node<TK> node(M);
-      index1.seekg(sizeof(long), ios::beg);
-      node.read(index1, M);
-      cout<<node.next_del<<endl;
-      node.print();
-      if(node.next_del == -1)
-        root_hoja = false;
+      index1.seekp(0, ios::end);
+      int tamI = index1.tellp();
+      cout << "TamI: " <<  tamI << endl;
+      if (tamI > sizeof(long)) {
+        index1.seekp(0, ios::beg);
+        long del_act;
+        index1.read((char*)(&del_act), sizeof(long));
+
+        Node<TK,N> node(M);
+        index1.seekg(sizeof(long), ios::beg);
+        node.read(index1, M);
+        cout<<node.next_del<<endl;
+        node.print();
+        if(node.next_del == -1)
+          root_hoja = false;
+        else{
+          root_hoja = true;
+        }
+      }
+      else{
+        root_hoja = true;
+      }
       root = sizeof(long);
+      cout << root_hoja << " asdas" << endl;
       index1.close();
     }
-    cout<<root<<endl;
     index.close();
     file.close();
   }
@@ -217,7 +244,8 @@ public:
       data.seekg(next_exist, ios::beg);
       bucket.read(data);
       for (int i = 0; i < bucket.count; i++) {
-        if (min <= bucket.records[i].key && bucket.records[i].key <= max) {
+        if ( menor_igual(min, bucket.records[i].key) && menor_igual(bucket.records[i].key, max) ){
+        // if (min <= bucket.records[i].key && bucket.records[i].key <= max) {
           res.push_back(bucket.records[i]);
         }
       }
@@ -252,7 +280,8 @@ public:
     data.close();
     index.close();
     for (int i = 0; i < bucket.count; i++) {
-      if(bucket.records[i].key == key)
+      if ( igual_igual(bucket.records[i].key , key) )
+      // if(bucket.records[i].key == key)
         res = bucket.records[i];
     }
     data.close();
@@ -313,7 +342,8 @@ public:
     fstream data(this->filename, ios::binary | ios::in | ios::out);
     fstream index(this->indexname, ios::binary | ios::in | ios::out);
     if(!root_hoja){
-      Node<TK> temp1(M);
+      Node<TK, N> temp1(M);
+      // Node<TK> temp1(M);
       index.seekg(root, ios::beg);
       temp1.read(index, M);
       while (!temp1.pre_leaf){
@@ -365,7 +395,8 @@ public:
         for (i = 0; i < n; i++) {
           long pos_node = queueq.front();
           index.seekg(pos_node, ios::beg);
-          Node<TK> node(M);
+          Node<TK, N> node(M);
+          // Node<TK> node(M);
           node.read(index, M);
           cout<< "<";
           for(j = 0; j < node.count; j++ )
@@ -410,12 +441,15 @@ private:
       return correcto;
     }
     index.seekg(pos_node, ios::beg);
-    Node<TK> node(M);
+    Node<TK, N> node(M);
+    // Node<TK> node(M);
     node.read(index, M);
 
     int bajada = -1;
     for(int i = 0; i < node.count; i++){
-      if(key <= node.keys[i]){
+      if (menor_igual(key, node.keys[i])){
+        cout << "asd" << endl;
+      // if(key <= node.keys[i]){
         bajada = i;
         break;
       }
@@ -439,7 +473,7 @@ private:
     if (pos_node == -1) {  
       pos_node = sizeof(long);
       // Si es nodo interno 
-      Node<TK> node(M);
+      Node<TK, N> node(M);
       if(leaf)
         node.pre_leaf = true;
       node.keys[0] = key;
@@ -447,7 +481,7 @@ private:
       index.seekp(sizeof(long), ios::beg);
       node.write(index, M);  
 
-      Node<TK> n1(M);
+      Node<TK, N> n1(M);
       index.seekg(sizeof(long), ios::beg);
       n1.read(index, M);
       cout<<endl;
@@ -460,10 +494,10 @@ private:
       node.read(data);
       Record1 temp;
       for (int i = 0; i < node.count; i++) {
-        if (key == node.records[i].key) {
+        if (igual_igual(key, node.records[i].key)){
           return false;
         }
-        else if (key < node.records[i].key) {
+        else if (menor(key, node.records[i].key)){
           temp = node.records[i];
           node.records[i] = value;
           value = temp;
@@ -482,13 +516,14 @@ private:
     }
     // Si no es hoja 
 
-    Node<TK> node(M);
+    Node<TK, N> node(M);
     index.seekg(pos_node, ios::beg);
     node.read(index, M);
 
     TK temp;
     for (int i = 0; i < node.count; i++) {
-      if (key < node.keys[i]) {
+      if (menor(key, node.keys[i])){
+      // if (key < node.keys[i]) {
         temp = node.keys[i];
         node.keys[i] = key;
         key = temp;
@@ -533,14 +568,15 @@ private:
       }
     }
     anclar_hojas(node1, node2, pos_padre, medio, index, data);
+    cout << "FIN" << endl;
   }
 
   void split_interno(long pos_node, long pos_padre, fstream &index, fstream &data){
-    Node<TK> node1(M);
-    Node<TK> node2(M);
+    Node<TK, N> node1(M);
+    Node<TK, N> node2(M);
 
     index.seekg(pos_node, ios::beg);
-    Node<TK> node(M);
+    Node<TK, N> node(M);
     node.read(index, M);
     
     if(node.pre_leaf){
@@ -592,7 +628,7 @@ private:
     return tam;
   }
 
-  int write_IndexDel(Node<TK>node, fstream& index){
+  int write_IndexDel(Node<TK, N>node, fstream& index){
     long value;
     index.seekg(0, ios::beg);
     index.read((char*)(&value), sizeof(long)) ;
@@ -607,7 +643,7 @@ private:
       return tam;
     }
     // Existe header
-    Node<TK> temp(M);
+    Node<TK, N> temp(M);
     index.seekg(value, ios::beg);
     tam = value;
     temp.read(index, M);
@@ -621,9 +657,9 @@ private:
     return tam;
   }
   
-  void anclar_internos(Node<TK> node1, Node<TK> node2, long pos_node, TK medio, fstream& index){
+  void anclar_internos(Node<TK, N> node1, Node<TK, N> node2, long pos_node, TK medio, fstream& index){
     index.seekg(pos_node, ios::beg);
-    Node<TK> node(M);
+    Node<TK, N> node(M);
     node.read(index, M);
     node.pre_leaf = false;
     bool finded = false;
@@ -635,7 +671,8 @@ private:
         temp = node.children[i];
         node.children[i] = act;
       }
-      else if ( medio == node.keys[i]) {
+      else if ( igual_igual(medio, node.keys[i]) ){
+      // else if ( medio == node.keys[i]) {
         finded = true;
         node.children[i] = write_IndexDel(node1, index);
         ++i;
@@ -652,7 +689,8 @@ private:
   // unir los buckets
   void anclar_hojas(Bucket b1, Bucket b2, long pos_node, TK medio, fstream& index, fstream& data){
     index.seekg(pos_node, ios::beg);
-    Node<TK> node(M);
+    Node<TK, N> node(M);
+    // Node<TK> node(M);
     node.read(index, M);
     if (pos_node == root) {
       node.pre_leaf = true;  
@@ -676,7 +714,8 @@ private:
           temp = node.children[i];
           node.children[i] = act;
         }
-        else if (medio == node.keys[i]) {
+        else if ( igual_igual(medio, node.keys[i]) ){
+        // else if (medio == node.keys[i]) {
           finded = true;
           long next_ = write_DataDel(b2, data);
           temp = node.children[i+1];
@@ -695,7 +734,7 @@ private:
     return;
   }
 
-  void ordenar_punteros(Node<TK> &node1, Node<TK> &node2, Node<TK> node, fstream &index){
+  void ordenar_punteros(Node<TK, N> &node1, Node<TK, N> &node2, Node<TK, N> node, fstream &index){
     for (int i = 0; i < node.count+1; i++) {
       if(i <= node1.count)
         node1.children[i] = node.children[i];
@@ -713,7 +752,8 @@ private:
       bucket.read(data);  
 
       for (int i = 0; i < bucket.count; i++) {
-        if (bucket.records[i].key == key) {
+        if ( igual_igual(bucket.records[i].key, key) ){
+        // if (bucket.records[i].key == key) {
           delete_node(bucket, i, data);
           if (bucket.count < (M)/2 && (pos_node != root || bucket.count < 1)) {
             arreglar_node(pos_node, pos_padre, pos_child, true, index, data);
@@ -725,14 +765,15 @@ private:
     }
     else {
       index.seekg(pos_node, ios::beg);
-      Node<TK> node(M);
+      Node<TK, N> node(M);
       node.read(index, M);
 
       int bajada = -1;
   
       for (int i = 0; i < node.count; i++) {
-        //delete_node(); // Lo hizo sebas
-        if (key <= node.keys[i]){
+        //delete_node(); 
+          // if (key <= node.keys[i]){
+        if (menor_igual(key, node.keys[i]) ){
           bajada = i;
           break;
         }
@@ -768,11 +809,11 @@ private:
         root = -1;
         return;
       }
-      Node<TK> node(M);
+      Node<TK, N> node(M);
       index.seekg(pos_node, ios::beg);
       node.read(index, M);
       index.seekg(node.children[0], ios::beg);
-      Node<TK> nuevo_padre(M);
+      Node<TK, N> nuevo_padre(M);
       nuevo_padre.read(index, M);
       index.seekp(sizeof(long), ios::beg);
       nuevo_padre.write(index, M);
@@ -792,10 +833,10 @@ private:
     long left = -1;
     long right = -1;
     bool sibling_available = false;
-    Node<TK> padre(M);
+    Node<TK, N> padre(M);
     if(leaf){
-      Node<TK> node_l(M);
-      Node<TK> node_r(M);
+      Node<TK, N> node_l(M);
+      Node<TK, N> node_r(M);
       index.seekg(pos_padre, ios::beg);
       padre.read(index, M);
       if(pos_child > 0){
@@ -847,7 +888,7 @@ private:
     data.seekg(pos_node, ios::beg);
     node.read(data);
 
-    Node<TK> padre(M);
+    Node<TK, N> padre(M);
     index.seekg(pos_padre, ios::beg);
     padre.read(index, M);
 
@@ -919,11 +960,11 @@ private:
   }
 
   void unir_en_interno(long pos_node, long left, long right, long pos_padre, int pos_child, bool leaf, fstream &index){
-    Node<TK> padre(M);
+    Node<TK, N> padre(M);
     index.seekg(pos_padre, ios::beg);
     padre.read(index, M);
 
-    Node<TK> node(M);
+    Node<TK, N> node(M);
     index.seekg(pos_node, ios::beg);
     node.read(index, M);
 
@@ -932,7 +973,7 @@ private:
     index.read(reinterpret_cast<char*>(&last_next_del), sizeof(long));
 
     if(left != -1){
-      Node<TK> node_l(M);
+      Node<TK, N> node_l(M);
       index.seekg(left, ios::beg);
       node_l.read(index, M);
       node_l.keys[node_l.count] = padre.keys[pos_child-1];
@@ -970,7 +1011,7 @@ private:
       return;
     }
 
-    Node<TK> node_r(M);
+    Node<TK, N> node_r(M);
     index.seekg(right, ios::beg);
     node_r.read(index, M);
     node.keys[node.count] = padre.keys[pos_child];
@@ -1012,17 +1053,17 @@ private:
     // Lectura
     // Nodo que incumple
     index.seekg(pos_node, ios::beg);
-    Node<TK> node(M);
+    Node<TK, N> node(M);
     node.read(index, M);
 
     // Nodo prestamista
     index.seekg(pos_node_prest, ios::beg);
-    Node<TK> node_prest(M);
+    Node<TK, N> node_prest(M);
     node.read(index, M);
 
     // Nodo padre 
     index.seekg(pos_node_padre, ios::beg);
-    Node<TK> node_padre(M);
+    Node<TK, N> node_padre(M);
     node.read(index, M);
     if (right) {
 
@@ -1067,7 +1108,7 @@ private:
  
   void rotar_hojas(long pos_bucket, long pos_bucket_prest, long pos_node_padre, int index1, bool right,fstream &index, fstream &data){
     index.seekg(pos_node_padre, ios::beg);
-    Node<TK> node_padre(M);
+    Node<TK, N> node_padre(M);
     node_padre.read(index, M);
 
     data.seekp(pos_bucket, ios::beg);
@@ -1108,11 +1149,12 @@ private:
 
   long search_recursive(long pos_node, TK key, fstream &index){
     index.seekg(pos_node, ios::beg);
-    Node<TK> node(M);
+    Node<TK, N> node(M);
     node.read(index, M);
     int bajada = -1;
     for(int i = 0; i < node.count; i++){
-      if(key <= node.keys[i]){
+      // if(key <= node.keys[i]){
+      if ( menor_igual(key, node.keys[i]) ){
         bajada = i;
         break;
       }
