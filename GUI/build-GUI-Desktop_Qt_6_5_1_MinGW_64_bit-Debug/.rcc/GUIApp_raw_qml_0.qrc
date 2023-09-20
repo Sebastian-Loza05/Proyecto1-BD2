@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="/Main/">
+    <file alias="main.qml">E:/BD2/PROYECTO1/GUI/GUI/main.qml</file>
+  </qresource>
+</RCC>
+

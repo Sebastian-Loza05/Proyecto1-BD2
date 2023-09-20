@@ -1,0 +1,4 @@
+module Main
+typeinfo GUIApp.qmltypes
+prefer :/Main/
+

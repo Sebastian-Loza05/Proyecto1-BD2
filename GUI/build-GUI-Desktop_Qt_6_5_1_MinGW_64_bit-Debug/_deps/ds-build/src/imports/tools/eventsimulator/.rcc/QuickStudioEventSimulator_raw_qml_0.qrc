@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="/QtQuick/Studio/EventSimulator/">
+    <file alias="EventSimulator.qml">E:/BD2/PROYECTO1/GUI/build-GUI-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/_deps/ds-src/src/imports/tools/eventsimulator/EventSimulator.qml</file>
+    <file alias="EventSimulatorDelegate.qml">E:/BD2/PROYECTO1/GUI/build-GUI-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/_deps/ds-src/src/imports/tools/eventsimulator/EventSimulatorDelegate.qml</file>
+  </qresource>
+</RCC>
+
