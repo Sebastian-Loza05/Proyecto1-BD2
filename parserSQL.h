@@ -5,7 +5,9 @@
 #include <string>
 #include <fstream>
 #include "tokenSQL.h"
+#include <utility>
 #include <vector>
+#include <map>
 using namespace std;
 
 
@@ -13,6 +15,7 @@ class Parser {
   Scanner* scanner;
   Token* current, * previous;
   vector<string> atributos;
+  map<string, string> values;
 public:
   Parser(Scanner* sc):scanner(sc) {
     previous = current = NULL;
@@ -41,6 +44,12 @@ private:
       cout<<v<<", ";
     }
     cout<<endl;
+  }
+  
+  void mostrarValues(){
+    for(auto it : values){
+      cout<<it.first<<": "<<it.second<<endl;
+    }
   }
 
   bool match(Token::Type ttype) {
@@ -100,8 +109,92 @@ private:
       cout<<"Error de sintaxis"<<endl;
       return;
     }
+    else if(match(Token::INSERT)){
+      if(match(Token::INTO)){
+        if(match(Token::ID)){
+          if(match(Token::VALUES)){
+            bool res = parseValuesSentence();
+            return;
+          }
+          cout<<"Esperaba la sentencia VALUES"<<endl;
+          return;
+        }
+        cout<<"Esperaba el nombre de la tabla"<<endl;
+        return;
+      }
+      cout<<"Espera INTO en despues del INSERT."<<endl;
+      return;
+    }
+    else if(match(Token::DELETE)){
+      parseTableDelete();
+      return;
+    }
     cout<< "Error esperaba una sentencia SQL." <<endl;
   }
+  bool parseValuesSentence(){
+    if(match(Token::LPARENT)){
+      bool res = parseValuesList();
+      if(!res) return false;
+      if(match(Token::RPARENT)){
+        if(match(Token::SEMICOLON)){
+          //Insertar
+          cout<<"Insertar en la tabla values: "<<endl;
+          mostrarValues();
+          return true;
+        }
+        cout<<"Esperaba ;"<<endl;
+        return false;
+      }
+      cout<<"Esperaba ), se encontro "<<current->lexema<<endl;
+      return false;
+    }
+    cout<<"Se esperaba (, se encontro "<<current<<endl;
+    return false;
+  }
+
+  bool parseValuesList(){
+    bool res = parseValues();
+    while(match(Token::COLON)){
+       res = parseValues();
+    }
+    return res;
+  }
+
+  bool parseValues(){
+    if(match(Token::QUOTE)){
+      if(match(Token::ID)){
+        string value = previous->lexema;
+        if(match(Token::QUOTE)){
+          values.insert(make_pair(value, "string"));
+          return true;
+        }
+        cout<<"Esperaba \", se cencontro: "<<current->lexema<<endl;
+        return false;
+      }
+      cout<<"Se esperaba un dato"<<endl;
+      return false;
+    }
+    else if(match(Token::NUM)){
+      values.insert(make_pair(previous->lexema, "int"));
+      return true;
+    }
+    else if(match(Token::FLOAT)){
+      values.insert(make_pair(previous->lexema, "float"));
+      return true;
+    }
+    else if(match(Token::TRUE)){
+      values.insert(make_pair("true", "bool"));
+      return true;
+    }
+    else if(match(Token::FALSE)){
+      values.insert(make_pair("false", "bool"));
+      return true;
+    }
+    cout<<"Sintaxis incorrecta"<<endl;
+    return false;
+  }
+
+
   void parseExpression(){
     atributos.push_back(previous->lexema);
     if(match(Token::COLON)){
@@ -117,6 +210,7 @@ private:
       if(match(Token::ID)){
         if(match(Token::SEMICOLON)){
           cout<<"Mostrar tabla"<<endl;
+          atributos.clear();
           return;
         }
         parseCondition();
@@ -130,6 +224,41 @@ private:
       return;
     }
     cout<<"Error de sintaxis"<<endl;
+  }
+  void parseTableDelete(){
+    if(match(Token::FROM)){
+      if(match(Token::ID)){
+        bool r = parseConditionDelete();
+        return;
+      }
+      cout<<"Se esperaba el nombre de la tabla, se obtuvo "<<current<<endl;
+      return;
+    }
+    cout<<"Se esperaba la sentencia FROM, se obtuvo "<<current<<endl;
+  }
+
+  bool parseConditionDelete(){
+    if (match(Token::WHERE)){
+      if(match(Token::ID)){
+        if(match(Token::EQUAL)){
+          bool r = parseEqual();
+          if(r){
+            if(match(Token::SEMICOLON)){
+              cout<<" Eliminacion"<<endl;
+              return true;
+            }
+            cout<<"Sintaxis incorrecta, se esperaba ;"<<endl;
+            return false;
+          }
+          return false;
+        }
+        cout<<"Se esperaba la un '=' se encontro "<<current<<endl;
+      }
+      cout<< "Se esperaba un id" <<endl;
+      return false;
+    }
+    cout<< "Se esperaba un WHERE" <<endl;
+    return false;
   }
 
   void parseFile(){
@@ -166,7 +295,6 @@ private:
   
   void parseIndexType(){
     if(match(Token::BPLUS)){
-      // cout<<current<<endl;
       if(match(Token::SEMICOLON)){
         cout<<"Se crea tabla con index bplus"<<endl;
         return;
@@ -175,7 +303,6 @@ private:
       return;
     }
     else if(match(Token::AVL)){
-      cout<<current<<endl;
       if(match(Token::SEMICOLON)){
         cout<<"Se crea tabla con index avl"<<endl;
         return;
@@ -184,7 +311,6 @@ private:
       return;
     }
     else if(match(Token::SEQUENTIAL)){
-      cout<<current<<endl;
       if(match(Token::SEMICOLON)){
         cout<<"Se crea tabla con index sequential"<<endl;
       }
@@ -214,6 +340,7 @@ private:
       if(v){
         if(match(Token::SEMICOLON)){
           cout<<"Busqueda unitaria"<<endl;
+          atributos.clear();
           return;
         }
         cout<<"Sintaxis incorrecta"<<endl;
@@ -251,6 +378,7 @@ private:
 
   void parse_range(){
     if(match(Token::NUM)){
+      cout<<"numero: "<<previous->lexema<<endl;
       if(match(Token::AND)){
         if(match(Token::NUM)){
           if(match(Token::SEMICOLON)){

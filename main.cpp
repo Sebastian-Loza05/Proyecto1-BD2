@@ -23,7 +23,7 @@ int main (int argc, char *argv[]) {
   while(true){
     cout<<"Inserte su sentencia SQL: "<<endl;
     getline(cin, sentencia);
-    Scanner scanner(sentencia);
+    Scanner scanner(sentencia + " ");
     Parser parser(&scanner);
     parser.parse();
   }

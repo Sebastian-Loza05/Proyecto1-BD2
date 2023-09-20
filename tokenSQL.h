@@ -19,8 +19,8 @@ using namespace std;
 
 class Token {
 public:
-  enum Type { SELECT, CREATE, TABLE, FROM, ALL, WHERE, DELETE, EQUAL, BETWEEN, AND, INSERT, INTO, VALUES, FILE, LPARENT, RPARENT, INDEX, USING, BPLUS, AVL, SEQUENTIAL, END, ERR, SEMICOLON, COLON, ID, EOL, NUM, VALUE, QUOTE, FILENAME};
-  static const char* token_names[31]; 
+  enum Type { SELECT, CREATE, TABLE, FROM, ALL, WHERE, DELETE, EQUAL, BETWEEN, AND, INSERT, INTO, VALUES, FILE, LPARENT, RPARENT, INDEX, USING, BPLUS, AVL, SEQUENTIAL, END, ERR, SEMICOLON, COLON, ID, EOL, NUM, VALUE, QUOTE, FILENAME, TRUE, FALSE, FLOAT};
+  static const char* token_names[34]; 
   Type type;
   string lexema;
   Token(Type type):type(type) { lexema = ""; }
@@ -31,7 +31,7 @@ public:
 
 };
 
-const char* Token::token_names[31] = {"SELECT", "CREATE", "TABLE", "FROM", "ALL", "WHERE", "DELETE", "EQUAL", "BETWEEN", "AND", "INSERT", "INTO", "VALUES", "FILE", "LPARENT", "RPARENT", "INDEX", "USING", "BPLUS", "AVL", "SEQUENTIAL", "END", "ERR", "SEMICOLON", "COLON", "ID", "EOL", "NUM", "VALUE", "QUOTE", "FILENAME"};
+const char* Token::token_names[34] = {"SELECT", "CREATE", "TABLE", "FROM", "ALL", "WHERE", "DELETE", "EQUAL", "BETWEEN", "AND", "INSERT", "INTO", "VALUES", "FILE", "LPARENT", "RPARENT", "INDEX", "USING", "BPLUS", "AVL", "SEQUENTIAL", "END", "ERR", "SEMICOLON", "COLON", "ID", "EOL", "NUM", "VALUE", "QUOTE", "FILENAME", "TRUE", "FALSE", "FLOAT"};
 
 
 // Modificar
@@ -71,6 +71,8 @@ public:
     palabras.insert(make_pair("BPLUS", Token::BPLUS));
     palabras.insert(make_pair("AVL", Token::AVL));
     palabras.insert(make_pair("SEQUENTIAL", Token::SEQUENTIAL));
+    palabras.insert(make_pair("TRUE", Token::TRUE));
+    palabras.insert(make_pair("FALSE", Token::FALSE));
   }
 
   Token::Type search(string lexema){
@@ -104,7 +106,6 @@ public:
         c = nextChar();
       }
 
-
       if (c == ':') {
         c = nextChar();
         while (strchr("\\.:",c) || isalpha(c)) {
@@ -114,7 +115,17 @@ public:
         string a = getLexema();
         return new Token(Token::FILENAME,a);
       }
-
+      else if(isNumber(getLexema().substr(0,getLexema().length()-1)) && c == '.'){
+        c = nextChar();
+        while (isdigit(c)){
+          c = nextChar();
+        }
+        if(isalpha(c))
+          return new Token(Token::ERR, getLexema());
+        rollBack();
+        string a = getLexema();
+        return new Token(Token::FLOAT, getLexema());
+      }
       rollBack();
       string lexema = getLexema();
       if(current == input.length()){
@@ -146,8 +157,8 @@ public:
     }
     else if (strchr("()=,;*\"",c)){
       switch (c) {
-        case '(': return new Token(Token::RPARENT);
-        case ')': return new Token(Token::LPARENT);
+        case '(': return new Token(Token::LPARENT);
+        case ')': return new Token(Token::RPARENT);
         case '=': return new Token(Token::EQUAL);
         case ',': return new Token(Token::COLON);
         case ';': return new Token(Token::SEMICOLON);
