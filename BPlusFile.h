@@ -7,6 +7,7 @@
 #include <memory>
 #include <strings.h>
 #include <sys/utsname.h>
+#include "Structures/methods.h"
 #include "methods.h"
 #include "Structures/Record.h"
 #include <unistd.h>
@@ -136,7 +137,7 @@ struct Node{
 
 
 template<typename TK, size_t N>
-class BPlusFile{
+class BPlusFile : public MethodSelector{
   string filename;
   string indexname;
   long page_size;
@@ -223,7 +224,7 @@ public:
     file.close();
   }
 
-  vector<Record> search_range(TK min, TK max){
+  vector<Record> search_range(TK min, TK max) override{
     fstream index(this->indexname, ios::binary | ios::in | ios::out);
     if (!index.is_open()) throw ("No se puede abrir el archivo");
 
@@ -266,7 +267,7 @@ public:
 
   } 
 
-  Record search(TK key){
+  Record search(TK key) override{
     Record res;
     fstream index(this->indexname, ios::binary | ios::in | ios::out);
     fstream data(this->indexname, ios::binary | ios::in | ios::out);
@@ -296,7 +297,7 @@ public:
     return res;
   }
   
-  bool add(Record record){
+  bool add(Record record) override{
     fstream index(this->indexname, ios::binary | ios::in | ios::out);
     if (!index.is_open()) throw ("No se puede abrir el archivo");
 
@@ -320,7 +321,7 @@ public:
   
   
 
-  bool remove(TK key){
+  bool remove(TK key) override{
     fstream index(this->indexname, ios::binary | ios::in | ios::out);
     if (!index.is_open()) throw ("No se puede abrir el archivo");
 
@@ -397,7 +398,7 @@ public:
     index.close();
   }
 
-  vector<Record> load(){
+  vector<Record> load() {
     fstream data(this->filename, ios::binary | ios::in | ios::out);
     fstream index(this->indexname, ios::binary | ios::in | ios::out);
     if(!root_hoja){
