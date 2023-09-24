@@ -325,6 +325,7 @@ private:
       if(match(Token::SEMICOLON)){
         this->method = SequentialFile<int>();
         cout<<"Se crea tabla con index sequential"<<endl;
+        return;
       }
       cout<<"Se esperaba un ;"<<endl;
       return;
