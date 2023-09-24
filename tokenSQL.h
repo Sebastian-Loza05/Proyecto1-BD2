@@ -108,7 +108,7 @@ public:
 
       if (c == ':') {
         c = nextChar();
-        while (strchr("\\.:/",c) || isalpha(c) || isdigit(c)) {
+        while (strchr("\\.:/-_",c) || isalpha(c) || isdigit(c)) {
           c = nextChar();
         }
         rollBack();
@@ -148,7 +148,7 @@ public:
     }
     else if (c == '/' || c == '~'){
         c = nextChar();
-      while (strchr("~/.",c) || isalpha(c) || isdigit(c)) {
+      while (strchr("~/.-_",c) || isalpha(c) || isdigit(c)) {
           c = nextChar();
         }
         rollBack();

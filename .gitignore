@@ -33,7 +33,6 @@
 
 *.dat
 
-#build
-GUI/GUI/build
+# build
 
-
+GUI/GUI/build/

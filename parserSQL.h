@@ -413,6 +413,7 @@ private:
   }
 
   void insertCsv(string ruta){
+    cout << ruta << endl;
     ifstream archivo(ruta);
     if (!archivo.is_open()) {
       cout << "Error al abrir el archivo" << endl;

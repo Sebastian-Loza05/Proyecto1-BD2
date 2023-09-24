@@ -1,5 +1,7 @@
 #include "BridgeClass.h"
-
+#include <iostream>
+#include <string>
+#include <QString>
 using namespace std;
 
 BridgeClass::BridgeClass(QObject *parent) : QObject(parent) {
@@ -20,9 +22,12 @@ void BridgeClass::runQuery(const QString& query)
         Parser parser(&scanner);
         parser.parse();
         this->method_global=method;
+    
     }
 
     emit dataChanged();
+    // std::string str = "pipipi";
+    // query = QString::fromUtf8(str.c_str());
 }
 
 
