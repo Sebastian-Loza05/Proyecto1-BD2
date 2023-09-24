@@ -27,7 +27,7 @@ public:
     return;
   }
 
-  virtual vector<Record> rangeSearch(){
+  virtual vector<Record> rangeSearch(int min, int max){
     return vector<Record>();
   }
 

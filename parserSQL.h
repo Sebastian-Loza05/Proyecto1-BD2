@@ -4,6 +4,8 @@
 #include <cstring>
 #include <string>
 #include <fstream>
+#include "BPlusFile.h"
+#include "SequentialFile.h"
 #include "Structures/methods.h"
 #include "Structures/AVLFile.h"
 #include "tokenSQL.h"
@@ -302,6 +304,7 @@ private:
     MethodSelector *method = new MethodSelector();
     if(match(Token::BPLUS)){
       if(match(Token::SEMICOLON)){
+        this->method = BPlusFile<int, sizeof(int)>();
         cout<<"Se crea tabla con index bplus"<<endl;
         
         return;
@@ -311,7 +314,7 @@ private:
     }
     else if(match(Token::AVL)){
       if(match(Token::SEMICOLON)){
-        method = new AVLFile<long>;
+        this->method = AVLFile<int>();
         cout<<"Se crea tabla con index avl"<<endl;
         return;
       }
@@ -320,6 +323,7 @@ private:
     }
     else if(match(Token::SEQUENTIAL)){
       if(match(Token::SEMICOLON)){
+        this->method = SequentialFile<int>();
         cout<<"Se crea tabla con index sequential"<<endl;
       }
       cout<<"Se esperaba un ;"<<endl;
