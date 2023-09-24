@@ -99,7 +99,7 @@ void ingreso(T *method){
     // bplus.displayTree();
     //
     // cin >> asd;
-    if(counter == 200000)break;
+    if(counter == 2000)break;
     campos.clear();
   }
   // bplus.displayTree();
