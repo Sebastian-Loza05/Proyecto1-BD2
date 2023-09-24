@@ -63,8 +63,8 @@ void ingreso(){
     string asd;
     // if (counter > 96)
     // cin >> asd;
-    bool asd__ = bplus.remove(record.key);
-    // bool asd__ = bplus.add(record);
+    // bool asd__ = bplus.remove(record.key);
+    bool asd__ = bplus.add(record);
     // cout<<"counter: "<<counter<<endl;
     counter++;
     bplus.displayTree();
