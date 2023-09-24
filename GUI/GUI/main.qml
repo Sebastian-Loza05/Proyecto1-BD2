@@ -9,7 +9,7 @@ ApplicationWindow {
     Rectangle {
         anchors.fill: parent
         Image {
-            source: "file:///E:/BD2/PROYECTO1/GUI/GUI/images/fondo.jpeg"
+            source: "file:/home/luisd/UTEC/ciclo_6/BDII/proyecto/Proyecto1-BD2/GUI/GUI/images/fondo.jpeg"
             fillMode: Image.PreserveAspectCrop
             anchors.fill: parent
         }
@@ -50,7 +50,7 @@ ApplicationWindow {
             Button {
                 text: "Read CSV"
                 onClicked: {
-                    var csvLines = bridge.getThreeLines("E:/BD2/PROYECTO1/GUI/GUI/Libro1.csv");
+                    var csvLines = bridge.getThreeLines("/home/luisd/UTEC/ciclo_6/BDII/proyecto/Proyecto1-BD2/GUI/GUI/Libro1.csv");
                     outputArea.text = csvLines.join("\n");
                 }
             }

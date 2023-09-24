@@ -304,7 +304,7 @@ private:
     if(match(Token::BPLUS)){
       if(match(Token::SEMICOLON)){
         method = new BPlusFile<int, sizeof(int)>();
-        //insertCsv(filename);
+        insertCsv(filename);
         cout<<"Se crea tabla con index bplus"<<endl;
         
         return;
@@ -413,6 +413,7 @@ private:
     return;
   }
   void insertCsv(string ruta){
+    cout << ruta << endl;
     ifstream archivo(ruta);
 
     if (!archivo.is_open()) {
