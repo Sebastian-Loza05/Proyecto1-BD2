@@ -1,0 +1,62 @@
+{
+	"backtrace" : 0,
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : 
+		[
+			"imports/GUI/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			}
+		]
+	},
+	"folder" : 
+	{
+		"name" : "QtInternalTargets"
+	},
+	"id" : "GUI_resources_1_autogen_timestamp_deps::@5d140e5acad573dfbb07",
+	"isGeneratorProvided" : true,
+	"name" : "GUI_resources_1_autogen_timestamp_deps",
+	"paths" : 
+	{
+		"build" : "imports/GUI",
+		"source" : "imports/GUI"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "",
+			"sourceIndexes" : 
+			[
+				0
+			]
+		},
+		{
+			"name" : "CMake Rules",
+			"sourceIndexes" : 
+			[
+				1
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "E:/BD2/PROYECTO1/GUI/build-GUI-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/imports/GUI/CMakeFiles/GUI_resources_1_autogen_timestamp_deps",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "E:/BD2/PROYECTO1/GUI/build-GUI-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/imports/GUI/CMakeFiles/GUI_resources_1_autogen_timestamp_deps.rule",
+			"sourceGroupIndex" : 1
+		}
+	],
+	"type" : "UTILITY"
+}

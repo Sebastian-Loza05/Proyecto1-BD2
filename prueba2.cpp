@@ -8,6 +8,8 @@
 #include <cstring>
 void ingreso(){
   BPlusFile<char*, 20> bplus;
+  // bplus.displayTree();
+  // return;
   // BPlusFile<long , sizeof(long)> bplus;
   ifstream archivo("datos.csv");
   
@@ -56,24 +58,19 @@ void ingreso(){
     precio = stof(campos[4]);
     cantidad = stoi(campos[5]);
 
-    Record1 record(key,nombre,producto,marca,precio,cantidad);
+    Record record(key,nombre,producto,marca,precio,cantidad);
     record.print();
     string asd;
     // if (counter > 96)
-    //   cin >> asd;
-    bool asd__ = bplus.add(record);
-    // cout << "Asda" << endl;
-    // cout << "Asda" << endl;
-    // for (const string& valor: campos){
-    //   cout << valor << "\t";
-    // }
-    // cout << endl;
-    cout<<"counter: "<<counter<<endl;
+    // cin >> asd;
+    bool asd__ = bplus.remove(record.key);
+    // bool asd__ = bplus.add(record);
+    // cout<<"counter: "<<counter<<endl;
     counter++;
     bplus.displayTree();
     //
-    cin >> asd;
-    if(counter == 200000)break;
+    // cin >> asd;
+    if(counter == 5000)break;
     campos.clear();
   }
   bplus.displayTree();

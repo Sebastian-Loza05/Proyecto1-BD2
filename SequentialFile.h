@@ -32,6 +32,10 @@ struct Entry {
         cout<<"Cantidad:";
         cin>>record.cantidad;
     }
+
+    void showData(){
+            cout<<id<<" - "<<nombre<<" - "<<producto<<" - "<<precio<<" - "<<cantidad<<endl;
+    }
 };
 
 template <typename T>
@@ -603,6 +607,26 @@ public:
 
         mainFile.close();
         auxFile.close();
+        return result;
+    }
+
+    vector<Registro> scandata(){
+        merge(mainFilename,auxFilename);
+
+        ifstream file(mainFilename, ios::binary);
+        if(!file.is_open()) throw ("No se pudo abrir el archivo");
+        vector<Registro> result;
+        Registro record;
+
+        file.seekg(sizeof(int) + sizeof(bool), ios::beg);
+        while(file.peek() != EOF){
+            record = Registro();
+            file.read((char*) &record, sizeof(Registro));
+            if (record.nextPF != -2) {
+                result.push_back(record);
+            }
+        }
+        file.close();
         return result;
     }
 };
