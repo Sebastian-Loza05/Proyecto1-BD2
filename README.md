@@ -135,9 +135,12 @@ Donde en cada registro solo se cambia los left y right para el balanceo, y si en
 
 #### Búsqueda:
 
-
+La búsqueda de un registro con respecto a la llave comienza desde el pos_root, donde comparara la llave a buscar con la llave del nodo actual, y si movilizara al left o right dependiendo del caso. Y asi seguira sucesivamente hasta encontrar un nodo que contenga la data con esa key, si en caso llega hasta a un pos_node igual a "-1" significa que el elemento búscado no existe.
+Esta función retoran un `pair<Record,bool` cosa que si en caso no encuentra el elemento retorna una record vacio y false.
 
 #### Eliminación:
+
+La eliminación de registro en el AVL File, sigue la misma estructura que la de un AVL Tree. Buscara la posición del record con cierta key que mandemos, comparando la key con la key del nodo actual para movilizarnos hasta la posición. Una vez encontrada el registro se validara los casos de eliminación que existe, si es que tiene un nodo right y left, o solo uno de ambos o ninguno. Al momento de eliminar seguimos la estrategia LIFO para la actualización del next_del del header, cosa que insertemos nuevos valores en la posición del next_del actual.
 
 #### Complejidades:
 
