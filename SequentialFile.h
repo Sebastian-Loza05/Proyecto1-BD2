@@ -6,6 +6,7 @@
 #include <vector>
 #include <filesystem>
 #include <cmath>
+#include "Structures/Record.h"
 #include "Structures/methods.h"
 
 using namespace std;
@@ -33,9 +34,9 @@ struct Entry {
         cin>>record.cantidad;
     }
 
-    void showData(){
-            cout<<id<<" - "<<nombre<<" - "<<producto<<" - "<<precio<<" - "<<cantidad<<endl;
-    }
+    // void showData(){
+    //         cout<<id<<" - "<<nombre<<" - "<<producto<<" - "<<precio<<" - "<<cantidad<<endl;
+    // }
 };
 
 template <typename T>
@@ -495,10 +496,10 @@ public:
         return true;
     }
 
-    vector<Entry> search(T key) override {
+    Record search(T key) override {
         vector<Entry> result;
         ifstream mainFile(mainFilename, ios::binary);
-        if (!mainFile.is_open()) throw runtime_error("No se pudo abrir el archivo main");
+        if (!mainFile.is_open()) Record();
 
         int inicio = 0;
         mainFile.seekg(0, ios::end);
@@ -517,11 +518,11 @@ public:
             // if (record.record.key == key) {
                 if (record.nextPF == -2){
                     cout << "El Entry se encuentra eliminado" <<endl;
-                    return result;
+                    return Record();
                 }
                 else{
                     result.push_back(record);
-                    return result;
+                    return result[0].record;
                 }
             } 
             else if ( menor(record.record.key, key) ) {
@@ -543,7 +544,7 @@ public:
             if ( igual_igual(PrevRecord.record.key, key) ) {
             // if (PrevRecord.record.key == key) {
                 result.push_back(PrevRecord);
-                return result;
+                return result[0].record;
             }
         }
 
@@ -551,10 +552,10 @@ public:
 
         mainFile.close();
         auxFile.close();
-        return result;
+        return result[0].record;
     }
 
-    vector<Entry> rangeSearch(T beginkey, T endkey) {
+    vector<Entry> rangeSearch(T beginkey, T endkey) override {
         vector<Entry> result;
         ifstream mainFile(mainFilename, ios::binary);
         if (!mainFile.is_open()) throw runtime_error("No se pudo abrir el archivo main");
@@ -610,20 +611,20 @@ public:
         return result;
     }
 
-    vector<Registro> scandata(){
+    vector<Record> load() override {
         merge(mainFilename,auxFilename);
 
         ifstream file(mainFilename, ios::binary);
         if(!file.is_open()) throw ("No se pudo abrir el archivo");
-        vector<Registro> result;
-        Registro record;
+        vector<Record> result;
+        Entry record;
 
         file.seekg(sizeof(int) + sizeof(bool), ios::beg);
         while(file.peek() != EOF){
-            record = Registro();
-            file.read((char*) &record, sizeof(Registro));
+            record = Entry();
+            file.read((char*) &record, sizeof(Entry));
             if (record.nextPF != -2) {
-                result.push_back(record);
+                result.push_back(record.record);
             }
         }
         file.close();

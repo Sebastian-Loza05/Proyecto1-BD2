@@ -18,22 +18,19 @@ public:
   }
 
   virtual void display(){
-   
+    return;
   }
 
-  bool search(){
-    //metodo.search();
-    return true;
+  Record search(){
+    return Record();
   }
 
   virtual void display_all(){
-
+    return;
   }
 
   virtual vector<Record> rangeSearch(){
-    vector<Record> res;
-    //metodo.rangeSearch();
-    return res;
+    return vector<Record>();
   }
 
   virtual bool remove( char* key ){
