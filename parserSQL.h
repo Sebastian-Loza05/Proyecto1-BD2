@@ -15,7 +15,7 @@
 using namespace std;
 
 inline MethodSelector* method = nullptr;
-inline vector<Record> record;
+inline vector<Record> records;
 inline string error_message;
 
 class Parser {
@@ -217,7 +217,7 @@ private:
       if(match(Token::ID)){
         if(match(Token::SEMICOLON)){
           cout<<"Mostrar tabla"<<endl;
-          vector<Record> res = method->load();
+          records = method->load();
           atributos.clear();
           return;
         }
