@@ -496,7 +496,7 @@ public:
         return true;
     }
 
-    Record search(T key) override {
+    pair<Record, bool> search(T key) override {
         vector<Entry> result;
         ifstream mainFile(mainFilename, ios::binary);
         if (!mainFile.is_open()) Record();
@@ -517,12 +517,12 @@ public:
             if ( igual_igual(record.record.key, key) ) {
             // if (record.record.key == key) {
                 if (record.nextPF == -2){
-                    cout << "El Entry se encuentra eliminado" <<endl;
-                    return Record();
+                    // cout << "El Entry se encuentra eliminado" <<endl;
+                    return make_pair(Record(), false);
                 }
                 else{
                     result.push_back(record);
-                    return result[0].record;
+                    return make_pair(result[0].record, true);
                 }
             } 
             else if ( menor(record.record.key, key) ) {
@@ -538,21 +538,21 @@ public:
         }
 
         ifstream auxFile(auxFilename, ios::binary);
-        if (!auxFile.is_open()) throw runtime_error("No se pudo abrir el archivo auxiliar");
+        if (!auxFile.is_open()) return make_pair(Record(), false);
 
         while(auxFile.read((char*)&record, sizeof(Entry))){
             if ( igual_igual(PrevRecord.record.key, key) ) {
             // if (PrevRecord.record.key == key) {
                 result.push_back(PrevRecord);
-                return result[0].record;
+                return make_pair(result[0].record, true);
             }
         }
 
-        cout << "No se encontro el ID" << endl;
+        // cout << "No se encontro el ID" << endl;
 
         mainFile.close();
         auxFile.close();
-        return result[0].record;
+        return make_pair(Record(), false);
     }
 
     vector<Entry> rangeSearch(T beginkey, T endkey) override {

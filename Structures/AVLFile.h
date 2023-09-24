@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <functional>
+#include "Record.h"
 #include "functions.h"
 #include "methods.h"
 #include <iomanip>
@@ -117,7 +118,7 @@ public:
       data.close();
       return result;
     };
-    Record find(T key);
+    pair<Record, bool> search(T key);
     vector<NodeBTAVL> rangeSearch(string begin, string end);
 
     void display() override {

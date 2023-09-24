@@ -17,12 +17,6 @@ template<typename T>
 int AVLFile<T>::sizeNode(){
     return 45;
 }
-template<typename T>
-Record AVLFile<T>::find(T key){
-    Record temp = find(pos_root, key);
-    return temp;
-}
-
 
 template<typename T>
 vector<NodeBTAVL> AVLFile<T>::rangeSearch(string begin, string end){

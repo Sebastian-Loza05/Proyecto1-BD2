@@ -4,10 +4,12 @@
 #include <cstring>
 #include <string>
 #include <fstream>
+#include "Structures/AVLFile.h"
 #include "tokenSQL.h"
 #include <utility>
 #include <vector>
 #include <map>
+#include "Structures/methods.h"
 using namespace std;
 
 
@@ -294,9 +296,11 @@ private:
   }
   
   void parseIndexType(){
+    MethodSelector *method = new MethodSelector();
     if(match(Token::BPLUS)){
       if(match(Token::SEMICOLON)){
         cout<<"Se crea tabla con index bplus"<<endl;
+        
         return;
       }
       cout<<"Se esperaba un ;"<<endl;
@@ -304,6 +308,7 @@ private:
     }
     else if(match(Token::AVL)){
       if(match(Token::SEMICOLON)){
+        method = new AVLFile<long>;
         cout<<"Se crea tabla con index avl"<<endl;
         return;
       }

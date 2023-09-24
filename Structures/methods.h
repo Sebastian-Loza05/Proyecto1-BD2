@@ -1,5 +1,6 @@
 #pragma once
 #include "Record.h"
+#include <utility>
 #include <vector>
 
 
@@ -21,9 +22,6 @@ public:
     return;
   }
 
-  Record search(){
-    return Record();
-  }
 
   virtual void display_all(){
     return;
@@ -55,6 +53,30 @@ public:
 
   virtual bool remove( long key ){
     return false;
+  }
+
+  virtual pair<Record, bool> search(char* key){
+    return make_pair(Record(), false);
+  }
+
+  virtual pair<Record, bool> search(int key){
+    return make_pair(Record(), false);
+  }
+
+  virtual pair<Record, bool> search(float key){
+    return make_pair(Record(), false);
+  }
+
+  virtual pair<Record, bool> search(double key){
+    return make_pair(Record(), false);
+  }
+
+  virtual pair<Record, bool> search(char key){
+    return make_pair(Record(), false);
+  }
+  
+  virtual pair<Record, bool> search(long key){
+    return make_pair(Record(), false);
   }
   ~MethodSelector(){}
 };
