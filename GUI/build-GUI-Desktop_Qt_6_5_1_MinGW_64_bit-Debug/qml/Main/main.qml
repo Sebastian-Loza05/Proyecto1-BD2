@@ -7,12 +7,17 @@ ApplicationWindow {
     height: 480
     title: "App Window"
 
-    Rectangle {  // Fondo de la ventana para ocupar todo el espacio disponible
-        color: "transparent"
+    Rectangle {
         anchors.fill: parent
 
+        Image {
+            source: "file:///E:/BD2/PROYECTO1/GUI/GUI/images/fondo.jpeg"
+            fillMode: Image.PreserveAspectCrop
+            anchors.fill: parent
+        }
+
         Column {
-            anchors.centerIn: parent  // Esto centra la Column en el Rectangle
+            anchors.centerIn: parent
             spacing: 10
 
             Text {
@@ -21,16 +26,25 @@ ApplicationWindow {
                 font.pixelSize: 24
             }
 
-            TextArea {
-                id: txtArea
+            Rectangle {
                 width: 400
-                height: 100
+                height: 200
+                color: "white"
+                border.color: "black"
+                radius: 10 // Radio de las esquinas redondeadas
+                clip: true
+
+                TextArea {
+                    id: txtArea
+                    width: parent.width
+                    height: parent.height
+                }
             }
 
             Button {
                 text: "RUN"
                 onClicked: {
-                    outputArea.text = "\nConsulta: " + txtArea.text;
+                    outputArea.text = "Consulta: " + txtArea.text;
                     bridge.runQuery(txtArea.text);
                 }
             }
@@ -51,11 +65,21 @@ ApplicationWindow {
                 }
             }
 
-            TextArea {
-                id: outputArea
+            Rectangle {
                 width: 400
-                height: 100
-                readOnly: true
+                height: 200
+                color: "white"
+                border.color: "black"
+                radius: 10 // Radio de las esquinas redondeadas
+                clip: true
+
+                TextArea {
+                    id: outputArea
+                    width: parent.width
+                    height: parent.height
+                    readOnly: true
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                }
             }
         }
     }
