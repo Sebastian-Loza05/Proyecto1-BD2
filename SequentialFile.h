@@ -6,34 +6,41 @@
 #include <vector>
 #include <filesystem>
 #include <cmath>
+#include "Structures/Record.h"
+#include "Structures/methods.h"
 
 using namespace std;
 
-struct Registro {
-    int id;
-    char nombre[10];
-    char producto[10];
-    float precio;
-    int cantidad;
+struct Entry {
+    Record record;
     long nextPF;
     bool isMain=false;
-public:
+    Entry(){}
+    
+    Entry(Record record_){
+      this->record = record_;
+    }
+
     void setData(){
         cout<<"ID:";
-        cin>>id;
+        cin>>record.key;
         cout<<"Nombre:";
-        cin>>nombre;
+        cin>>record.nombre;
         cout<<"Producto:";
-        cin>>producto;
+        cin>>record.producto;
         cout<<"Precio:";
-        cin>>precio;
+        cin>>record.precio;
         cout<<"Cantidad:";
-        cin>>cantidad;
+        cin>>record.cantidad;
     }
+
+    // void showData(){
+    //         cout<<id<<" - "<<nombre<<" - "<<producto<<" - "<<precio<<" - "<<cantidad<<endl;
+    // }
 };
 
 template <typename T>
-class SequentialFile {
+class SequentialFile: public MethodSelector {
 private:
     string mainFilename;
     string auxFilename;
@@ -42,13 +49,14 @@ public:
     SequentialFile() {
         this->mainFilename = "sequential_datos.dat";
         this->auxFilename = "sequential_aux.dat";
+        // ofstream main(this->mainFilename, ios::binary | ios::app);
+        ofstream aux(this->auxFilename, ios::binary | ios::app);
+        // main.close();
+        aux.close();
 
-        ifstream mainFile(mainFilename, ios::binary);
+        ifstream mainFile(this->mainFilename, ios::binary);
         if (!mainFile) {
-            ofstream newMainFile(mainFilename, ios::binary);
-            if (!newMainFile.is_open()) {
-                throw runtime_error("No se pudo crear el archivo main");
-            }
+            ofstream newMainFile(this->mainFilename, ios::binary);
             int nextPF = 0;
             bool isMain = true;
             newMainFile.write((char*)&nextPF, sizeof(int));
@@ -64,9 +72,6 @@ public:
         ifstream mainFile(mainFilename, ios::binary);
         if (!mainFile) {
             ofstream newMainFile(mainFilename, ios::binary);
-            if (!newMainFile.is_open()) {
-                throw runtime_error("No se pudo crear el archivo main");
-            }
             int nextPF = 0;
             bool isMain = true;
             newMainFile.write((char*)&nextPF, sizeof(int));
@@ -75,19 +80,20 @@ public:
         }
     }
 
-    void add(Registro NuevoRegistro) {
+    bool add(Record Nuevorecord) override {
+        Entry NuevoEntry(Nuevorecord); 
 
         ifstream auxp(auxFilename, ios::binary | ios::app);
 
         ifstream mainp(mainFilename, ios::binary);
         if (!mainp.is_open()) {
-            throw runtime_error("No se pudo abrir el archivo main");
+          return false;
         }
         auxp.seekg(0,ios::end);
-        int SizeAux=auxp.tellg()/sizeof(Registro);
+        int SizeAux=auxp.tellg()/sizeof(Entry);
 
         mainp.seekg(0,ios::end);
-        int SizeMain=((int)mainp.tellg() - sizeof(int) - sizeof(bool))/sizeof(Registro);
+        int SizeMain=((int)mainp.tellg() - sizeof(int) - sizeof(bool))/sizeof(Entry);
 
         auxp.close();
         mainp.close();
@@ -98,7 +104,7 @@ public:
 
         ifstream mainFile(mainFilename, ios::binary);
         if (!mainFile.is_open()) {
-            throw runtime_error("No se pudo abrir el archivo main");
+          return false;
         }
 
         int HnextPF;
@@ -106,19 +112,20 @@ public:
         mainFile.read((char*)&HnextPF, sizeof(int));
         mainFile.read((char*)&HisMain, sizeof(bool));
 
-        Registro FirstRecord;
-        mainFile.read((char*)&FirstRecord, sizeof(Registro));
+        Entry FirstEntry;
+        mainFile.read((char*)&FirstEntry, sizeof(Entry));
 
-        if(FirstRecord.id>=NuevoRegistro.id){
+        if ( menor_igual(NuevoEntry.record.key, FirstEntry.record.key) ) {
+        // if(FirstEntry.record.key>=NuevoEntry.record.key){ // FirstEntry.record.key   NuevoEntry <=
 
             if(HisMain){
-                NuevoRegistro.nextPF=HnextPF;
-                NuevoRegistro.isMain=HisMain;
+                NuevoEntry.nextPF=HnextPF;
+                NuevoEntry.isMain=HisMain;
                 HnextPF=SizeAux;
                 HisMain=false;
 
                 ofstream auxFile2(auxFilename, ios::binary | ios::app);
-                auxFile2.write((char*)&NuevoRegistro, sizeof(Registro));
+                auxFile2.write((char*)&NuevoEntry, sizeof(Entry));
                 auxFile2.close();
 
                 ofstream mainFile(mainFilename, ios::binary | ios::in | ios::out);
@@ -128,33 +135,35 @@ public:
             }
 
             else{
-                Registro PrevioRecord;
+                Entry PrevioRecord;
                 ifstream auxFile(auxFilename, ios::binary | ios::app);
-                auxFile.seekg(HnextPF*sizeof(Registro));
-                auxFile.read((char*)&PrevioRecord,sizeof(Registro));
-                if(PrevioRecord.id>NuevoRegistro.id){
-                    NuevoRegistro.nextPF=HnextPF;
-                    NuevoRegistro.isMain=false;
+                auxFile.seekg(HnextPF*sizeof(Entry));
+                auxFile.read((char*)&PrevioRecord,sizeof(Entry));
+                if ( menor(NuevoEntry.record.key, PrevioRecord.record.key) ) {
+                // if(PrevioRecord.record.key>NuevoEntry.record.key){
+                    NuevoEntry.nextPF=HnextPF;
+                    NuevoEntry.isMain=false;
                     HnextPF=SizeAux;
                 }
                 else{
                     int posPrevio=HnextPF;
-                    Registro SPrevioRecord;
-                    auxFile.seekg(PrevioRecord.nextPF*sizeof(Registro));
-                    auxFile.read((char*)&SPrevioRecord,sizeof(Registro));
-                    while(SPrevioRecord.id<=NuevoRegistro.id and SPrevioRecord.isMain){
+                    Entry SPrevioRecord;
+                    auxFile.seekg(PrevioRecord.nextPF*sizeof(Entry));
+                    auxFile.read((char*)&SPrevioRecord,sizeof(Entry));
+                    while ( menor_igual(SPrevioRecord.record.key, NuevoEntry.record.key) and SPrevioRecord.isMain ) {
+                    // while(SPrevioRecord.record.key<=NuevoEntry.record.key and SPrevioRecord.isMain){
                         posPrevio=PrevioRecord.nextPF;
                         PrevioRecord=SPrevioRecord;
-                        auxFile.seekg(SPrevioRecord.nextPF*sizeof(Registro));
-                        auxFile.read((char*)&SPrevioRecord,sizeof(Registro));
+                        auxFile.seekg(SPrevioRecord.nextPF*sizeof(Entry));
+                        auxFile.read((char*)&SPrevioRecord,sizeof(Entry));
                     }
-                    NuevoRegistro.nextPF=PrevioRecord.nextPF;
-                    NuevoRegistro.isMain=PrevioRecord.isMain;
+                    NuevoEntry.nextPF=PrevioRecord.nextPF;
+                    NuevoEntry.isMain=PrevioRecord.isMain;
                     PrevioRecord.nextPF=SizeAux;
                     PrevioRecord.isMain=false;
                     ofstream auxFile3(auxFilename, ios::binary | ios::in | ios::out);
-                    auxFile3.seekp(posPrevio*sizeof(Registro));
-                    auxFile3.write((char*)&PrevioRecord, sizeof(Registro));
+                    auxFile3.seekp(posPrevio*sizeof(Entry));
+                    auxFile3.write((char*)&PrevioRecord, sizeof(Entry));
                     auxFile3.close();
                 }
 
@@ -164,40 +173,41 @@ public:
                 mainFile.close();
 
                 ofstream auxFile3(auxFilename, ios::binary | ios::app);
-                auxFile3.write((char*)&NuevoRegistro, sizeof(Registro));
+                auxFile3.write((char*)&NuevoEntry, sizeof(Entry));
                 auxFile3.close();
             }
-            return;
+            return true;
         }
 
         mainFile.seekg(0, ios::end);
 
         if ((int)mainFile.tellg() <= sizeof(int) + sizeof(bool)) {
-            NuevoRegistro.nextPF = -1;
+            NuevoEntry.nextPF = -1;
             ofstream mainFile(mainFilename, ios::binary | ios::app);
-            mainFile.write((char*)&NuevoRegistro, sizeof(Registro));
+            mainFile.write((char*)&NuevoEntry, sizeof(Entry));
             mainFile.close();
-            return;
+            return true;
         }
 
         else {
 
             int inicio = 0;
             mainFile.seekg(0, ios::end);
-            int tamMain = mainFile.tellg() / sizeof(Registro);
+            int tamMain = mainFile.tellg() / sizeof(Entry);
             int fin=tamMain;
             mainFile.seekg(0, ios::beg);
 
-            Registro record;
-            Registro PrevRecord;
+            Entry record;
+            Entry PrevRecord;
             int medio;
             int pos;
             bool lastMain=true;
             while (inicio <= fin) {
                 medio = (inicio + fin) / 2;
-                mainFile.seekg(medio * sizeof(Registro) + sizeof(int) + sizeof(bool));
-                mainFile.read((char *) &record, sizeof(Registro));
-                if(record.id<NuevoRegistro.id){
+                mainFile.seekg(medio * sizeof(Entry) + sizeof(int) + sizeof(bool));
+                mainFile.read((char *) &record, sizeof(Entry));
+                if ( menor(record.record.key, NuevoEntry.record.key) ) {
+                // if(record.record.key<NuevoEntry.record.key){
                     inicio = medio + 1;
                     pos=medio;
                     PrevRecord=record;
@@ -206,7 +216,8 @@ public:
                     fin = medio - 1;
                     pos=medio-1;
                 }
-                if(record.id==NuevoRegistro.id){
+                if ( igual_igual(record.record.key, NuevoEntry.record.key) ) {
+                // if(record.record.key==NuevoEntry.record.key){
                     PrevRecord=record;
                     pos=medio;
                     break;
@@ -217,17 +228,19 @@ public:
             }
             if(PrevRecord.nextPF==-2){
                 pos-=1;
-                mainFile.seekg(pos * sizeof(Registro) + sizeof(int) + sizeof(bool), ios::beg);
-                mainFile.read((char *) &PrevRecord, sizeof(Registro));
+                mainFile.seekg(pos * sizeof(Entry) + sizeof(int) + sizeof(bool), ios::beg);
+                mainFile.read((char *) &PrevRecord, sizeof(Entry));
             }
 
-            while(!PrevRecord.isMain and PrevRecord.id<NuevoRegistro.id){
+            while (!PrevRecord.isMain and menor(PrevRecord.record.key, NuevoEntry.record.key)) {
+            // while(!PrevRecord.isMain and PrevRecord.record.key<NuevoEntry.record.key){
                 lastMain=false;
                 ifstream auxFile1(auxFilename, ios::binary | ios::app);
-                auxFile1.seekg(PrevRecord.nextPF*sizeof(Registro));
-                auxFile1.read((char*)&record, sizeof(Registro));
+                auxFile1.seekg(PrevRecord.nextPF*sizeof(Entry));
+                auxFile1.read((char*)&record, sizeof(Entry));
                 auxFile1.close();
-                if(record.id<=NuevoRegistro.id){
+                if ( menor_igual(record.record.key, NuevoEntry.record.key) ) {
+                // if(record.record.key<=NuevoEntry.record.key){
                     pos=PrevRecord.nextPF;
                     PrevRecord=record;
                 }
@@ -235,23 +248,23 @@ public:
                     break;
                 }
             }
-            NuevoRegistro.nextPF=PrevRecord.nextPF;
-            NuevoRegistro.isMain=PrevRecord.isMain;
+            NuevoEntry.nextPF=PrevRecord.nextPF;
+            NuevoEntry.isMain=PrevRecord.isMain;
             PrevRecord.nextPF=SizeAux;
             PrevRecord.isMain=false;
             if(lastMain){
                 ofstream mainFile2(mainFilename, ios::binary | ios::in | ios::out);
-                mainFile2.seekp(pos * sizeof(Registro)+sizeof(int)+sizeof(bool),ios::beg);
-                mainFile2.write((char*)&PrevRecord, sizeof(Registro));
+                mainFile2.seekp(pos * sizeof(Entry)+sizeof(int)+sizeof(bool),ios::beg);
+                mainFile2.write((char*)&PrevRecord, sizeof(Entry));
                 mainFile2.close();
             } else{
                 ofstream auxFile2(auxFilename, ios::binary | ios::in | ios::out);
-                auxFile2.seekp(pos * sizeof(Registro),ios::beg);
-                auxFile2.write((char*)&PrevRecord, sizeof(Registro));
+                auxFile2.seekp(pos * sizeof(Entry),ios::beg);
+                auxFile2.write((char*)&PrevRecord, sizeof(Entry));
                 auxFile2.close();
             }
             ofstream auxFile2(auxFilename, ios::binary | ios::app);
-            auxFile2.write((char*)&NuevoRegistro, sizeof(Registro));
+            auxFile2.write((char*)&NuevoEntry, sizeof(Entry));
             auxFile2.close();
         }
 
@@ -261,19 +274,20 @@ public:
         if(SizeAux+1>int(log(SizeMain))){
             merge(mainFilename,auxFilename);
         }
+        return true;
     }
 
 
     void merge(string &mainFilename, string &auxFilename) {
         ofstream outputFile("merge.dat", ios::binary);
         if (!outputFile.is_open()) {
-            throw runtime_error("No se pudo abrir el archivo de salida");
+          return;
         }
 
 
         ifstream mainFile(mainFilename, ios::binary);
         if (!mainFile.is_open()) {
-            throw runtime_error("No se pudo abrir el archivo main");
+          return;
         }
 
         ifstream auxFile(auxFilename, ios::binary);
@@ -290,11 +304,11 @@ public:
             int contador = 0;
 
             while(nextPos != -1){
-                Registro record;
-                Registro temp;
+                Entry record;
+                Entry temp;
 
-                mainFile.seekg(nextPos * sizeof(Registro) + sizeof(int) + sizeof(bool));
-                mainFile.read((char*) &record, sizeof(Registro));
+                mainFile.seekg(nextPos * sizeof(Entry) + sizeof(int) + sizeof(bool));
+                mainFile.read((char*) &record, sizeof(Entry));
 
                 if (!record.isMain){
                         temp = record;
@@ -302,14 +316,14 @@ public:
                         contador++;
                         if (record.nextPF == -1){contador = -1;}
                         temp.nextPF = contador;
-                        outputFile.write((char*) &temp, sizeof(Registro));
+                        outputFile.write((char*) &temp, sizeof(Entry));
                 }
                 else{
                     contador++;
                     if (record.nextPF == -1){contador = -1;}
                     int tempnext = record.nextPF;
                     record.nextPF = contador;
-                    outputFile.write((char*) &record, sizeof(Registro));
+                    outputFile.write((char*) &record, sizeof(Entry));
                     record.nextPF = tempnext;
                     }
 
@@ -329,11 +343,11 @@ public:
             bool Whcfile = HisMain;
             int contador = 0;
             while(nextPos != -1){
-                Registro record;
-                Registro temp;
+                Entry record;
+                Entry temp;
                 if (Whcfile){
-                    mainFile.seekg(nextPos * sizeof(Registro) + sizeof(int) + sizeof(bool));
-                    mainFile.read((char*) &record, sizeof(Registro));
+                    mainFile.seekg(nextPos * sizeof(Entry) + sizeof(int) + sizeof(bool));
+                    mainFile.read((char*) &record, sizeof(Entry));
 
                     if (!record.isMain){
                         temp = record;
@@ -341,20 +355,20 @@ public:
                         contador++;
                         if (record.nextPF == -1){contador = -1;}
                         temp.nextPF = contador;
-                        outputFile.write((char*) &temp, sizeof(Registro));
+                        outputFile.write((char*) &temp, sizeof(Entry));
                     }
                     else{
                         contador++;
                         if (record.nextPF == -1){contador = -1;}
                         int tempnext = record.nextPF;
                         record.nextPF = contador;
-                        outputFile.write((char*) &record, sizeof(Registro));
+                        outputFile.write((char*) &record, sizeof(Entry));
                         record.nextPF = tempnext;
                     }
                 }
                 else {
-                    auxFile.seekg(nextPos * sizeof(Registro));
-                    auxFile.read((char*) &record, sizeof(Registro));
+                    auxFile.seekg(nextPos * sizeof(Entry));
+                    auxFile.read((char*) &record, sizeof(Entry));
 
                     if (!record.isMain){
                         temp = record;
@@ -362,14 +376,14 @@ public:
                         contador++;
                         if (record.nextPF == -1){contador = -1;}
                         temp.nextPF = contador;
-                        outputFile.write((char*) &temp, sizeof(Registro));
+                        outputFile.write((char*) &temp, sizeof(Entry));
                     }
                     else {
                         contador++;
                         if (record.nextPF == -1){contador = -1;}
                         int tempnext = record.nextPF;
                         record.nextPF = contador;
-                        outputFile.write((char*) &record, sizeof(Registro));
+                        outputFile.write((char*) &record, sizeof(Entry));
                         record.nextPF = tempnext;
                     }
                 }
@@ -388,7 +402,7 @@ public:
 
         fstream main(mainFilename, ios::binary | ios::in | ios::out);
         if (!main.is_open()) {
-            throw runtime_error("No se pudo abrir el archivo de salida");
+          return;
         }
 
         int HnextPF = 0;
@@ -399,33 +413,37 @@ public:
         main.close();
     }
 
-    void remove(T key){
+    bool remove(T key) override {
         merge(mainFilename,auxFilename);
 
         fstream mainFile(mainFilename, ios::binary| ios::in | ios::out);
         if (!mainFile.is_open()) {
-            throw runtime_error("No se pudo abrir el archivo main");
+          return false;
         }
 
         int inicio = 0;
         mainFile.seekg(0, ios::end);
-        int fin = ((int)mainFile.tellg() - inicio) / sizeof(Registro) - 1;
+        int fin = ((int)mainFile.tellg() - inicio) / sizeof(Entry) - 1;
         mainFile.seekg(0, ios::beg);
 
-        Registro record;
-        Registro PrevRecord;
+        Entry record;
+        Entry PrevRecord;
         int pos;
         while (inicio <= fin) {
             int medio = (inicio + fin) / 2;
-            mainFile.seekg(medio * sizeof(Registro) + sizeof(int) + sizeof(bool));
-            mainFile.read((char*)&record, sizeof(Registro));
+            mainFile.seekg(medio * sizeof(Entry) + sizeof(int) + sizeof(bool));
+            mainFile.read((char*)&record, sizeof(Entry));
 
-            if (record.id == key) {
+            if ( igual_igual(record.record.key, key) ) {
+            // if (record.record.key == key) {
                 pos = medio;
                 break;
-            } else if (record.id < key) {
+            }
+            else if ( menor(record.record.key, key) ) {
+            // else if (record.record.key < key) {
                 inicio = medio + 1;
-                if (key - record.id < key - PrevRecord.id) {
+                if ( menor(PrevRecord.record.key, record.record.key) ) { // 
+                // if (key- record.record.key < key - PrevRecord.record.key) { //  record.key  > prevredc
                     PrevRecord = record;
                 }
             } else {
@@ -437,7 +455,7 @@ public:
 
         if (pos == -4){
             cout<<"No existe el ID"<<endl;
-            return;
+            return false;
         }
 
         if (pos == 0){
@@ -446,67 +464,72 @@ public:
             mainFile.seekp(0, ios::beg);
             mainFile.write((char*)&HnextPF, sizeof(int));
 
-            Registro rmrecord;
-            mainFile.seekg(pos * sizeof(Registro) + sizeof(int) + sizeof(bool), ios::beg);
-            mainFile.read((char*) &rmrecord, sizeof(Registro));
+            Entry rmrecord;
+            mainFile.seekg(pos * sizeof(Entry) + sizeof(int) + sizeof(bool), ios::beg);
+            mainFile.read((char*) &rmrecord, sizeof(Entry));
 
             rmrecord.nextPF = -2;
 
-            mainFile.seekp(pos * sizeof(Registro) + sizeof(int) + sizeof(bool), ios::beg);
-            mainFile.write((char*) &rmrecord, sizeof(Registro));
+            mainFile.seekp(pos * sizeof(Entry) + sizeof(int) + sizeof(bool), ios::beg);
+            mainFile.write((char*) &rmrecord, sizeof(Entry));
         }
 
         else{
-            Registro prevrecord;
-            mainFile.seekg((pos-1) * sizeof(Registro) + sizeof(int) + sizeof(bool), ios::beg);
-            mainFile.read((char*) &prevrecord, sizeof(Registro));
+            Entry prevrecord;
+            mainFile.seekg((pos-1) * sizeof(Entry) + sizeof(int) + sizeof(bool), ios::beg);
+            mainFile.read((char*) &prevrecord, sizeof(Entry));
 
-            Registro rmrecord;
-            mainFile.seekg(pos * sizeof(Registro) + sizeof(int) + sizeof(bool), ios::beg);
-            mainFile.read((char*) &rmrecord, sizeof(Registro));
+            Entry rmrecord;
+            mainFile.seekg(pos * sizeof(Entry) + sizeof(int) + sizeof(bool), ios::beg);
+            mainFile.read((char*) &rmrecord, sizeof(Entry));
 
             prevrecord.nextPF = rmrecord.nextPF;
             rmrecord.nextPF = -2;
 
-            mainFile.seekp((pos-1) * sizeof(Registro) + sizeof(int) + sizeof(bool), ios::beg);
-            mainFile.write((char*) &prevrecord, sizeof(Registro));
+            mainFile.seekp((pos-1) * sizeof(Entry) + sizeof(int) + sizeof(bool), ios::beg);
+            mainFile.write((char*) &prevrecord, sizeof(Entry));
 
-            mainFile.seekp(pos * sizeof(Registro) + sizeof(int) + sizeof(bool), ios::beg);
-            mainFile.write((char*) &rmrecord, sizeof(Registro));
+            mainFile.seekp(pos * sizeof(Entry) + sizeof(int) + sizeof(bool), ios::beg);
+            mainFile.write((char*) &rmrecord, sizeof(Entry));
         }
         mainFile.close();
+        return true;
     }
 
-    vector<Registro> search(T key) {
-        vector<Registro> result;
+    Record search(T key) override {
+        vector<Entry> result;
         ifstream mainFile(mainFilename, ios::binary);
-        if (!mainFile.is_open()) throw runtime_error("No se pudo abrir el archivo main");
+        if (!mainFile.is_open()) Record();
 
         int inicio = 0;
         mainFile.seekg(0, ios::end);
-        int fin = ((int)mainFile.tellg() - inicio) / sizeof(Registro) - 1;
+        int fin = ((int)mainFile.tellg() - inicio) / sizeof(Entry) - 1;
         mainFile.seekg(0, ios::beg);
 
-        Registro record;
-        Registro PrevRecord;
+        Entry record;
+        Entry PrevRecord;
 
         while (inicio <= fin) {
             int medio = (inicio + fin) / 2;
-            mainFile.seekg(medio * sizeof(Registro) + sizeof(int) + sizeof(bool));
-            mainFile.read((char*)&record, sizeof(Registro));
+            mainFile.seekg(medio * sizeof(Entry) + sizeof(int) + sizeof(bool));
+            mainFile.read((char*)&record, sizeof(Entry));
 
-            if (record.id == key) {
+            if ( igual_igual(record.record.key, key) ) {
+            // if (record.record.key == key) {
                 if (record.nextPF == -2){
-                    cout << "El registro se encuentra eliminado" <<endl;
-                    return result;
+                    cout << "El Entry se encuentra eliminado" <<endl;
+                    return Record();
                 }
                 else{
                     result.push_back(record);
-                    return result;
+                    return result[0].record;
                 }
-            } else if (record.id < key) {
+            } 
+            else if ( menor(record.record.key, key) ) {
+            // else if (record.record.key < key) {
                 inicio = medio + 1;
-                if (key - record.id < key - PrevRecord.id) {
+                if ( menor(PrevRecord.record.key, record.record.key) ) {
+                // if (key - record.record.key < key - PrevRecord.record.key) { // -recr < -prev  rec > prev
                     PrevRecord = record;
                 }
             } else {
@@ -517,10 +540,11 @@ public:
         ifstream auxFile(auxFilename, ios::binary);
         if (!auxFile.is_open()) throw runtime_error("No se pudo abrir el archivo auxiliar");
 
-        while(auxFile.read((char*)&record, sizeof(Registro))){
-            if (PrevRecord.id == key) {
+        while(auxFile.read((char*)&record, sizeof(Entry))){
+            if ( igual_igual(PrevRecord.record.key, key) ) {
+            // if (PrevRecord.record.key == key) {
                 result.push_back(PrevRecord);
-                return result;
+                return result[0].record;
             }
         }
 
@@ -528,29 +552,30 @@ public:
 
         mainFile.close();
         auxFile.close();
-        return result;
+        return result[0].record;
     }
 
-    vector<Registro> rangeSearch(T beginkey, T endkey) {
-        vector<Registro> result;
+    vector<Entry> rangeSearch(T beginkey, T endkey) override {
+        vector<Entry> result;
         ifstream mainFile(mainFilename, ios::binary);
         if (!mainFile.is_open()) throw runtime_error("No se pudo abrir el archivo main");
 
         ifstream auxFile(auxFilename, ios::binary);
         if (!auxFile.is_open()) throw runtime_error("No se pudo abrir el archivo auxiliar");
 
-        Registro record;
+        Entry record;
         int inicio = 0;
         mainFile.seekg(0, ios::end);
-        int fin = ((int)mainFile.tellg() - inicio) / sizeof(Registro) - 1;
+        int fin = ((int)mainFile.tellg() - inicio) / sizeof(Entry) - 1;
         mainFile.seekg(0, ios::beg);
 
         while (inicio <= fin) {
             int medio = (inicio + fin) / 2;
-            mainFile.seekg(medio * sizeof(Registro) + sizeof(int) + sizeof(bool));
-            mainFile.read((char*)&record, sizeof(Registro));
-
-            if (record.id >= beginkey) {
+            mainFile.seekg(medio * sizeof(Entry) + sizeof(int) + sizeof(bool));
+            mainFile.read((char*)&record, sizeof(Entry));
+            
+            if ( menor_igual(beginkey, record.record.key) ) {
+            // if (record.record.key >= beginkey) { // beginkey =< record
                 fin = medio - 1;
             } else {
                 inicio = medio + 1;
@@ -559,28 +584,50 @@ public:
 
         bool found = false;
 
-        while (record.id <= endkey) {
-            if (found && record.id < beginkey) {
+        while ( menor_igual(record.record.key, endkey) ) {
+        // while (record.record.key <= endkey) {
+            if ( found && menor(record.record.key, beginkey) ){
+            // if (found && record.record.key < beginkey) {
                 break;
             }
-
-            if (record.id >= beginkey) {
+            if ( menor_igual(beginkey, record.record.key) ) {
+            // if (record.record.key >= beginkey) {
                 result.push_back(record);
                 found = true;
             }
             if(record.nextPF==-1)break;
             if (record.isMain) {
-                mainFile.seekg(record.nextPF * sizeof(Registro)  + sizeof(int) + sizeof(bool));
-                mainFile.read((char*)&record, sizeof(Registro));
+                mainFile.seekg(record.nextPF * sizeof(Entry)  + sizeof(int) + sizeof(bool));
+                mainFile.read((char*)&record, sizeof(Entry));
             } else {
-                auxFile.seekg(record.nextPF * sizeof(Registro));
-                auxFile.read((char*)&record, sizeof(Registro));
+                auxFile.seekg(record.nextPF * sizeof(Entry));
+                auxFile.read((char*)&record, sizeof(Entry));
 
             }
         }
 
         mainFile.close();
         auxFile.close();
+        return result;
+    }
+
+    vector<Record> load() override {
+        merge(mainFilename,auxFilename);
+
+        ifstream file(mainFilename, ios::binary);
+        if(!file.is_open()) throw ("No se pudo abrir el archivo");
+        vector<Record> result;
+        Entry record;
+
+        file.seekg(sizeof(int) + sizeof(bool), ios::beg);
+        while(file.peek() != EOF){
+            record = Entry();
+            file.read((char*) &record, sizeof(Entry));
+            if (record.nextPF != -2) {
+                result.push_back(record.record);
+            }
+        }
+        file.close();
         return result;
     }
 };
