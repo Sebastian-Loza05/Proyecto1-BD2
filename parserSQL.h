@@ -1,4 +1,3 @@
-#include <sstream>
 #include <iostream>
 #include <stdlib.h>
 #include <cstring>
@@ -217,6 +216,7 @@ private:
       if(match(Token::ID)){
         if(match(Token::SEMICOLON)){
           cout<<"Mostrar tabla"<<endl;
+          vector<Record> res = method.load();
           atributos.clear();
           return;
         }
@@ -290,7 +290,7 @@ private:
   void parseIndex(string filename){
     if(match(Token::USING)){
       if(match(Token::INDEX)){
-        parseIndexType();
+        parseIndexType(filename);
         return;
       }
       cout<<"Sintaxis incorrecta"<<endl;
@@ -300,11 +300,12 @@ private:
     return;
   }
   
-  void parseIndexType(){
+  void parseIndexType(string filename){
     MethodSelector *method = new MethodSelector();
     if(match(Token::BPLUS)){
       if(match(Token::SEMICOLON)){
         this->method = BPlusFile<int, sizeof(int)>();
+        insertCsv(filename);
         cout<<"Se crea tabla con index bplus"<<endl;
         
         return;
@@ -315,6 +316,7 @@ private:
     else if(match(Token::AVL)){
       if(match(Token::SEMICOLON)){
         this->method = AVLFile<int>();
+        insertCsv(filename);
         cout<<"Se crea tabla con index avl"<<endl;
         return;
       }
@@ -324,6 +326,7 @@ private:
     else if(match(Token::SEQUENTIAL)){
       if(match(Token::SEMICOLON)){
         this->method = SequentialFile<int>();
+        insertCsv(filename);
         cout<<"Se crea tabla con index sequential"<<endl;
         return;
       }
@@ -409,5 +412,57 @@ private:
     }
     cout<<"Sintaxis Incorrecta"<<endl;
     return;
+  }
+
+  void insertCsv(string ruta){
+    ifstream archivo("datos.csv");
+
+    if (!archivo.is_open()) {
+      cout << "Error al abrir el archivo" << endl;
+      return;
+    }
+
+    string linea;
+    vector<string> campos;
+
+    istringstream lineaStream(linea);
+    while (getline(archivo, linea)) {
+      istringstream lineaStream(linea);
+      string campo;
+
+      while (getline(lineaStream, campo, ',')) {
+        campos.push_back(campo);
+      }
+
+      char key[20];
+      // long key;
+      char nombre[20];
+      char producto[20];
+      char marca[20];
+      float precio;
+      int cantidad;
+
+      // key = stoi(campos[0]);
+
+      strncpy(key, campos[0].c_str(), sizeof(key) - 1);
+      nombre[sizeof(key) - 1 ]= '\0';
+
+      strncpy(nombre, campos[1].c_str(), sizeof(nombre) - 1);
+      nombre[sizeof(nombre) - 1 ]= '\0';
+
+
+      strncpy(producto, campos[2].c_str(), sizeof(producto) - 1);
+      producto[sizeof(producto) - 1 ]= '\0';
+
+      strncpy(marca, campos[3].c_str(), sizeof(marca) - 1);
+      marca[sizeof(marca) - 1 ]= '\0';
+
+      // cout << campos[4] << endl;
+      precio = stof(campos[4]);
+      cantidad = stoi(campos[5]);
+
+      Record record(key,nombre,producto,marca,precio,cantidad);
+      bool asd__ = method.add(record);
+    }
   }
 };

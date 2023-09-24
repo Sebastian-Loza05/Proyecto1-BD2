@@ -146,8 +146,8 @@ class BPlusFile : public MethodSelector{
 
 public:
   BPlusFile(){
-    this->filename = "bplus_datos.dat";
-    this->indexname = "bplus_index.dat";
+    this->filename = "../../bplus_datos.dat";
+    this->indexname = "../../bplus_index.dat";
 
     //definicion del page_size dependiendo del sistema operativo y la maquina.
     struct utsname unameData;
