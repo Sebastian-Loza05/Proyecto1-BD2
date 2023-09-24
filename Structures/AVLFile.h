@@ -118,7 +118,15 @@ public:
       data.close();
       return result;
     };
-    pair<Record, bool> search(T key);
+    pair<Record, bool> search(T key){
+      ifstream data(this->filename, ios::binary);
+      
+      pair<Record, bool> result;
+        
+      data.close();
+      return result;
+      
+    };
     vector<NodeBTAVL> rangeSearch(string begin, string end);
 
     void display() override {
@@ -412,7 +420,18 @@ private:
       }
       return true;
   }
-    Record find(long nodepos, T key);
+    pair<Record,bool> search(long pos_node, T key, ifstream &data){
+      if (pos_node == -1) {
+        return make_pair(Record(), false);
+      }
+
+      NodeBTAVL temp;
+      data.seekg(pos_node, ios::beg);
+      
+      
+      
+        
+    };
     void updateHeight(long pos_node, fstream &data){
       if ( pos_node == -1 ) {
         return;

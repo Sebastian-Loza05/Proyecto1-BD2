@@ -555,8 +555,8 @@ public:
         return make_pair(Record(), false);
     }
 
-    vector<Entry> rangeSearch(T beginkey, T endkey) override {
-        vector<Entry> result;
+    vector<Record> rangeSearch(T beginkey, T endkey) override {
+        vector<Record> result;
         ifstream mainFile(mainFilename, ios::binary);
         if (!mainFile.is_open()) throw runtime_error("No se pudo abrir el archivo main");
 
@@ -592,7 +592,7 @@ public:
             }
             if ( menor_igual(beginkey, record.record.key) ) {
             // if (record.record.key >= beginkey) {
-                result.push_back(record);
+                result.push_back(record.record);
                 found = true;
             }
             if(record.nextPF==-1)break;

@@ -2,6 +2,7 @@
 #include <typeinfo>
 #include <sstream>
 // #include "BPlusFile.h"
+#include "BPlusFile.h"
 #include "SequentialFile.h"
 #include "Structures/AVLFile.h"
 
@@ -73,10 +74,10 @@ void ingreso(T *method){
     cin >> inser;
     if (inser) {
       cout << "Key: ";
-      char key_del[20];
-      cin >> key_del;
+      char key_insert[20];
+      cin >> key_insert;
 
-      pair<Record,bool> asd__ = method->search(record);
+      pair<Record,bool> asd__ = method->search(key_insert);
     }
     else {
       cout << "Key: ";
@@ -128,7 +129,7 @@ int main (int argc, char *argv[]) {
   MethodSelector *method = nullptr;
   //
   // if (metodo == 1) {
-    method = new AVLFile<char*>(); // STRUCT 1
+    method = new BPlusFile<long, sizeof(long)>(); // STRUCT 1
   // }
   
   ingreso(method);
