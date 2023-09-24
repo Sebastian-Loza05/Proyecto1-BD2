@@ -77,11 +77,70 @@ En el caso de la eliminación, los archivos principales y auxiliares se combinan
 
 ### AVL File:
 
+El AVL File es un sistema de organización que sigue la estrategia de un árbol binario de búsqueda balanceado. En este tipo de organización cada registro tiene un atributo "left" y "right" de tipo long que indica la posición en el archivo de su nodo izquierdo o derecho respectivamente. En este AVL File el archivo posee dos header, donde uno indica la posición del root y otro guarda la posicion del último eliminado.
+
+| pos_root  | next_del  |          |           |            |
+|-----------|-----------|----------|-----------|------------|
+|   data-1  |   left-1  |  right-1 |  height-1 |  nex_del-1 |
+|   data-2  |   left-2  |  right-2 |  height-2 |  nex_del-2 |
+|   data-3  |   left-3  |  right-3 |  height-3 |  nex_del-3 |
+
 #### Inserción:
+
+La operación de inserción en un AVL File consiste en insertar el registro en un nodo vacio identificado por "-1", siguiendo la estructura de AVL Tree, donde primero se busca el lugar de insertación comparando el registro de la llave con la del nodo actual para movilizarnos hasta un nodo vacio. 
+Una vez encontrada la posición a donde insertar, se debe escribir en el archivo actualizando la posición del left o right del nodo anterior y escribir el nuevo nodo al final de archivo o insertando dependiendo del next_del. Si se escribe el archivo dependiendo del next_del del header, el next_del de la posición a escribir se convertira en el nuevo next_del del header y se seteara el next_del del registro actual con 0.
+
+**Antes de insertar**
+
+| pos_root  |     7     |          |           |            |
+|-----------|-----------|----------|-----------|------------|
+|   data-1  |   left-1  |  right-1 |  height-1 |  nex_del-1 |
+|    ...    |    ...    |    ...   |    ...    |     ...    |
+|   data-7  |   left-7  |  right-7 |  height-7 |  nex_del-7 |
+|    ...    |    ...    |    ...   |    ...    |     ...    |
+
+**Después de insertar**
+
+|  pos_root  |  nex_del-7 |           |            |            |
+|------------|------------|-----------|------------|------------|
+|   data-1   |   left-1   |  right-1  |  height-1  |  nex_del-1 |
+|    ...     |    ...     |    ...    |    ...     |     ...    |
+|  data-new  |  left-new  | right-new | height-new |      0     |
+|    ...     |    ...     |    ...    |    ...     |     ...    |
+
+Una vez insertado el valor se debe realizar un balanceo para poder mantener la propiedad de equilibrio del árbol.
+Donde en cada registro solo se cambia los left y right para el balanceo, y si en caso el balanceo afecta al root, se escribira el header del por_root.
+
+<p align="center">
+  <img src="Imagenes/avl22-768.png">
+</p>
+
+**Antes de balancear afectando el root**
+
+|    1      | next_del  |          |           |            |
+|-----------|-----------|----------|-----------|------------|
+|   A  |     2     |    -1    |  height-1 |  nex_del-1 |
+|   B  |     3     |    -1    |  height-2 |  nex_del-2 |
+|   C  |    -1     |    -1    |  height-3 |  nex_del-3 |
+|    ...    |    ...    |    ...   |    ...    |     ...    |
+
+**Después de balancear afectando el root**
+
+|    2      | next_del  |          |           |            |
+|-----------|-----------|----------|-----------|------------|
+|   A  |    -1     |    -1    |  height-1 |  nex_del-1 |
+|   B  |     1     |     3    |  height-2 |  nex_del-2 |
+|   C  |    -1     |    -1    |  height-3 |  nex_del-3 |
+|    ...    |    ...    |    ...   |    ...    |     ...    |
 
 #### Búsqueda:
 
+La búsqueda de un registro con respecto a la llave comienza desde el pos_root, donde comparara la llave a buscar con la llave del nodo actual, y si movilizara al left o right dependiendo del caso. Y asi seguira sucesivamente hasta encontrar un nodo que contenga la data con esa key, si en caso llega hasta a un pos_node igual a "-1" significa que el elemento búscado no existe.
+Esta función retoran un `pair<Record,bool` cosa que si en caso no encuentra el elemento retorna una record vacio y false.
+
 #### Eliminación:
+
+La eliminación de registro en el AVL File, sigue la misma estructura que la de un AVL Tree. Buscara la posición del record con cierta key que mandemos, comparando la key con la key del nodo actual para movilizarnos hasta la posición. Una vez encontrada el registro se validara los casos de eliminación que existe, si es que tiene un nodo right y left, o solo uno de ambos o ninguno. Al momento de eliminar seguimos la estrategia LIFO para la actualización del next_del del header, cosa que insertemos nuevos valores en la posición del next_del actual.
 
 #### Complejidades:
 

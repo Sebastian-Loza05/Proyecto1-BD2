@@ -8,18 +8,18 @@
 using namespace std;
 
 struct Record{
-  // long key;
-  char key[20];
+  int key;
+  //char key[20];
   char nombre[20];
   char producto[20];
   char marca[20];
   float precio;
   int cantidad;
   
-  // Record(long key_, char nombre_[20], char producto_[20], char marca_[20], float precio_, int cantidad_){
-  Record(char key_[20], char nombre_[20], char producto_[20], char marca_[20], float precio_, int cantidad_){
-    strncpy(key, key_, sizeof(key));
-    // this->key = key_;
+  Record(int key_, char nombre_[20], char producto_[20], char marca_[20], float precio_, int cantidad_){
+  // Record(char key_[20], char nombre_[20], char producto_[20], char marca_[20], float precio_, int cantidad_){
+    //strncpy(key, key_, sizeof(key));
+    this->key = key_;
     strncpy(nombre, nombre_, sizeof(nombre));
     strncpy(producto, producto_, sizeof(producto));
     strncpy(marca, marca_, sizeof(marca));

@@ -8,7 +8,11 @@
 #include "methods.h"
 #include <iomanip>
 #include <queue>
+#include <utility>
+#include <vector>
 using namespace std;
+
+inline int a = 5;
 
 struct NodeBTAVL{
   Record data;
@@ -47,7 +51,26 @@ private:
     long size();
     int sizeNode();
     void addvector(vector<NodeBTAVL> &aux, long value);
-    void rangeSearch(long root, string begin, string end, vector<NodeBTAVL> &aux);
+    void rangeSearch(long pos_node, T begin, T end, vector<Record> &aux, ifstream &data){
+      if (pos_node == -1) {
+        return;
+      }
+      NodeBTAVL temp;
+      data.seekg(pos_node, ios::beg);
+      data.read( (char*)(&temp), sizeof(NodeBTAVL) );
+
+      if ( menor_igual(begin, temp.data.key ) ) {
+        rangeSearch(temp.left, begin, end, aux, data);
+      }
+      if (menor_igual(begin, temp.data.key) && menor_igual(temp.data.key, end) ) {
+        aux.push_back(temp.data);
+      } 
+      if ( menor_igual(temp.data.key, end) ) {
+        rangeSearch(temp.right, begin, end, aux, data);
+      }
+      return;
+      
+    };
 
 public:
     AVLFile(){
@@ -118,22 +141,31 @@ public:
       data.close();
       return result;
     };
-    pair<Record, bool> search(T key){
+    pair<Record, bool> search(T key) override {
       ifstream data(this->filename, ios::binary);
       
-      pair<Record, bool> result;
+      pair<Record, bool> result = search(this->pos_root, key, data);
         
       data.close();
       return result;
       
     };
-    vector<NodeBTAVL> rangeSearch(string begin, string end);
+    vector<Record> rangeSearch(T begin, T end) override {
+      vector<Record> result;
+      ifstream data(this->filename, ios::binary);
+        
+      rangeSearch(this->pos_root, begin, end, result, data);
+      
+      data.close();
+      return  result;
+    };
 
     void display() override {
       ifstream data(this->filename, ios::binary);
       if ( !data.is_open() ) return;
       
       display(this->pos_root, data);
+      data.close();
     };
 
 
@@ -167,8 +199,30 @@ public:
 
       return result;
     }
+    vector<Record> load() override {
+      vector<Record> result;
+      ifstream data(this->filename, ios::binary);
 
+      load(this->pos_root, result, data);
+        
+      data.close();
+      return result;
+    } 
 private:
+    void load(long pos_node, vector<Record> &result, ifstream &data){
+      if (pos_node == -1) {
+        return;
+      }
+      
+      NodeBTAVL temp;
+      data.seekg(pos_node, ios::beg);
+      data.read( (char*)(&temp), sizeof(NodeBTAVL) );
+      
+      load(temp.left, result, data);
+      result.push_back(temp.data);
+      load(temp.right, result, data);
+      return;
+    };
     void display(long pos_node, ifstream& data) {
       if ( pos_node == -1 ) {
         return;
@@ -427,10 +481,17 @@ private:
 
       NodeBTAVL temp;
       data.seekg(pos_node, ios::beg);
+      data.read( (char*)&temp, sizeof(NodeBTAVL) );
       
-      
-      
-        
+      if ( igual_igual(key, temp.data.key) ) {
+        return make_pair(temp.data, true);
+      }
+      else if ( menor(key, temp.data.key) ){
+        return search(temp.left, key, data);
+      }
+      else {
+        return search(temp.right, key, data);
+      }  
     };
     void updateHeight(long pos_node, fstream &data){
       if ( pos_node == -1 ) {

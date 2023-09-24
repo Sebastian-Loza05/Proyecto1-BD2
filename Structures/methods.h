@@ -10,6 +10,7 @@ public:
   MethodSelector(){}
   
   virtual bool add(Record record){
+    cout<<"add-method"<<endl;
     return false;
   }
 

@@ -2,7 +2,6 @@
 #include <typeinfo>
 #include <sstream>
 // #include "BPlusFile.h"
-#include "BPlusFile.h"
 #include "SequentialFile.h"
 #include "Structures/AVLFile.h"
 
@@ -71,21 +70,38 @@ void ingreso(T *method){
       bool inser = 0;
     // method->display_all();
     method->display();
+    vector<Record> vec1 = method->load();
+    
+    for (int i = 0; i < vec1.size(); i++) {
+      vec1[i].print();
+      cout << "-----" << endl;
+    }
     cin >> inser;
     if (inser) {
       cout << "Key: ";
-      char key_insert[20];
-      cin >> key_insert;
+      char key_insert_b[20], key_insert_e[20];
+      cin >> key_insert_b >> key_insert_e;
 
-      pair<Record,bool> asd__ = method->search(key_insert);
+      vector<Record> vec = method->rangeSearch(key_insert_b, key_insert_e);
+      for (int i = 0; i < vec.size(); i++) {
+        vec[i].print();
+        cout << "-----" << endl;
+      }
+      // if (asd__.second) {
+      //   asd__.first.print();
+      // }
+      // else{
+      //   cout << "No existe este elemento" << endl;
+      // }
     }
     else {
-      cout << "Key: ";
-      char key_del[20];
-      cin >> key_del;
-      bool asd___ = method->remove(key_del);
-      cout << "Rpta: " << asd___ << endl;
-      method->display();
+      bool asd___ = method->add(record);
+      // cout << "Key: ";
+      // char key_del[20];
+      // cin >> key_del;
+      // bool asd___ = method->remove(key_del);
+      // cout << "Rpta: " << asd___ << endl;
+      // method->display();
     }
     
     // cout << "Rpta: " << asd__ << endl;
@@ -104,7 +120,7 @@ void ingreso(T *method){
     // bplus.displayTree();
     //
     // cin >> asd;
-    if(counter == 2000)break;
+    if(counter == 200000)break;
     campos.clear();
   }
   // bplus.displayTree();
@@ -126,13 +142,13 @@ int main (int argc, char *argv[]) {
   //   cin>>metodo;
   // } while ( metodo < 1 || metodo > 3 );
   //
-  MethodSelector *method = nullptr;
+  // MethodSelector *method = nullptr;
   //
   // if (metodo == 1) {
-    method = new BPlusFile<long, sizeof(long)>(); // STRUCT 1
+    // method = new AVLFile<char*>(); // STRUCT 1
   // }
   
-  ingreso(method);
+  // ingreso(method);
   // SequentialFile<int> *seq = new SequentialFile<int>;
   // ingreso(seq);
   

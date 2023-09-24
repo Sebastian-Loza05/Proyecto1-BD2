@@ -1,3 +1,5 @@
+#ifndef TOKEN_H
+#define TOKEN_H
 #include <cctype>
 #include <sstream>
 #include <iostream>
@@ -20,7 +22,7 @@ using namespace std;
 class Token {
 public:
   enum Type { SELECT, CREATE, TABLE, FROM, ALL, WHERE, DELETE, EQUAL, BETWEEN, AND, INSERT, INTO, VALUES, FILE, LPARENT, RPARENT, INDEX, USING, BPLUS, AVL, SEQUENTIAL, END, ERR, SEMICOLON, COLON, ID, EOL, NUM, VALUE, QUOTE, FILENAME, TRUE, FALSE, FLOAT};
-  static const char* token_names[34]; 
+  inline static const char* token_names[34]= {"SELECT", "CREATE", "TABLE", "FROM", "ALL", "WHERE", "DELETE", "EQUAL", "BETWEEN", "AND", "INSERT", "INTO", "VALUES", "FILE", "LPARENT", "RPARENT", "INDEX", "USING", "BPLUS", "AVL", "SEQUENTIAL", "END", "ERR", "SEMICOLON", "COLON", "ID", "EOL", "NUM", "VALUE", "QUOTE", "FILENAME", "TRUE", "FALSE", "FLOAT"};;
   Type type;
   string lexema;
   Token(Type type):type(type) { lexema = ""; }
@@ -31,11 +33,9 @@ public:
 
 };
 
-const char* Token::token_names[34] = {"SELECT", "CREATE", "TABLE", "FROM", "ALL", "WHERE", "DELETE", "EQUAL", "BETWEEN", "AND", "INSERT", "INTO", "VALUES", "FILE", "LPARENT", "RPARENT", "INDEX", "USING", "BPLUS", "AVL", "SEQUENTIAL", "END", "ERR", "SEMICOLON", "COLON", "ID", "EOL", "NUM", "VALUE", "QUOTE", "FILENAME", "TRUE", "FALSE", "FLOAT"};
-
 
 // Modificar
-std::ostream& operator << ( std::ostream& outs, const Token & tok )
+inline std::ostream& operator << ( std::ostream& outs, const Token & tok )
 {
   if (tok.lexema.empty())
     return outs << Token::token_names[tok.type];
@@ -43,7 +43,7 @@ std::ostream& operator << ( std::ostream& outs, const Token & tok )
     return outs << Token::token_names[tok.type] << "(" << tok.lexema << ")";
 }
 
-std::ostream& operator << ( std::ostream& outs, const Token* tok ) {
+inline std::ostream& operator << ( std::ostream& outs, const Token* tok ) {
   return outs << *tok;
 }
 
@@ -78,7 +78,7 @@ public:
   Token::Type search(string lexema){
     auto it = palabras.find(lexema);
     if(it != palabras.end()) return it->second;
-    cout << lexema << endl;
+    //cout << lexema << endl;
     return Token::VALUE;
   }
 };
@@ -108,7 +108,7 @@ public:
 
       if (c == ':') {
         c = nextChar();
-        while (strchr("\\.:",c) || isalpha(c)) {
+        while (strchr("\\.:/",c) || isalpha(c) || isdigit(c)) {
           c = nextChar();
         }
         rollBack();
@@ -148,14 +148,14 @@ public:
     }
     else if (c == '/' || c == '~'){
         c = nextChar();
-        while (strchr("~/.",c) || isalpha(c)) {
+      while (strchr("~/.",c) || isalpha(c) || isdigit(c)) {
           c = nextChar();
         }
         rollBack();
         string a = getLexema();
         return new Token(Token::FILENAME,a);
     }
-    else if (strchr("()=,;*\"",c)){
+    else if (strchr("()=,;*'",c)){
       switch (c) {
         case '(': return new Token(Token::LPARENT);
         case ')': return new Token(Token::RPARENT);
@@ -163,7 +163,7 @@ public:
         case ',': return new Token(Token::COLON);
         case ';': return new Token(Token::SEMICOLON);
         case '*': return new Token(Token::ALL);
-        case '"': return new Token(Token::QUOTE);
+        case '\'': return new Token(Token::QUOTE);
         default: cout << "No deberia llegar aca" << endl;
       }
     }
@@ -208,5 +208,5 @@ private:
 };
 
 
-
+#endif // TOKEN_H
 // ---------------------------------------------------

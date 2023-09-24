@@ -6,16 +6,16 @@
 #include <fstream>
 #include <memory>
 #include <strings.h>
-#include <sys/utsname.h>
+//si usas windows comenta la linea de abajo
+//#include <sys/utsname.h>
 #include "Structures/methods.h"
-#include <unistd.h>
 // #include "structs.h"
 #include <vector>
 #include <queue>
 #include <stack>
-#include <unistd.h>
+//#include <unistd.h>
 //Si usas windows descomenta la linea de abajo y comenta la de arriba.
-// #include <windows.h>
+//#include <windows.h>
 
 struct Bucket{
   vector<Record> records;
@@ -28,7 +28,7 @@ struct Bucket{
     count = 0;
     page_size -= (sizeof(long) + (2*sizeof(int)));
     this->m = page_size / sizeof(Record);
-    this->m = 5;
+    //this->m = 5;
     records = vector<Record>(this->m);
     next_del = -1;
     next = -1;
@@ -60,7 +60,7 @@ struct Bucket{
 };
 
 
-ostream& operator<<(ostream& os, Bucket buck){
+inline ostream& operator<<(ostream& os, Bucket buck){
   os<<"count: "<<buck.count<<endl;
   os<<"next: "<<buck.next<<endl;
   os<<"m: "<<buck.m<<endl;
@@ -150,26 +150,27 @@ public:
     this->indexname = "../../bplus_index.dat";
 
     //definicion del page_size dependiendo del sistema operativo y la maquina.
-    struct utsname unameData;
+    /*struct utsname unameData;
     if (uname(&unameData) == 0) {
-      page_size = sysconf(_SC_PAGESIZE);
-      //Si usas windows descomenta estas lineas de abajo y comenta la de arriba.
-      /*
-      SYSTEM_INFO system_info;
-      GetSystemInfo(&system_info);
-      DWORD p_size = system_info.dwPageSize;
-      page_size = static_cast<long>(p_size);
-      */
+      //page_size = sysconf(_SC_PAGESIZE);
     } else {
       page_size = 4092;
-    }
-    
+    }*/
+    //Si usas windows descomenta estas lineas de abajo y comenta las de arriba.
+    /*SYSTEM_INFO system_info;
+    GetSystemInfo(&system_info);
+    DWORD p_size = system_info.dwPageSize;
+    page_size = static_cast<long>(p_size);
+    */
+    page_size=4092;
+
     int page_s = page_size - sizeof(long) - sizeof(bool) - sizeof(int) + N;
     int X  = (page_s)/(N + sizeof(long)) ;
     this->M = X-1;
-    this->M = 5;
+    //this->M = 5;
     ofstream index(this->indexname, ios::binary | ios::app);
     ofstream file(this->filename, ios::binary | ios::app);
+    cout<<"Se agrego"<<endl;
     file.seekp(0,ios::end);
     index.seekp(0,ios::end);
     int tam1 = file.tellp();
@@ -294,8 +295,9 @@ public:
     index.close();
     return make_pair(res, true);
   }
-  
+
   bool add(Record record) override{
+
     fstream index(this->indexname, ios::binary | ios::in | ios::out);
     if (!index.is_open()) throw ("No se puede abrir el archivo");
 
@@ -303,11 +305,7 @@ public:
     if (!data.is_open()) throw ("No se puede abrir el archivo");
 
     index.seekg(0, ios::end);
-    int tam = index.tellg();
-    cout<<"Tam: "<<tam<<endl;
-
-    index.seekg(0, ios::beg);
-    
+    index.seekg(0, ios::beg);  
     bool res = false;
     if(root_hoja)
        res = add_recursive(root, -1, record.key, record, true, index, data);
@@ -435,7 +433,7 @@ public:
     return res;
   }
 
-  void displayTree(){
+  void display_all() override{
     fstream index(this->indexname, ios::binary | ios::in | ios::out);
     fstream data(this->filename, ios::binary | ios::in | ios::out);
     // return;

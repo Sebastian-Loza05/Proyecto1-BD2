@@ -39,7 +39,7 @@ int main(int argc, const char* argv[]) {
     Token* tk = scanner.nextToken();
     cout << "-------*-------" << endl;
     while (tk->type != Token::END && tk->type != Token::SEMICOLON) {
-      cout << tk << endl;
+      cout << "asda " <<  tk << endl;
       delete tk;
       tk =  scanner.nextToken();
       if (tk->type == Token::END) {

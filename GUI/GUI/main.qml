@@ -6,28 +6,18 @@ ApplicationWindow {
     width: 640
     height: 480
     title: "App Window"
-
     Rectangle {
         anchors.fill: parent
-
         Image {
             source: "file:///E:/BD2/PROYECTO1/GUI/GUI/images/fondo.jpeg"
             fillMode: Image.PreserveAspectCrop
             anchors.fill: parent
         }
-
         Column {
             anchors.centerIn: parent
             spacing: 10
-
-            Text {
-                text: "Run Your Query"
-                font.bold: true
-                font.pixelSize: 24
-            }
-
             Rectangle {
-                width: 400
+                width: 800
                 height: 200
                 color: "white"
                 border.color: "black"
@@ -64,15 +54,13 @@ ApplicationWindow {
                     outputArea.text = csvLines.join("\n");
                 }
             }
-
             Rectangle {
                 width: 400
                 height: 200
                 color: "white"
                 border.color: "black"
-                radius: 10 // Radio de las esquinas redondeadas
+                radius: 10
                 clip: true
-
                 TextArea {
                     id: outputArea
                     width: parent.width

@@ -14,16 +14,15 @@
 #include "Structures/methods.h"
 using namespace std;
 
+inline MethodSelector* method = nullptr;
 
 class Parser {
   Scanner* scanner;
-  MethodSelector method;
   Token* current, * previous;
   vector<string> atributos;
   map<string, string> values;
 public:
-  Parser(Scanner* sc, MethodSelector &_method):scanner(sc) {
-    method = _method;
+  Parser(Scanner* sc):scanner(sc) {
     previous = current = NULL;
     return;
   }
@@ -216,7 +215,7 @@ private:
       if(match(Token::ID)){
         if(match(Token::SEMICOLON)){
           cout<<"Mostrar tabla"<<endl;
-          vector<Record> res = method.load();
+          vector<Record> res = method->load();
           atributos.clear();
           return;
         }
@@ -283,7 +282,7 @@ private:
       cout<<"Se esperaba el nombre del archivo"<<endl;
       return;
     }
-    cout<<"Se esperaba \""<<endl;
+    cout<<"Se esperaba '"<<endl;
     return;
   }
 
@@ -301,10 +300,9 @@ private:
   }
   
   void parseIndexType(string filename){
-    MethodSelector *method = new MethodSelector();
     if(match(Token::BPLUS)){
       if(match(Token::SEMICOLON)){
-        this->method = BPlusFile<int, sizeof(int)>();
+        method = new BPlusFile<int, sizeof(int)>();
         insertCsv(filename);
         cout<<"Se crea tabla con index bplus"<<endl;
         
@@ -315,7 +313,7 @@ private:
     }
     else if(match(Token::AVL)){
       if(match(Token::SEMICOLON)){
-        this->method = AVLFile<int>();
+        method = new AVLFile<int>();
         insertCsv(filename);
         cout<<"Se crea tabla con index avl"<<endl;
         return;
@@ -325,7 +323,7 @@ private:
     }
     else if(match(Token::SEQUENTIAL)){
       if(match(Token::SEMICOLON)){
-        this->method = SequentialFile<int>();
+        method = new SequentialFile<int>();
         insertCsv(filename);
         cout<<"Se crea tabla con index sequential"<<endl;
         return;
@@ -415,8 +413,7 @@ private:
   }
 
   void insertCsv(string ruta){
-    ifstream archivo("datos.csv");
-
+    ifstream archivo(ruta);
     if (!archivo.is_open()) {
       cout << "Error al abrir el archivo" << endl;
       return;
@@ -424,8 +421,8 @@ private:
 
     string linea;
     vector<string> campos;
-
     istringstream lineaStream(linea);
+    int counter = 0;
     while (getline(archivo, linea)) {
       istringstream lineaStream(linea);
       string campo;
@@ -434,18 +431,18 @@ private:
         campos.push_back(campo);
       }
 
-      char key[20];
-      // long key;
+      //char key[20];
+      int key;
       char nombre[20];
       char producto[20];
       char marca[20];
       float precio;
       int cantidad;
 
-      // key = stoi(campos[0]);
+      key = stoi(campos[0]);
 
-      strncpy(key, campos[0].c_str(), sizeof(key) - 1);
-      nombre[sizeof(key) - 1 ]= '\0';
+      //strncpy(key, campos[0].c_str(), sizeof(key) - 1);
+      //nombre[sizeof(key) - 1 ]= '\0';
 
       strncpy(nombre, campos[1].c_str(), sizeof(nombre) - 1);
       nombre[sizeof(nombre) - 1 ]= '\0';
@@ -462,7 +459,14 @@ private:
       cantidad = stoi(campos[5]);
 
       Record record(key,nombre,producto,marca,precio,cantidad);
-      bool asd__ = method.add(record);
+      bool asd__ = method->add(record);
+      method->display_all();
+      if(counter == 2000)
+        break;
+      counter ++;
+      campos.clear();
     }
+    method->display_all();
   }
 };
+

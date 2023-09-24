@@ -30,23 +30,23 @@
                         "access": "public",
                         "arguments": [
                             {
-                                "name": "method",
-                                "type": "QString"
-                            }
-                        ],
-                        "name": "methodChosen",
-                        "returnType": "void"
-                    },
-                    {
-                        "access": "public",
-                        "arguments": [
-                            {
                                 "name": "query",
                                 "type": "QString"
                             }
                         ],
                         "name": "runQuery",
                         "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "arguments": [
+                            {
+                                "name": "ingreso",
+                                "type": "string"
+                            }
+                        ],
+                        "name": "input",
+                        "returnType": "std::vector<std::string>"
                     }
                 ],
                 "superClasses": [
