@@ -2,14 +2,15 @@
 #include <typeinfo>
 #include <sstream>
 // #include "BPlusFile.h"
-// #include "SequentialFile.h"
+#include "SequentialFile.h"
 #include "Structures/AVLFile.h"
 
 using namespace std;
 
-void ingreso(MethodSelector *method){
+template<typename  T>
+void ingreso(T *method){
   // BPlusFile<long , sizeof(long)> bplus;
-  ifstream archivo("datos.csv");
+  ifstream archivo("datos_prueba.csv");
   
   if (!archivo.is_open()) {
     cout << "Error al abrir el archivo" << endl;
@@ -56,13 +57,33 @@ void ingreso(MethodSelector *method){
     precio = stof(campos[4]);
     cantidad = stoi(campos[5]);
 
-    method->display_all();
+    // cout << "---prev---" << endl;
+    // method->display_all();
+    // cout << "--**----" << endl;
     Record record(key,nombre,producto,marca,precio,cantidad);
-    // record.print();
+    cout << "Insert: ";
+    record.print();
     string asd;
     // if (counter > 96)
     //   cin >> asd;
-    bool asd__ = method->add(record);
+    // cout << endl << endl << endl;
+      bool inser = 0;
+    // method->display_all();
+  // method->display();
+    // cin >> inser;
+    if (inser) {
+      bool asd__ = method->add(record);
+    }
+    else {
+      // cout << "Key: ";
+      // char key_del[20];
+      // cin >> key_del;
+      bool asd___ = method->remove(record.key);
+      cout << "Rpta: " << asd___ << endl;
+      method->display();
+    }
+    
+    // cout << "Rpta: " << asd__ << endl;
     // cout << "Asda" << endl;
     // cout << "Asda" << endl;
     // for (const string& valor: campos){
@@ -71,13 +92,13 @@ void ingreso(MethodSelector *method){
     // cout << endl;
     cout<<"counter: "<<counter<<endl;
     counter++;
-    cout << "------" << endl;
-    method->display();
-    cout << "------" << endl;
+    // cout << "--desp----" << endl;
+    // method->display_all();
+    // cout << "------" << endl;
     
     // bplus.displayTree();
     //
-    cin >> asd;
+    // cin >> asd;
     if(counter == 200000)break;
     campos.clear();
   }
@@ -91,22 +112,26 @@ void ingreso(MethodSelector *method){
 int main (int argc, char *argv[]) {
 
   //Se pedira escoger con que metodo se trabajara(pensando en la UI).
-  int metodo;
-  do{
-    cout<<"1.- AvlFile."<<endl;
-    cout<<"2.- Sequential File."<<endl;
-    cout<<"3.- Bplus File."<<endl;
-    cout<<"Ingrese el metodo a utilizar: ";
-    cin>>metodo;
-  } while ( metodo < 1 || metodo > 3 );
-  
+  // int metodo;
+  // do{
+  //   cout<<"1.- AvlFile."<<endl;
+  //   cout<<"2.- Sequential File."<<endl;
+  //   cout<<"3.- Bplus File."<<endl;
+  //   cout<<"Ingrese el metodo a utilizar: ";
+  //   cin>>metodo;
+  // } while ( metodo < 1 || metodo > 3 );
+  //
   MethodSelector *method = nullptr;
-
-  if (metodo == 1) {
+  //
+  // if (metodo == 1) {
     method = new AVLFile<char*>(); // STRUCT 1
-  }
+  // }
   
   ingreso(method);
+  // SequentialFile<int> *seq = new SequentialFile<int>;
+  // ingreso(seq);
+  
+
   
   return 0;
 }
