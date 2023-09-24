@@ -1,0 +1,18 @@
+<RCC>
+  <qresource prefix="/QtQuick/Studio/Components/">
+    <file alias="ArcItem.qml">E:/BD2/PROYECTO1/GUI/build-GUI-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/_deps/ds-src/src/imports/components/ArcItem.qml</file>
+    <file alias="PieItem.qml">E:/BD2/PROYECTO1/GUI/build-GUI-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/_deps/ds-src/src/imports/components/PieItem.qml</file>
+    <file alias="TriangleItem.qml">E:/BD2/PROYECTO1/GUI/build-GUI-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/_deps/ds-src/src/imports/components/TriangleItem.qml</file>
+    <file alias="SvgPathItem.qml">E:/BD2/PROYECTO1/GUI/build-GUI-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/_deps/ds-src/src/imports/components/SvgPathItem.qml</file>
+    <file alias="EllipseItem.qml">E:/BD2/PROYECTO1/GUI/build-GUI-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/_deps/ds-src/src/imports/components/EllipseItem.qml</file>
+    <file alias="FlipableItem.qml">E:/BD2/PROYECTO1/GUI/build-GUI-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/_deps/ds-src/src/imports/components/FlipableItem.qml</file>
+    <file alias="RectangleItem.qml">E:/BD2/PROYECTO1/GUI/build-GUI-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/_deps/ds-src/src/imports/components/RectangleItem.qml</file>
+    <file alias="RegularPolygonItem.qml">E:/BD2/PROYECTO1/GUI/build-GUI-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/_deps/ds-src/src/imports/components/RegularPolygonItem.qml</file>
+    <file alias="BorderItem.qml">E:/BD2/PROYECTO1/GUI/build-GUI-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/_deps/ds-src/src/imports/components/BorderItem.qml</file>
+    <file alias="IsoItem.qml">E:/BD2/PROYECTO1/GUI/build-GUI-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/_deps/ds-src/src/imports/components/IsoItem.qml</file>
+    <file alias="GroupItem.qml">E:/BD2/PROYECTO1/GUI/build-GUI-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/_deps/ds-src/src/imports/components/GroupItem.qml</file>
+    <file alias="ArcArrow.qml">E:/BD2/PROYECTO1/GUI/build-GUI-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/_deps/ds-src/src/imports/components/ArcArrow.qml</file>
+    <file alias="StraightArrow.qml">E:/BD2/PROYECTO1/GUI/build-GUI-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/_deps/ds-src/src/imports/components/StraightArrow.qml</file>
+  </qresource>
+</RCC>
+

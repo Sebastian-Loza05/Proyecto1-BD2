@@ -1,0 +1,48 @@
+{
+    "classes": [
+        {
+            "className": "BridgeClass",
+            "object": true,
+            "qualifiedClassName": "BridgeClass",
+            "signals": [
+                {
+                    "access": "public",
+                    "name": "dataChanged",
+                    "returnType": "void"
+                }
+            ],
+            "slots": [
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "method",
+                            "type": "QString"
+                        }
+                    ],
+                    "name": "methodChosen",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "query",
+                            "type": "QString"
+                        }
+                    ],
+                    "name": "runQuery",
+                    "returnType": "void"
+                }
+            ],
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QObject"
+                }
+            ]
+        }
+    ],
+    "inputFile": "BridgeClass.h",
+    "outputRevision": 68
+}

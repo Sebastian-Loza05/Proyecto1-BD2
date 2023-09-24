@@ -1,0 +1,15 @@
+-rootPath
+E:/BD2/PROYECTO1/GUI/GUI
+-cmake-output
+-output-file
+E:/BD2/PROYECTO1/GUI/build-GUI-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/.qt_plugins/Qt6_QmlPlugins_Imports_GUIApp.cmake
+-importPath
+E:/BD2/PROYECTO1/GUI/build-GUI-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/qml/Main
+-importPath
+E:/BD2/PROYECTO1/GUI/build-GUI-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/qml
+-importPath
+C:/Qt/6.5.1/mingw_64/./qml
+-qrcFiles
+E:/BD2/PROYECTO1/GUI/build-GUI-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/.rcc/configuration.qrc
+E:/BD2/PROYECTO1/GUI/build-GUI-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/.rcc/qmake_Main.qrc
+E:/BD2/PROYECTO1/GUI/build-GUI-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/.rcc/GUIApp_raw_qml_0.qrc

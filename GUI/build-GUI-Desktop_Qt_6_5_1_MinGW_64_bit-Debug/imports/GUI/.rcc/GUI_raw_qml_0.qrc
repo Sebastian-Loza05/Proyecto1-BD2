@@ -1,0 +1,9 @@
+<RCC>
+  <qresource prefix="/GUI/">
+    <file alias="Constants.qml">E:/BD2/PROYECTO1/GUI/GUI/imports/GUI/Constants.qml</file>
+    <file alias="DirectoryFontLoader.qml">E:/BD2/PROYECTO1/GUI/GUI/imports/GUI/DirectoryFontLoader.qml</file>
+    <file alias="EventListModel.qml">E:/BD2/PROYECTO1/GUI/GUI/imports/GUI/EventListModel.qml</file>
+    <file alias="EventListSimulator.qml">E:/BD2/PROYECTO1/GUI/GUI/imports/GUI/EventListSimulator.qml</file>
+  </qresource>
+</RCC>
+

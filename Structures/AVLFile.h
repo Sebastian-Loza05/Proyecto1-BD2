@@ -5,6 +5,7 @@
 #include <functional>
 #include "methods.h"
 
+
 using namespace std;
 
 struct NodeBTAVL{
@@ -71,6 +72,6 @@ private:
     void remove(long node, char value[5], long father = 0, bool sit = true);
 };
 
-#include "AVLFile.cpp"
+
 
 #endif // AVL_AVL_H
