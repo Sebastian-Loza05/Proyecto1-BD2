@@ -81,9 +81,9 @@ El AVL File es un sistema de organización que sigue la estrategia de un árbol 
 
 | pos_root  | next_del  |          |           |            |
 |-----------|-----------|----------|-----------|------------|
-|   data1   |   left1   |  right1  |  height1  |  nex_del1  |
-|   data2   |   left2   |  right2  |  height2  |  nex_del2  |
-|   data3   |   left3   |  right3  |  height3  |  nex_del3  |
+|   data-1  |   left-1  |  right-1 |  height-1 |  nex_del-1 |
+|   data-2  |   left-2  |  right-2 |  height-2 |  nex_del-2 |
+|   data-3  |   left-3  |  right-3 |  height-3 |  nex_del-3 |
 
 #### Inserción:
 
@@ -94,42 +94,48 @@ Una vez encontrada la posición a donde insertar, se debe escribir en el archivo
 
 | pos_root  |     7     |          |           |            |
 |-----------|-----------|----------|-----------|------------|
-|   data1   |   left1   |  right1  |  height1  |  nex_del1  |
+|   data-1  |   left-1  |  right-1 |  height-1 |  nex_del-1 |
 |    ...    |    ...    |    ...   |    ...    |     ...    |
-|   data7   |   left7   |  right7  |  height7  |  nex_del7  |
+|   data-7  |   left-7  |  right-7 |  height-7 |  nex_del-7 |
 |    ...    |    ...    |    ...   |    ...    |     ...    |
 
 **Después de insertar**
 
-| pos_root  |  nex_del7 |          |           |            |
-|-----------|-----------|----------|-----------|------------|
-|   data1   |   left1   |  right1  |  height1  |  nex_del1  |
-|    ...    |    ...    |    ...   |    ...    |     ...    |
-|  datanew  |  leftnew  | rightnew | heightnew |      0     |
-|    ...    |    ...    |    ...   |    ...    |     ...    |
+|  pos_root  |  nex_del-7 |           |            |            |
+|------------|------------|-----------|------------|------------|
+|   data-1   |   left-1   |  right-1  |  height-1  |  nex_del-1 |
+|    ...     |    ...     |    ...    |    ...     |     ...    |
+|  data-new  |  left-new  | right-new | height-new |      0     |
+|    ...     |    ...     |    ...    |    ...     |     ...    |
 
 Una vez insertado el valor se debe realizar un balanceo para poder mantener la propiedad de equilibrio del árbol.
 Donde en cada registro solo se cambia los left y right para el balanceo, y si en caso el balanceo afecta al root, se escribira el header del por_root.
+
+<p align="center">
+  <img src="Imagenes/avl22-768.png">
+</p>
 
 **Antes de balancear afectando el root**
 
 |    1      | next_del  |          |           |            |
 |-----------|-----------|----------|-----------|------------|
-|   data1   |     2     |    -1    |  height1  |  nex_del1  |
-|   data2   |     3     |    -1    |  height2  |  nex_del2  |
-|   data3   |    -1     |    -1    |  height3  |  nex_del3  |
+|   A  |     2     |    -1    |  height-1 |  nex_del-1 |
+|   B  |     3     |    -1    |  height-2 |  nex_del-2 |
+|   C  |    -1     |    -1    |  height-3 |  nex_del-3 |
 |    ...    |    ...    |    ...   |    ...    |     ...    |
 
 **Después de balancear afectando el root**
 
 |    2      | next_del  |          |           |            |
 |-----------|-----------|----------|-----------|------------|
-|   data1   |    -1     |    -1    |  height1  |  nex_del1  |
-|   data2   |     1     |     3    |  height2  |  nex_del2  |
-|   data3   |    -1     |    -1    |  height3  |  nex_del3  |
+|   A  |    -1     |    -1    |  height-1 |  nex_del-1 |
+|   B  |     1     |     3    |  height-2 |  nex_del-2 |
+|   C  |    -1     |    -1    |  height-3 |  nex_del-3 |
 |    ...    |    ...    |    ...   |    ...    |     ...    |
 
 #### Búsqueda:
+
+
 
 #### Eliminación:
 
