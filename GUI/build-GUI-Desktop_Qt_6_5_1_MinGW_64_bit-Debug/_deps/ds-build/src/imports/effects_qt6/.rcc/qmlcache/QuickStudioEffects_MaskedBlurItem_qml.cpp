@@ -584,11 +584,11 @@ Q_UNUSED(argumentsPtr)
 // expression for onCompleted at line 63, column 5
 QObject *r7_1;
 QQmlListProperty<QObject> r8_1;
+int r2_3;
 QQmlListProperty<QObject> r2_2;
+QObject *r2_1;
 QVariant r2_4;
 QString r2_5;
-QObject *r2_1;
-int r2_3;
 QString r10_1;
 // generate_CreateCallContext
 {

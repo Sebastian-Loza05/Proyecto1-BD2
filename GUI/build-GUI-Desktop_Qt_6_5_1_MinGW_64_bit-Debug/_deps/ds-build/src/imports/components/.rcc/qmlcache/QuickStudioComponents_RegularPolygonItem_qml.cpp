@@ -1823,12 +1823,12 @@ Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 // expression for onRadiusChanged at line 186, column 5
 QObject *r9_1;
-double r7_1;
 QObject *r7_2;
+double r7_1;
 double r8_1;
+double r2_2;
 QObject *r2_1;
 int r2_4;
-double r2_2;
 bool r2_3;
 // generate_CreateCallContext
 {
@@ -2013,8 +2013,8 @@ Q_UNUSED(argumentsPtr)
 // expression for __radius at line 197, column 5
 double r11_1;
 double r7_1;
-double r2_2;
 QObject *r2_1;
+double r2_2;
 double r10_1;
 // generate_LoadQmlContextPropertyLookup
 while (!aotContext->loadContextIdLookup(17, &r2_1)) {
@@ -2069,8 +2069,8 @@ return r2_2;
 Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 // expression for __previousRadius at line 199, column 5
-QObject *r2_1;
 int r2_2;
+QObject *r2_1;
 // generate_LoadQmlContextPropertyLookup
 while (!aotContext->loadContextIdLookup(22, &r2_1)) {
 aotContext->setInstructionPointer(2);
@@ -2096,8 +2096,8 @@ Q_UNUSED(argumentsPtr)
 // expression for __actualRadius at line 204, column 5
 double r16_1;
 double r11_1;
-double r2_2;
 QObject *r2_1;
+double r2_2;
 int r2_3;
 double r15_1;
 double r10_1;
@@ -2191,9 +2191,9 @@ Q_UNUSED(argumentsPtr)
 QObject *r7_1;
 int r7_2;
 QObject *r8_1;
-bool r2_3;
-QObject *r2_1;
 int r2_2;
+QObject *r2_1;
+bool r2_3;
 // generate_LoadQmlContextPropertyLookup
 while (!aotContext->loadContextIdLookup(42, &r2_1)) {
 aotContext->setInstructionPointer(2);
@@ -2364,8 +2364,8 @@ return r2_2;
 Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 // expression for enabled at line 164, column 5
-QObject *r2_1;
 bool r2_2;
+QObject *r2_1;
 // generate_LoadQmlContextPropertyLookup
 while (!aotContext->loadContextIdLookup(278, &r2_1)) {
 aotContext->setInstructionPointer(5);
@@ -2414,9 +2414,9 @@ return r2_2;
 Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 // expression for samples at line 166, column 5
-int r2_3;
 QObject *r2_1;
 bool r2_2;
+int r2_3;
 // generate_LoadQmlContextPropertyLookup
 while (!aotContext->loadContextIdLookup(282, &r2_1)) {
 aotContext->setInstructionPointer(5);
@@ -2473,8 +2473,8 @@ return r2_1;
 Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 // expression for margins at line 172, column 9
-double r2_2;
 QObject *r2_1;
+double r2_2;
 // generate_LoadQmlContextPropertyLookup
 while (!aotContext->loadContextIdLookup(285, &r2_1)) {
 aotContext->setInstructionPointer(5);

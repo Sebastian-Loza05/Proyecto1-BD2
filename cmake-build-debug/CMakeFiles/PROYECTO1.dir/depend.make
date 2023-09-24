@@ -9,6 +9,7 @@ CMakeFiles/PROYECTO1.dir/Structures/AVLFile.cpp.obj: \
  ../Structures/methods.h
 CMakeFiles/PROYECTO1.dir/main.cpp.obj: \
  ../BPlusFile.h \
+ ../GUI/GUI/src/BridgeClass.h \
  ../Structures/AVLFile.cpp \
  ../Structures/AVLFile.h \
  ../Structures/Record.h \

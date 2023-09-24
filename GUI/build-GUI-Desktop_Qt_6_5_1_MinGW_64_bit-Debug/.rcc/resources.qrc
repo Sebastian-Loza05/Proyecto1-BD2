@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="/">
+    <file alias="resources.qrc">E:/BD2/PROYECTO1/GUI/GUI/resources.qrc</file>
+  </qresource>
+</RCC>
+

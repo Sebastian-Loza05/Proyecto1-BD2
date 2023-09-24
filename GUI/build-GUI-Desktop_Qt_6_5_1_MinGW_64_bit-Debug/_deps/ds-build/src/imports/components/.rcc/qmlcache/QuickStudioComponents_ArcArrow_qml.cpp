@@ -714,8 +714,8 @@ Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 // expression for y at line 50, column 9
 double r7_1;
-double r2_2;
 QObject *r2_1;
+double r2_2;
 // generate_LoadQmlContextPropertyLookup
 while (!aotContext->loadContextIdLookup(4, &r2_1)) {
 aotContext->setInstructionPointer(2);
@@ -746,9 +746,9 @@ Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 // expression for capStyle at line 59, column 9
 int r7_1;
-int r2_2;
-bool r2_3;
 QObject *r2_1;
+bool r2_3;
+int r2_2;
 // generate_LoadQmlContextPropertyLookup
 while (!aotContext->loadContextIdLookup(6, &r2_1)) {
 aotContext->setInstructionPointer(2);
@@ -993,8 +993,8 @@ return r2_2;
 Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 // expression for height at line 74, column 17
-double r2_2;
 QObject *r2_1;
+double r2_2;
 // generate_LoadQmlContextPropertyLookup
 while (!aotContext->loadContextIdLookup(21, &r2_1)) {
 aotContext->setInstructionPointer(2);

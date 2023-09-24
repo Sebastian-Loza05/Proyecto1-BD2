@@ -476,8 +476,8 @@ Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 // expression for implicitHeight at line 47, column 5
 double r11_1;
-QObject *r2_1;
 double r2_2;
+QObject *r2_1;
 double r10_1;
 // generate_MoveConst
 r10_1 = double(32);

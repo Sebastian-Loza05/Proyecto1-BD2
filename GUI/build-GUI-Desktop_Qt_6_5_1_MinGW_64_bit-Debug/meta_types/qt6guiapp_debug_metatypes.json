@@ -3,6 +3,19 @@
         "classes": [
             {
                 "className": "BridgeClass",
+                "methods": [
+                    {
+                        "access": "public",
+                        "arguments": [
+                            {
+                                "name": "filename",
+                                "type": "QString"
+                            }
+                        ],
+                        "name": "getThreeLines",
+                        "returnType": "QStringList"
+                    }
+                ],
                 "object": true,
                 "qualifiedClassName": "BridgeClass",
                 "signals": [
