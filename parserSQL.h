@@ -4,6 +4,7 @@
 #include <cstring>
 #include <string>
 #include <fstream>
+#include "Structures/methods.h"
 #include "Structures/AVLFile.h"
 #include "tokenSQL.h"
 #include <utility>
@@ -15,11 +16,13 @@ using namespace std;
 
 class Parser {
   Scanner* scanner;
+  MethodSelector method;
   Token* current, * previous;
   vector<string> atributos;
   map<string, string> values;
 public:
-  Parser(Scanner* sc):scanner(sc) {
+  Parser(Scanner* sc, MethodSelector &_method):scanner(sc) {
+    method = _method;
     previous = current = NULL;
     return;
   }
