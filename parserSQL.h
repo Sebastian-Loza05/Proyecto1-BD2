@@ -1,4 +1,3 @@
-#include <sstream>
 #include <iostream>
 #include <stdlib.h>
 #include <cstring>
@@ -16,6 +15,8 @@
 using namespace std;
 
 inline MethodSelector* method = nullptr;
+inline vector<Record> records;
+inline string error_message;
 
 class Parser {
   Scanner* scanner;
@@ -30,16 +31,16 @@ public:
   void parse(){
     current = scanner->nextToken();
     if(check(Token::ERR)){
-      cout<< "Caracter invalido" << endl;
+      error_message = "Caracter invalido";
       return;
     }
     parseStatement();
     
-    if (current->type != Token::SEMICOLON)
-      cout<<"Esperaba fin de input, se encontro "<< current <<endl;
-    else 
-      cout<< "Fin de la ejecucion" << endl;
-    if(current) delete current;
+    // if (current->type != Token::SEMICOLON)
+    //   error_message = "Esperaba fin de input.";
+    // else 
+    //   cout<< "Fin de la ejecucion" << endl;
+    // if(current) delete current;
     return;
   }
 
@@ -79,8 +80,8 @@ private:
       current = scanner->nextToken();
       previous = temp;
       if (check(Token::ERR)) {
-        cout << "Parse error, unrecognised character: " << current->lexema << endl;
-        exit(0);
+        error_message = "Parse error, unrecognised character";
+        return false;
       }
       return true;
     }
@@ -99,7 +100,7 @@ private:
       else if(match(Token::ALL))
         parseTable(nullptr);
       else
-        cout<< "Error esperaba los atributos"<<endl;
+        error_message =  "Error esperaba los atributos";
       return;
     }
     else if(match(Token::CREATE)){
@@ -109,10 +110,10 @@ private:
           parseTable(temp);
           return;
         }
-        cout<<"Se esperaba un nombre de tabla"<<endl;
+        error_message = "Se esperaba un nombre de tabla";
         return;
       }
-      cout<<"Error de sintaxis"<<endl;
+      error_message = "Error de sintaxis";
       return;
     }
     else if(match(Token::INSERT)){
@@ -122,20 +123,20 @@ private:
             bool res = parseValuesSentence();
             return;
           }
-          cout<<"Esperaba la sentencia VALUES"<<endl;
+          error_message = "Esperaba la sentencia VALUES";
           return;
         }
-        cout<<"Esperaba el nombre de la tabla"<<endl;
+        error_message = "Esperaba el nombre de la tabla";
         return;
       }
-      cout<<"Espera INTO en despues del INSERT."<<endl;
+      error_message = "Espera INTO en despues del INSERT.";
       return;
     }
     else if(match(Token::DELETE)){
       parseTableDelete();
       return;
     }
-    cout<< "Error esperaba una sentencia SQL." <<endl;
+    error_message = "Error esperaba una sentencia SQL.";
   }
   bool parseValuesSentence(){
     if(match(Token::LPARENT)){
@@ -148,13 +149,13 @@ private:
           mostrarValues();
           return true;
         }
-        cout<<"Esperaba ;"<<endl;
+        error_message = "Esperaba ;";
         return false;
       }
-      cout<<"Esperaba ), se encontro "<<current->lexema<<endl;
+      error_message = "Esperaba )";
       return false;
     }
-    cout<<"Se esperaba (, se encontro "<<current<<endl;
+    error_message = "Se esperaba (.";
     return false;
   }
 
@@ -174,10 +175,10 @@ private:
           values.insert(make_pair(value, "string"));
           return true;
         }
-        cout<<"Esperaba \", se cencontro: "<<current->lexema<<endl;
+        error_message = "Esperaba \"";
         return false;
       }
-      cout<<"Se esperaba un dato"<<endl;
+      error_message = "Se esperaba un dato";
       return false;
     }
     else if(match(Token::NUM)){
@@ -196,7 +197,7 @@ private:
       values.insert(make_pair("false", "bool"));
       return true;
     }
-    cout<<"Sintaxis incorrecta"<<endl;
+    error_message = "Sintaxis incorrecta";
     return false;
   }
 
@@ -216,6 +217,7 @@ private:
       if(match(Token::ID)){
         if(match(Token::SEMICOLON)){
           cout<<"Mostrar tabla"<<endl;
+          records = method->load();
           atributos.clear();
           return;
         }
@@ -226,10 +228,10 @@ private:
         parseFile();
         return;
       }
-      cout<< "Error de sintaxis." <<endl;
+      error_message = "Error de sintaxis.";
       return;
     }
-    cout<<"Error de sintaxis"<<endl;
+    error_message = "Error de sintaxis";
   }
   void parseTableDelete(){
     if(match(Token::FROM)){
@@ -237,10 +239,10 @@ private:
         bool r = parseConditionDelete();
         return;
       }
-      cout<<"Se esperaba el nombre de la tabla, se obtuvo "<<current<<endl;
+      error_message  = "Se esperaba el nombre de la tabla.";
       return;
     }
-    cout<<"Se esperaba la sentencia FROM, se obtuvo "<<current<<endl;
+    error_message = "Se esperaba la sentencia FROM, se obtuvo ";
   }
 
   bool parseConditionDelete(){
@@ -253,17 +255,17 @@ private:
               cout<<" Eliminacion"<<endl;
               return true;
             }
-            cout<<"Sintaxis incorrecta, se esperaba ;"<<endl;
+            error_message = "Sintaxis incorrecta, se esperaba ;";
             return false;
           }
           return false;
         }
-        cout<<"Se esperaba la un '=' se encontro "<<current<<endl;
+        error_message = "Se esperaba la un '=' se encontro ";
       }
-      cout<< "Se esperaba un id" <<endl;
+      error_message = "Se esperaba un id" ;
       return false;
     }
-    cout<< "Se esperaba un WHERE" <<endl;
+    error_message = "Se esperaba un WHERE";
     return false;
   }
 
@@ -276,13 +278,13 @@ private:
           parseIndex(filename);
           return;
         }
-        cout<<"Se esperaba \""<<endl;
+        error_message = "Se esperaba \"";
         return;
       }
-      cout<<"Se esperaba el nombre del archivo"<<endl;
+      error_message = "Se esperaba el nombre del archivo";
       return;
     }
-    cout<<"Se esperaba '"<<endl;
+    error_message = "Se esperaba '";
     return;
   }
 
@@ -292,15 +294,14 @@ private:
         parseIndexType(filename);
         return;
       }
-      cout<<"Sintaxis incorrecta"<<endl;
+      error_message = "Sintaxis incorrecta";
       return;
     }
-    cout<<"Sintaxis incorrecta"<<endl;
+    error_message = "Sintaxis incorrecta";
     return;
   }
   
   void parseIndexType(string filename){
-
     if(match(Token::BPLUS)){
       if(match(Token::SEMICOLON)){
         method = new BPlusFile<int, sizeof(int)>();
@@ -309,7 +310,7 @@ private:
         
         return;
       }
-      cout<<"Se esperaba un ;"<<endl;
+      error_message = "Se esperaba un ;";
       return;
     }
     else if(match(Token::AVL)){
@@ -319,7 +320,7 @@ private:
         cout<<"Se crea tabla con index avl"<<endl;
         return;
       }
-      cout<<"Se esperaba un ;"<<endl;
+      error_message ="Se esperaba un ;";
       return;
     }
     else if(match(Token::SEQUENTIAL)){
@@ -329,10 +330,10 @@ private:
         cout<<"Se crea tabla con index sequential"<<endl;
         return;
       }
-      cout<<"Se esperaba un ;"<<endl;
+      error_message = "Se esperaba un ;";
       return;
     }
-    cout<<"Se esperaba index para hashear"<<endl;
+    error_message = "Se esperaba index para hashear";
     return;
   }
 
@@ -342,10 +343,10 @@ private:
         parseCondition2();
         return;
       }
-      cout<< "Se esperaba un id" <<endl;
+      error_message = "Se esperaba un id";
       return;
     }
-    cout<< "Se esperaba un WHERE" <<endl;
+    error_message = "Se esperaba un WHERE";
     return;
   }
 
@@ -358,7 +359,7 @@ private:
           atributos.clear();
           return;
         }
-        cout<<"Sintaxis incorrecta"<<endl;
+        error_message = "Sintaxis incorrecta";
         return;
       }
       return;
@@ -368,7 +369,7 @@ private:
       parse_range();
     }
     else
-      cout<<"Sintaxis incorrecta"<<endl;
+      error_message = "Sintaxis incorrecta";
     return;
   }
 
@@ -379,21 +380,21 @@ private:
     else if(match(Token::QUOTE)){
       if(match(Token::ID)){
         if(!match(Token::QUOTE)){
-          cout<<"Error de sintaxis, esperaba un \""<<endl;
+          error_message = "Error de sintaxis, esperaba un \"";
           return false;
         }
         return true;
       }
-      cout<<"Sintaxis incorrecta"<<endl;
+      error_message = "Sintaxis incorrecta";
       return false;
     }
-    cout<<"Sintaxis incorrecta"<<endl;
+    error_message  = "Sintaxis incorrecta";
     return false;
   }
 
   void parse_range(){
     if(match(Token::NUM)){
-      cout<<"numero: "<<previous->lexema<<endl;
+      // cout<"<"numero: "<<previous->lexema<<endl;
       if(match(Token::AND)){
         if(match(Token::NUM)){
           if(match(Token::SEMICOLON)){
@@ -401,24 +402,25 @@ private:
             cout<<"Busqueda por rango"<<endl;
             return;
           }
-          cout<<"Sintaxis Incorrecta"<<endl;
+          error_message = "Sintaxis Incorrecta";
           return;
         }
-        cout<<"Sintaxis Incorrecta"<<endl;
+        error_message = "Sintaxis Incorrecta";
         return;
       }
-      cout<<"Sintaxis Incorrecta"<<endl;
+      error_message = "Sintaxis Incorrecta";
       return;
     }
-    cout<<"Sintaxis Incorrecta"<<endl;
+    error_message = "Sintaxis Incorrecta";
     return;
   }
+
   void insertCsv(string ruta){
     cout << ruta << endl;
     ifstream archivo(ruta);
-
+    cout<<"ruta: "<<ruta<<endl;
     if (!archivo.is_open()) {
-      cout << "Error al abrir el archivo" << endl;
+      error_message = "La ruta del archivo es incorrecta.";
       return;
     }
 
@@ -465,6 +467,8 @@ private:
       bool asd__ = method->add(record);
       cout << "---*----" << endl;
       method->display_all();
+      if(counter == 2000)
+        break;
       counter ++;
       campos.clear();
     }
