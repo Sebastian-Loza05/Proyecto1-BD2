@@ -77,7 +77,57 @@ En el caso de la eliminación, los archivos principales y auxiliares se combinan
 
 ### AVL File:
 
+El AVL File es un sistema de organización que sigue la estrategia de un árbol binario de búsqueda balanceado. En este tipo de organización cada registro tiene un atributo "left" y "right" de tipo long que indica la posición en el archivo de su nodo izquierdo o derecho respectivamente. En este AVL File el archivo posee dos header, donde uno indica la posición del root y otro guarda la posicion del último eliminado.
+
+| pos_root  | next_del  |          |           |            |
+|-----------|-----------|----------|-----------|------------|
+|   data1   |   left1   |  right1  |  height1  |  nex_del1  |
+|   data2   |   left2   |  right2  |  height2  |  nex_del2  |
+|   data3   |   left3   |  right3  |  height3  |  nex_del3  |
+
 #### Inserción:
+
+La operación de inserción en un AVL File consiste en insertar el registro en un nodo vacio identificado por "-1", siguiendo la estructura de AVL Tree, donde primero se busca el lugar de insertación comparando el registro de la llave con la del nodo actual para movilizarnos hasta un nodo vacio. 
+Una vez encontrada la posición a donde insertar, se debe escribir en el archivo actualizando la posición del left o right del nodo anterior y escribir el nuevo nodo al final de archivo o insertando dependiendo del next_del. Si se escribe el archivo dependiendo del next_del del header, el next_del de la posición a escribir se convertira en el nuevo next_del del header y se seteara el next_del del registro actual con 0.
+
+**Antes de insertar**
+
+| pos_root  |     7     |          |           |            |
+|-----------|-----------|----------|-----------|------------|
+|   data1   |   left1   |  right1  |  height1  |  nex_del1  |
+|    ...    |    ...    |    ...   |    ...    |     ...    |
+|   data7   |   left7   |  right7  |  height7  |  nex_del7  |
+|    ...    |    ...    |    ...   |    ...    |     ...    |
+
+**Después de insertar**
+
+| pos_root  |  nex_del7 |          |           |            |
+|-----------|-----------|----------|-----------|------------|
+|   data1   |   left1   |  right1  |  height1  |  nex_del1  |
+|    ...    |    ...    |    ...   |    ...    |     ...    |
+|  datanew  |  leftnew  | rightnew | heightnew |      0     |
+|    ...    |    ...    |    ...   |    ...    |     ...    |
+
+Una vez insertado el valor se debe realizar un balanceo para poder mantener la propiedad de equilibrio del árbol.
+Donde en cada registro solo se cambia los left y right para el balanceo, y si en caso el balanceo afecta al root, se escribira el header del por_root.
+
+**Antes de balancear afectando el root**
+
+|    1      | next_del  |          |           |            |
+|-----------|-----------|----------|-----------|------------|
+|   data1   |     2     |    -1    |  height1  |  nex_del1  |
+|   data2   |     3     |    -1    |  height2  |  nex_del2  |
+|   data3   |    -1     |    -1    |  height3  |  nex_del3  |
+|    ...    |    ...    |    ...   |    ...    |     ...    |
+
+**Después de balancear afectando el root**
+
+|    2      | next_del  |          |           |            |
+|-----------|-----------|----------|-----------|------------|
+|   data1   |    -1     |    -1    |  height1  |  nex_del1  |
+|   data2   |     1     |     3    |  height2  |  nex_del2  |
+|   data3   |    -1     |    -1    |  height3  |  nex_del3  |
+|    ...    |    ...    |    ...   |    ...    |     ...    |
 
 #### Búsqueda:
 
