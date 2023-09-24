@@ -7,7 +7,9 @@
 
 #include <cstring>
 void ingreso(){
-  BPlusFile<char*, 20> bplus;
+  BPlusFile<long, sizeof(long)> bplus;
+  // bplus.displayTree();
+  // return;
   // BPlusFile<long , sizeof(long)> bplus;
   ifstream archivo("datos.csv");
   
@@ -29,18 +31,18 @@ void ingreso(){
       campos.push_back(campo);
     }
 
-    char key[20];
-    // long key;
+    // char key[20];
+    long key;
     char nombre[20];
     char producto[20];
     char marca[20];
     float precio;
     int cantidad;
     
-    // key = stoi(campos[0]);
+    key = stoi(campos[0]);
     
-    strncpy(key, campos[0].c_str(), sizeof(key) - 1);
-    nombre[sizeof(key) - 1 ]= '\0';
+    // strncpy(key, campos[0].c_str(), sizeof(key) - 1);
+    // nombre[sizeof(key) - 1 ]= '\0';
 
     strncpy(nombre, campos[1].c_str(), sizeof(nombre) - 1);
     nombre[sizeof(nombre) - 1 ]= '\0';
@@ -60,20 +62,15 @@ void ingreso(){
     record.print();
     string asd;
     // if (counter > 96)
-    //   cin >> asd;
-    bool asd__ = bplus.add(record);
-    // cout << "Asda" << endl;
-    // cout << "Asda" << endl;
-    // for (const string& valor: campos){
-    //   cout << valor << "\t";
-    // }
-    // cout << endl;
-    cout<<"counter: "<<counter<<endl;
+    // cin >> asd;
+    bool asd__ = bplus.remove(record.key);
+    // bool asd__ = bplus.add(record);
+    // cout<<"counter: "<<counter<<endl;
     counter++;
     bplus.displayTree();
     //
-    cin >> asd;
-    if(counter == 200000)break;
+    // cin >> asd;
+    if(counter == 5000)break;
     campos.clear();
   }
   bplus.displayTree();

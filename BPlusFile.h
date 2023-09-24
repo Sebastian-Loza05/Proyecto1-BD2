@@ -28,7 +28,7 @@ struct Bucket{
     count = 0;
     page_size -= (sizeof(long) + (2*sizeof(int)));
     this->m = page_size / sizeof(Record1);
-    // this->m = 4;
+    this->m = 5;
     records = vector<Record1>(this->m);
     next_del = -1;
     next = -1;
@@ -167,7 +167,7 @@ public:
     int page_s = page_size - sizeof(long) - sizeof(bool) - sizeof(int) + N;
     int X  = (page_s)/(N + sizeof(long)) ;
     this->M = X-1;
-    // this->M = 4;
+    this->M = 5;
     ofstream index(this->indexname, ios::binary | ios::app);
     ofstream file(this->filename, ios::binary | ios::app);
     file.seekp(0,ios::end);
@@ -179,7 +179,6 @@ public:
     if (tam2 == 0) {      
       index.write(reinterpret_cast<char*>(&value), sizeof(long));
     }
-    cout<<"tam: "<<tam1<<endl;
     if (tam1 == 0) {
       root = -1;
       file.write(reinterpret_cast<char*>(&value), sizeof(long));
@@ -188,7 +187,6 @@ public:
       fstream index1(this->indexname, ios::binary | ios::in | ios::out);
       index1.seekp(0, ios::end);
       int tamI = index1.tellp();
-      cout << "TamI: " <<  tamI << endl;
       if (tamI > sizeof(long)) {
         index1.seekp(0, ios::beg);
         long del_act;
@@ -197,8 +195,6 @@ public:
         Node<TK,N> node(M);
         index1.seekg(sizeof(long), ios::beg);
         node.read(index1, M);
-        cout<<node.next_del<<endl;
-        node.print();
         if(node.next_del == -1)
           root_hoja = false;
         else{
@@ -209,7 +205,6 @@ public:
         root_hoja = true;
       }
       root = sizeof(long);
-      cout << root_hoja << " asdas" << endl;
       index1.close();
     }
     index.close();
@@ -448,7 +443,6 @@ private:
     int bajada = -1;
     for(int i = 0; i < node.count; i++){
       if (menor_igual(key, node.keys[i])){
-        cout << "asd" << endl;
       // if(key <= node.keys[i]){
         bajada = i;
         break;
@@ -539,7 +533,6 @@ private:
   }
 
   void split_hoja(long pos_node, long pos_padre, fstream &index, fstream &data){
-    cout<<"llego a split en hoja"<<endl;
     root_hoja = false;
     Bucket node1(page_size);
     Bucket node2(page_size);
@@ -568,7 +561,6 @@ private:
       }
     }
     anclar_hojas(node1, node2, pos_padre, medio, index, data);
-    cout << "FIN" << endl;
   }
 
   void split_interno(long pos_node, long pos_padre, fstream &index, fstream &data){
@@ -747,15 +739,19 @@ private:
   bool remove_recursive(long pos_node, TK key, long pos_padre, int pos_child, bool leaf, fstream &index, fstream &data){
     if (leaf) {
       data.seekg(pos_node, ios::beg);
-      data.seekp(pos_node, ios::beg);
       Bucket bucket(page_size);
       bucket.read(data);  
+      // cout<<"Node: "<<endl;
+      // cout<<bucket<<endl;
+      // cout<<endl;
 
       for (int i = 0; i < bucket.count; i++) {
         if ( igual_igual(bucket.records[i].key, key) ){
         // if (bucket.records[i].key == key) {
-          delete_node(bucket, i, data);
-          if (bucket.count < (M)/2 && (pos_node != root || bucket.count < 1)) {
+          delete_node(bucket, pos_node, i, data);
+          data.seekg(pos_node, ios::beg);
+          bucket.read(data);  
+          if (bucket.count < (bucket.m-1)/2 && ((pos_node != root || !root_hoja) || bucket.count < 1)) {
             arreglar_node(pos_node, pos_padre, pos_child, true, index, data);
             return true;
           }
@@ -767,6 +763,9 @@ private:
       index.seekg(pos_node, ios::beg);
       Node<TK, N> node(M);
       node.read(index, M);
+      // cout<<"Node: "<<endl;
+      // node.print();
+      // cout<<endl;
 
       int bajada = -1;
   
@@ -787,23 +786,28 @@ private:
       else {
         rpta = remove_recursive(node.children[bajada], key, pos_node, bajada, false, index, data);
       }
-      if (node.count < (M)/2 && (pos_node != root || node.count < 1)) {
+      index.seekg(pos_node, ios::beg);
+      node.read(index, M);
+      if (node.count < (M-1)/2 && (pos_node != root || node.count < 1)) {
         arreglar_node(pos_node, pos_padre, pos_child, false, index, data);
+        // exit(0);
         return true;
       }
       return rpta;
     }
   }
 
-  void delete_node(Bucket &bucket, int pos, fstream &data){
+  void delete_node(Bucket bucket, long pos_node, int pos, fstream &data){
     for (int i = pos; i < bucket.count - 1; i++) {
       bucket.records[i] = bucket.records[i+1];
     }
     bucket.count--;
+    data.seekg(pos_node, ios::beg);
     bucket.write(data);
   }
 
   void arreglar_node(long pos_node, long pos_padre, int pos_child, bool leaf, fstream &index, fstream &data){
+    cout<<"Arreglar node"<<endl;
     if(pos_padre == -1){
       if(leaf){
         root = -1;
@@ -812,15 +816,26 @@ private:
       Node<TK, N> node(M);
       index.seekg(pos_node, ios::beg);
       node.read(index, M);
+
+      //leer el header
+      long value;
+      index.seekg(0, ios::beg);
+      index.read((char*)(&value), sizeof(long)) ;
+      if(node.pre_leaf){
+        root = node.children[0];
+        root_hoja = true;
+        node.next_del = value;
+        index.seekp(0, ios::beg);
+        index.write(reinterpret_cast<char*>(&pos_node), sizeof(long));
+        index.seekg(sizeof(long), ios::beg);
+        node.write(index, M);
+      }
       index.seekg(node.children[0], ios::beg);
       Node<TK, N> nuevo_padre(M);
       nuevo_padre.read(index, M);
       index.seekp(sizeof(long), ios::beg);
       nuevo_padre.write(index, M);
       //actualizar next_del
-      long value;
-      index.seekg(0, ios::beg);
-      index.read((char*)(&value), sizeof(long)) ;
       nuevo_padre.next_del = value;
       index.seekp(node.children[0], ios::beg);
       nuevo_padre.write(index, M);
@@ -834,11 +849,11 @@ private:
     long right = -1;
     bool sibling_available = false;
     Node<TK, N> padre(M);
-    if(leaf){
+    index.seekg(pos_padre, ios::beg);
+    padre.read(index, M);
+    if(!leaf){
       Node<TK, N> node_l(M);
       Node<TK, N> node_r(M);
-      index.seekg(pos_padre, ios::beg);
-      padre.read(index, M);
       if(pos_child > 0){
         left = padre.children[pos_child-1];
         index.seekg(left, ios::beg);
@@ -849,41 +864,47 @@ private:
         index.seekg(right, ios::beg);
         node_r.read(index, M);
       }
-      if(left != -1 && node_l.count > M/2){
+      if(left != -1 && node_l.count > (M-1)/2){
         sibling_available = true;
         rotar_internos(pos_node, left, pos_padre, pos_child, false, index);
-      }else if(right != -1 && node_r.count > M/2){
+      }else if(right != -1 && node_r.count > (M-1)/2){
         sibling_available = true;
         rotar_internos(pos_node, right, pos_padre, pos_child, true, index);
       }
       if(sibling_available) return;
     }
+    else{
       Bucket node_l(page_size);
       Bucket node_r(page_size);
-      index.seekg(pos_padre, ios::beg);
-      padre.read(index, M);
       if(pos_child > 0){
         left = padre.children[pos_child-1];
         data.seekg(left, ios::beg);
-        node_l.read(index);
+        node_l.read(data);
       }
       if(pos_child < padre.count){
         right = padre.children[pos_child+1];
         data.seekg(right, ios::beg);
-        node_r.read(index);
+        node_r.read(data);
       }
-      if(left != -1 && node_l.count > M/2){
+      if(left != -1 && node_l.count > (node_l.m-1)/2){
         sibling_available = true;
         rotar_hojas(pos_node, left, pos_padre, pos_child, false, index, data);
-      }else if(right != -1 && node_r.count > M/2){
+      }else if(right != -1 && node_r.count > (node_r.m-1)/2){
         sibling_available = true;
         rotar_hojas(pos_node, right, pos_padre, pos_child, true, index, data);
       }
       if(sibling_available) return;
+    }
+    if(leaf){
+      unir_en_hoja(pos_node, left, right, pos_padre, pos_child, index, data);
+      return;
+    }
+    unir_en_interno(pos_node, left, right, pos_padre, pos_child, index);
+    return;
     
   }
 
-  void unir_en_hoja(long pos_node, long left, long right, long pos_padre, int pos_child, bool leaf, fstream &index, fstream &data){
+  void unir_en_hoja(long pos_node, long left, long right, long pos_padre, int pos_child, fstream &index, fstream &data){
     Bucket node(page_size);
     data.seekg(pos_node, ios::beg);
     node.read(data);
@@ -895,13 +916,18 @@ private:
     long last_next_del;
     data.seekg(0, ios::beg);
     data.read(reinterpret_cast<char*>(&last_next_del), sizeof(long));
+    // cout<<"left: "<<left<<endl;
+    // cout<<"right: "<<right<<endl;
+    // cout<<"\nNode: "<<endl;
+    // cout<<node<<endl;
 
     if(left != -1){
       Bucket node_l(page_size);
       data.seekg(left, ios::beg);
       node_l.read(data);
-
-      for (int i = 0; i < node.count; i++) {
+      // cout<<"\nNode left: "<<endl<<node_l<<endl;
+      int tam = node.count;
+      for (int i = 0; i < tam; i++) {
         node_l.records[node_l.count] = node.records[i];
         node_l.count++;
         node.count--;
@@ -910,6 +936,7 @@ private:
       for (int i = pos_child-1; i < padre.count - 1; i++) {
         padre.keys[i] = padre.keys[i+1];
       }
+      padre.count--;
       for (int i = pos_child; i < padre.count + 1; i++) {
         padre.children[i] = padre.children[i+1];
       }
@@ -930,7 +957,9 @@ private:
     Bucket node_r(page_size);
     data.seekp(right, ios::beg);
     node_r.read(data);
-    for (int i = 0; i < node_r.count; i++) {
+    // cout<<"\nNode right: "<<endl<<node_r<<endl;
+    int tam = node_r.count;
+    for (int i = 0; i < tam; i++) {
       node.records[node.count] = node_r.records[i];
       node.count++;
       node_r.count--;
@@ -959,14 +988,22 @@ private:
     return;
   }
 
-  void unir_en_interno(long pos_node, long left, long right, long pos_padre, int pos_child, bool leaf, fstream &index){
+  void unir_en_interno(long pos_node, long left, long right, long pos_padre, int pos_child, fstream &index){
+    cout<<"Unir en interno: "<<endl;
+
     Node<TK, N> padre(M);
     index.seekg(pos_padre, ios::beg);
     padre.read(index, M);
+    
+    // cout<<"\nPadre: "<<endl;
+    // padre.print();
 
     Node<TK, N> node(M);
     index.seekg(pos_node, ios::beg);
     node.read(index, M);
+
+    // cout<<"\nNode: "<<endl;
+    // node.print();
 
     long last_next_del;
     index.seekg(0, ios::beg);
@@ -980,8 +1017,9 @@ private:
       node_l.count++;
 
       node_l.children[node_l.count] = node.children[0];
-
-      for (int i = 0; i < node.count; i++) {
+      
+      int tam = node.count;
+      for (int i = 0; i < tam; i++) {
         node_l.keys[node_l.count] = node.keys[i];
         node_l.count++;
         node.count--;
@@ -1014,12 +1052,15 @@ private:
     Node<TK, N> node_r(M);
     index.seekg(right, ios::beg);
     node_r.read(index, M);
+    // cout<<"\nNode right: "<<endl;
+    // node_r.print();
     node.keys[node.count] = padre.keys[pos_child];
     node.count++;
 
     node.children[node.count] = node_r.children[0];
-
-    for (int i = 0; i < node_r.count; i++) {
+    
+    int tam = node_r.count;
+    for (int i = 0; i < tam; i++) {
       node.keys[node.count] = node_r.keys[i];
       node.count++;
       node_r.count--;
@@ -1052,21 +1093,21 @@ private:
   void rotar_internos(long pos_node, long pos_node_prest, long pos_node_padre, int index1, bool right, fstream &index){
     // Lectura
     // Nodo que incumple
+    cout<<"Rotar en internos"<<endl;
     index.seekg(pos_node, ios::beg);
     Node<TK, N> node(M);
     node.read(index, M);
-
+    
     // Nodo prestamista
     index.seekg(pos_node_prest, ios::beg);
     Node<TK, N> node_prest(M);
-    node.read(index, M);
+    node_prest.read(index, M);
 
     // Nodo padre 
     index.seekg(pos_node_padre, ios::beg);
     Node<TK, N> node_padre(M);
-    node.read(index, M);
+    node_padre.read(index, M);
     if (right) {
-
       node.keys[node.count] = node_padre.keys[index1];
       node_padre.keys[index1] = node_prest.keys[0];
       for (int i = 0; i < node_prest.count-1; i++) {
@@ -1085,12 +1126,15 @@ private:
       for (int i = node.count-1; i > -1; i--) {
         node.keys[i+1] = node.keys[i];
       }
+      cout<<"Index: "<<index1<<endl;
       node.keys[0] = node_padre.keys[index1-1];
+      cout<<"Index: "<<index1<<endl;
+      node_padre.keys[index1-1] = node_prest.keys[node_prest.count-1];
       node_prest.count--;
       node.count++;
       
       for (int i = node.count-1; i > -1 ; i--) {
-        node.children[i+1] = node_prest.children[i];
+        node.children[i+1] = node.children[i];
       }
       node.children[0] = node_prest.children[node_prest.count+1];
     }
@@ -1107,6 +1151,7 @@ private:
   }
  
   void rotar_hojas(long pos_bucket, long pos_bucket_prest, long pos_node_padre, int index1, bool right,fstream &index, fstream &data){
+    cout<<"Rotar en hojas"<<endl;
     index.seekg(pos_node_padre, ios::beg);
     Node<TK, N> node_padre(M);
     node_padre.read(index, M);
@@ -1122,6 +1167,8 @@ private:
     if (right) {
       bucket.records[bucket.count] = bucket_prest.records[0];
       node_padre.keys[index1] = bucket_prest.records[0].key;
+      index.seekp(pos_node_padre, ios::beg);
+      node_padre.write(index, M);
       for (int i = 0; i < bucket_prest.count-1; i++) {
         bucket_prest.records[i] = bucket_prest.records[i+1];
       }
@@ -1135,10 +1182,10 @@ private:
       bucket.records[0] = bucket_prest.records[bucket_prest.count-1];
       bucket_prest.count--;
       node_padre.keys[index1-1] = bucket_prest.records[bucket_prest.count-1].key;
+      index.seekp(pos_node_padre, ios::beg);
+      node_padre.write(index, M);
       bucket.count++;
     }
-    index.seekp(pos_node_padre, ios::beg);
-    node_padre.write(index, M);
 
     data.seekp(pos_bucket, ios::beg);
     bucket.write(data);
