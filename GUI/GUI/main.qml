@@ -9,7 +9,7 @@ ApplicationWindow {
     Rectangle {
         anchors.fill: parent
         Image {
-            source: "file:/home/luisd/UTEC/ciclo_6/BDII/proyecto/Proyecto1-BD2/GUI/GUI/images/fondo.jpeg"
+            source: "file:/home/sebastian/Documents/utec/Ciclo6/BD2/Proyecto1-BD2/GUI/GUI/images/fondo.jpeg"
             fillMode: Image.PreserveAspectCrop
             anchors.fill: parent
         }
