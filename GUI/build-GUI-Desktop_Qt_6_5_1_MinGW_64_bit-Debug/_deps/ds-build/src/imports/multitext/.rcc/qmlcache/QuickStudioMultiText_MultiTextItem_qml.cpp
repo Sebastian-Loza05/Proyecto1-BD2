@@ -496,8 +496,8 @@ return r2_2;
 Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 // expression for height at line 36, column 5
-QVariant r2_1;
 double r2_2;
+QVariant r2_1;
 // generate_LoadQmlContextPropertyLookup
 r2_1 = QVariant(aotContext->lookupResultMetaType(2));
 while (!aotContext->loadScopeObjectPropertyLookup(2, r2_1.data())) {

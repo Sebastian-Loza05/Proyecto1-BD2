@@ -2217,8 +2217,8 @@ extern const QQmlPrivate::TypedFunction aotBuiltFunctions[] = {
 Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 // expression for roundEnd at line 307, column 5
-bool r2_2;
 QObject *r2_1;
+bool r2_2;
 // generate_LoadQmlContextPropertyLookup
 while (!aotContext->loadContextIdLookup(6, &r2_1)) {
 aotContext->setInstructionPointer(2);
@@ -2408,8 +2408,8 @@ Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 // expression for maxArcWidth at line 365, column 5
 double r11_1;
-double r2_2;
 QObject *r2_1;
+double r2_2;
 double r10_1;
 // generate_LoadQmlContextPropertyLookup
 while (!aotContext->loadContextIdLookup(69, &r2_1)) {
@@ -2483,8 +2483,8 @@ return r2_2;
 Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 // expression for smooth at line 284, column 5
-bool r2_2;
 QObject *r2_1;
+bool r2_2;
 // generate_LoadQmlContextPropertyLookup
 while (!aotContext->loadContextIdLookup(357, &r2_1)) {
 aotContext->setInstructionPointer(5);
@@ -2508,9 +2508,9 @@ return r2_2;
 Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 // expression for samples at line 285, column 5
-bool r2_2;
 int r2_3;
 QObject *r2_1;
+bool r2_2;
 // generate_LoadQmlContextPropertyLookup
 while (!aotContext->loadContextIdLookup(359, &r2_1)) {
 aotContext->setInstructionPointer(5);
@@ -2668,8 +2668,8 @@ Q_UNUSED(argumentsPtr)
 // expression for __arcWidth at line 373, column 9
 double r16_1;
 double r11_1;
-QObject *r2_1;
 double r2_2;
+QObject *r2_1;
 double r15_1;
 double r10_1;
 // generate_LoadQmlContextPropertyLookup
@@ -2744,8 +2744,8 @@ Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 // expression for __xCenter at line 375, column 9
 double r7_1;
-double r2_2;
 QObject *r2_1;
+double r2_2;
 // generate_LoadQmlContextPropertyLookup
 while (!aotContext->loadContextIdLookup(379, &r2_1)) {
 aotContext->setInstructionPointer(5);
@@ -2776,8 +2776,8 @@ Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 // expression for __yCenter at line 376, column 9
 double r7_1;
-QObject *r2_1;
 double r2_2;
+QObject *r2_1;
 // generate_LoadQmlContextPropertyLookup
 while (!aotContext->loadContextIdLookup(381, &r2_1)) {
 aotContext->setInstructionPointer(5);

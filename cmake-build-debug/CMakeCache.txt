@@ -253,6 +253,12 @@ PROYECTO1_BINARY_DIR:STATIC=E:/BD2/PROYECTO1/cmake-build-debug
 //Value Computed by CMake
 PROYECTO1_SOURCE_DIR:STATIC=E:/BD2/PROYECTO1
 
+//The directory containing a CMake configuration file for QT.
+QT_DIR:PATH=QT_DIR-NOTFOUND
+
+//The directory containing a CMake configuration file for Qt6.
+Qt6_DIR:PATH=Qt6_DIR-NOTFOUND
+
 
 ########################
 # INTERNAL cache entries

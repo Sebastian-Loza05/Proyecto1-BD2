@@ -1608,8 +1608,8 @@ return;
 Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 // expression for width at line 336, column 9
-double r2_2;
 QObject *r2_1;
+double r2_2;
 // generate_LoadQmlContextPropertyLookup
 while (!aotContext->loadContextIdLookup(293, &r2_1)) {
 aotContext->setInstructionPointer(5);

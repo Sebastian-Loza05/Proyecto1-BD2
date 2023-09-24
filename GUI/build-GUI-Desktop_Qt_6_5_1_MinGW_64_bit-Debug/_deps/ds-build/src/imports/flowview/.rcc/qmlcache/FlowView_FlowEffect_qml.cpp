@@ -728,8 +728,8 @@ double r13_1;
 double r8_1;
 QObject *r2_1;
 double r2_2;
-QVariant r2_3;
 int r2_5;
+QVariant r2_3;
 bool r2_4;
 double r12_1;
 // generate_LoadQmlContextPropertyLookup
@@ -968,10 +968,10 @@ double r9_1;
 QObject *r7_1;
 double r13_1;
 double r8_1;
+QVariant r2_2;
+double r2_4;
 int r2_5;
 QObject *r2_1;
-double r2_4;
-QVariant r2_2;
 bool r2_3;
 double r12_1;
 // generate_LoadQmlContextPropertyLookup
@@ -1228,9 +1228,9 @@ Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 // expression for value at line 109, column 9
 double r7_1;
-QVariant r2_3;
-QObject *r2_1;
 double r2_2;
+QObject *r2_1;
+QVariant r2_3;
 // generate_LoadQmlContextPropertyLookup
 while (!aotContext->loadContextIdLookup(101, &r2_1)) {
 aotContext->setInstructionPointer(2);

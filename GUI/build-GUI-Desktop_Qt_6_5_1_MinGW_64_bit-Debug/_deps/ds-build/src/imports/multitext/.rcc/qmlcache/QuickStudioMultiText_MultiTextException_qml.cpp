@@ -303,9 +303,9 @@ Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 // expression for exceptionAcive at line 37, column 5
 QString r7_1;
-bool r2_3;
 QObject *r2_1;
 QString r2_2;
+bool r2_3;
 // generate_LoadQmlContextPropertyLookup
 while (!aotContext->loadSingletonLookup(0, &r2_1)) {
 aotContext->setInstructionPointer(2);

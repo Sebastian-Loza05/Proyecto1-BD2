@@ -470,8 +470,8 @@ Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 // expression for implicitWidth at line 43, column 5
 double r11_1;
-double r2_2;
 QObject *r2_1;
+double r2_2;
 double r10_1;
 // generate_MoveConst
 r10_1 = double(32);
@@ -544,8 +544,8 @@ Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 // expression for implicitWidth at line 48, column 9
 double r7_1;
-double r2_2;
 QVariant r2_1;
+double r2_2;
 // generate_LoadQmlContextPropertyLookup
 r2_1 = QVariant(aotContext->lookupResultMetaType(8));
 while (!aotContext->loadScopeObjectPropertyLookup(8, r2_1.data())) {

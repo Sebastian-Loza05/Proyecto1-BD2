@@ -28,6 +28,13 @@ qt_add_resources(${CMAKE_PROJECT_NAME} "configuration"
         qtquickcontrols2.conf
 )
 
+qt_add_resources(${CMAKE_PROJECT_NAME} "resources"
+    PREFIX "/"
+    FILES
+        resources.qrc
+        # ... (otros archivos que quieras agregar en el .qrc)
+)
+
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui

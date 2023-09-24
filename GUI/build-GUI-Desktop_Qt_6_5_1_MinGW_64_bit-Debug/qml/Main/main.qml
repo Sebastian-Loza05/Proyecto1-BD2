@@ -7,75 +7,79 @@ ApplicationWindow {
     height: 480
     title: "App Window"
 
-    Column {
-        anchors.centerIn: parent
-        spacing: 10
+    Rectangle {
+        anchors.fill: parent
 
-        Text {
-            text: "Select method"
-            font.bold: true
-            font.pixelSize: 24
+        Image {
+            source: "file:///E:/BD2/PROYECTO1/GUI/GUI/images/fondo.jpeg"
+            fillMode: Image.PreserveAspectCrop
+            anchors.fill: parent
         }
 
-        Row {
+        Column {
+            anchors.centerIn: parent
             spacing: 10
-            Text { text: "AVL" }
+
+            Text {
+                text: "Run Your Query"
+                font.bold: true
+                font.pixelSize: 24
+            }
+
+            Rectangle {
+                width: 400
+                height: 200
+                color: "white"
+                border.color: "black"
+                radius: 10 // Radio de las esquinas redondeadas
+                clip: true
+
+                TextArea {
+                    id: txtArea
+                    width: parent.width
+                    height: parent.height
+                }
+            }
+
             Button {
-                id: btn1
-                text: "1"
-                onClicked: bridge.methodChosen("1")
+                text: "RUN"
+                onClicked: {
+                    outputArea.text = "Consulta: " + txtArea.text;
+                    bridge.runQuery(txtArea.text);
+                }
             }
-        }
 
-        Row {
-            spacing: 10
-            Text { text: "HASHING" }
             Button {
-                id: btn2
-                text: "2"
-                onClicked: bridge.methodChosen("2")
+                text: "Clear"
+                onClicked: {
+                    txtArea.text = "";
+                    outputArea.text = "";
+                }
             }
-        }
 
-        Row {
-            spacing: 10
-            Text { text: "BPLUS" }
             Button {
-                id: btn3
-                text: "3"
-                onClicked: bridge.methodChosen("3")
+                text: "Read CSV"
+                onClicked: {
+                    var csvLines = bridge.getThreeLines("E:/BD2/PROYECTO1/GUI/GUI/Libro1.csv");
+                    outputArea.text = csvLines.join("\n");
+                }
             }
-        }
 
-        TextArea {
-            id: txtArea
-            width: 200
-            height: 100
-        }
+            Rectangle {
+                width: 400
+                height: 200
+                color: "white"
+                border.color: "black"
+                radius: 10 // Radio de las esquinas redondeadas
+                clip: true
 
-        Button {
-            text: "RUN"
-            onClicked: {
-                outputArea.text = "Metodo: " + bridge.method + "\nConsulta: " + txtArea.text;
-                bridge.runQuery(txtArea.text);
-            }
-        }
-
-        Button {
-            text: "Clear"
-            onClicked: {
-                txtArea.text = "";
-                outputArea.text = "";
-            }
-        }
-
-        TextArea {
-            id: outputArea
-            width: 200
-            height: 100
-            readOnly: true
-            onTextChanged: {
-                text = "Metodo: " + bridge.method + "\nConsulta: " + bridge.query;
+                TextArea {
+                    id: outputArea
+                    width: parent.width
+                    height: parent.height
+                    readOnly: true
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                }
             }
         }
     }

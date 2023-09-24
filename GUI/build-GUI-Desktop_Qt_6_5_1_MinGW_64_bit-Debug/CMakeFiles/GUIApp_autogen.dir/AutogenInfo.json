@@ -598,6 +598,7 @@
 		"C:/Qt/6.5.1/mingw_64/lib/cmake/Qt6Quick/Qt6QuickVersionlessTargets.cmake",
 		"C:/Qt/Tools/CMake_64/share/cmake-3.24/Modules/GNUInstallDirs.cmake",
 		"C:/Qt/6.5.1/mingw_64/lib/cmake/Qt6Core/Qt6CoreConfigureFileTemplate.in",
+		"C:/Qt/6.5.1/mingw_64/lib/cmake/Qt6Core/Qt6CoreConfigureFileTemplate.in",
 		"E:/BD2/PROYECTO1/GUI/GUI/qmlcomponents",
 		"C:/Qt/Tools/CMake_64/share/cmake-3.24/Modules/FetchContent.cmake",
 		"C:/Qt/Tools/CMake_64/share/cmake-3.24/Modules/FindGit.cmake",
@@ -702,6 +703,7 @@
 		"E:/BD2/PROYECTO1/GUI/build-GUI-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/.rcc/qrc_GUIApp_raw_qml_0.cpp",
 		"E:/BD2/PROYECTO1/GUI/build-GUI-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/.rcc/qrc_configuration.cpp",
 		"E:/BD2/PROYECTO1/GUI/build-GUI-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/.rcc/qrc_qmake_Main.cpp",
+		"E:/BD2/PROYECTO1/GUI/build-GUI-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/.rcc/qrc_resources.cpp",
 		"E:/BD2/PROYECTO1/GUI/build-GUI-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/guiapp_qmltyperegistrations.cpp"
 	],
 	"MULTI_CONFIG" : false,

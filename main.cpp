@@ -144,8 +144,8 @@ int main (int argc, char *argv[]) {
 
 */
 
-#include <QGuiApplication>
-#include <QQmlApplicationEngine>
+#include <GUI/QGui  Application>
+#include <Gui/Gui/QQmlApplicationEngine>
 #include "Gui/Gui/src/BridgeClass.h"
 
 int main(int argc, char *argv[])

@@ -513,8 +513,8 @@ Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 // expression for implicitHeight at line 41, column 5
 double r11_1;
-double r2_2;
 QObject *r2_1;
+double r2_2;
 double r10_1;
 // generate_MoveConst
 r10_1 = double(32);
@@ -551,10 +551,10 @@ Q_UNUSED(argumentsPtr)
 // expression for onCompleted at line 61, column 5
 QObject *r7_1;
 QQmlListProperty<QObject> r8_1;
-QObject *r2_1;
+int r2_3;
 QQmlListProperty<QObject> r2_2;
 QVariant r2_4;
-int r2_3;
+QObject *r2_1;
 // generate_CreateCallContext
 {
 // generate_LoadQmlContextPropertyLookup
