@@ -1,7 +1,8 @@
-<!DOCTYPE RCC>
-<RCC version="1.0">
-<qresource prefix="/">
-<file>E:/BD2/PROYECTO1/GUI/GUI/Libro1.csv</file>
-<file>E:/BD2/PROYECTO1/GUI/GUI/images/fondo.jpeg</file>
-</qresource>
+<RCC>
+    <qresource prefix="/">
+        <file>Libro1.csv</file>
+        <file>images/fondo.jpeg</file>
+        <file>LoginPage.qml</file>
+        <file>MainPage.qml</file>
+    </qresource>
 </RCC>

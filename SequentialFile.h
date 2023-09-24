@@ -80,8 +80,10 @@ public:
         }
     }
 
+
     bool add(Record Nuevorecord) override {
-        Entry NuevoEntry(Nuevorecord); 
+
+        Entry NuevoEntry(Nuevorecord);
 
         ifstream auxp(auxFilename, ios::binary | ios::app);
 
