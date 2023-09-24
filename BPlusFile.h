@@ -8,6 +8,7 @@
 #include <strings.h>
 #include <sys/utsname.h>
 #include "methods.h"
+#include "Structures/Record.h"
 #include <unistd.h>
 // #include "structs.h"
 #include <vector>
@@ -18,7 +19,7 @@
 // #include <windows.h>
 
 struct Bucket{
-  vector<Record1> records;
+  vector<Record> records;
   int count;
   long next;
   int m;
@@ -27,9 +28,9 @@ struct Bucket{
   Bucket(int page_size){
     count = 0;
     page_size -= (sizeof(long) + (2*sizeof(int)));
-    this->m = page_size / sizeof(Record1);
+    this->m = page_size / sizeof(Record);
     this->m = 5;
-    records = vector<Record1>(this->m);
+    records = vector<Record>(this->m);
     next_del = -1;
     next = -1;
   }
@@ -38,7 +39,7 @@ struct Bucket{
     file.write(reinterpret_cast<char*>(&count), sizeof(int));
     file.write(reinterpret_cast<char*>(&m), sizeof(int));
     for (int i = 0; i < m; i++) {
-      file.write((char*)&records[i], sizeof(Record1));
+      file.write((char*)&records[i], sizeof(Record));
       // cout << "-----WRITE----"<< endl;
       // records[i].print();
     }
@@ -50,8 +51,8 @@ struct Bucket{
     file.read((char*)(&this->count), sizeof(int));
     file.read((char*)(&this->m), sizeof(int));
     for (int i = 0; i < this->m; i++) {
-      file.read(reinterpret_cast<char* >(&this->records[i]), sizeof(Record1));
-      // file.read((char*)(&this->records[i]), sizeof(Record1));
+      file.read(reinterpret_cast<char* >(&this->records[i]), sizeof(Record));
+      // file.read((char*)(&this->records[i]), sizeof(Record));
     }
     file.read((char*)(&this->next), sizeof(long));
     file.read((char*)(&this->next_del), sizeof(long));
@@ -222,13 +223,13 @@ public:
     file.close();
   }
 
-  vector<Record1> search_range(TK min, TK max){
+  vector<Record> search_range(TK min, TK max){
     fstream index(this->indexname, ios::binary | ios::in | ios::out);
     if (!index.is_open()) throw ("No se puede abrir el archivo");
 
     fstream data(this->filename, ios::binary | ios::in | ios::out);
     if (!data.is_open()) throw ("No se puede abrir el archivo");
-    vector<Record1> res;
+    vector<Record> res;
 
     data.seekg(0, ios::end);
     if(data.tellg() == 0)
@@ -265,8 +266,8 @@ public:
 
   } 
 
-  Record1 search(TK key){
-    Record1 res;
+  Record search(TK key){
+    Record res;
     fstream index(this->indexname, ios::binary | ios::in | ios::out);
     fstream data(this->indexname, ios::binary | ios::in | ios::out);
     data.seekg(sizeof(long), ios::end);
@@ -295,7 +296,7 @@ public:
     return res;
   }
   
-  bool add(Record1 record){
+  bool add(Record record){
     fstream index(this->indexname, ios::binary | ios::in | ios::out);
     if (!index.is_open()) throw ("No se puede abrir el archivo");
 
@@ -396,6 +397,45 @@ public:
     index.close();
   }
 
+  vector<Record> load(){
+    fstream data(this->filename, ios::binary | ios::in | ios::out);
+    fstream index(this->indexname, ios::binary | ios::in | ios::out);
+    if(!root_hoja){
+      Node<TK, N> temp1(M);
+      // Node<TK> temp1(M);
+      index.seekg(root, ios::beg);
+      temp1.read(index, M);
+      while (!temp1.pre_leaf){
+        index.seekg(temp1.children[0], ios::beg);
+        temp1.read(index, M);
+      }
+      data.seekg(temp1.children[0], ios::beg);
+    }
+    else{
+      data.seekg(sizeof(long), ios::beg);
+    }
+    Bucket temp(page_size);
+    temp.read(data);
+    int contador = 0;
+    vector<Record> res;
+    while(temp.next != -1){
+      for(int j = 0; j < temp.count; j++ ){
+        res.push_back(temp.records[j]);
+        contador++;
+      }
+      data.seekg(temp.next, ios::beg);
+      temp.read(data);
+    }
+    for(int j = 0; j < temp.count; j++ ){
+      res.push_back(temp.records[j]);
+      contador++;
+    }
+    cout<<"contador: "<<contador<<endl;
+    data.close();
+    index.close();
+    return res;
+  }
+
   void displayTree(){
     fstream index(this->indexname, ios::binary | ios::in | ios::out);
     fstream data(this->filename, ios::binary | ios::in | ios::out);
@@ -435,7 +475,7 @@ public:
 
 private:
   
-  bool add_recursive(long pos_node, long pos_padre, TK key, Record1 value, bool leaf, fstream &index, fstream &data){
+  bool add_recursive(long pos_node, long pos_padre, TK key, Record value, bool leaf, fstream &index, fstream &data){
     if(pos_node == -1){
       Bucket node(page_size);
       node.records[0] = value;
@@ -482,7 +522,7 @@ private:
     return correcto;
   }
 
-  bool insertar(long &pos_node, bool leaf, TK key, Record1 value, fstream &index, fstream &data){
+  bool insertar(long &pos_node, bool leaf, TK key, Record value, fstream &index, fstream &data){
     if (pos_node == -1) {  
       pos_node = sizeof(long);
       // Si es nodo interno 
@@ -521,7 +561,7 @@ private:
       Bucket node(page_size);
       data.seekg(pos_node, ios::beg);
       node.read(data);
-      Record1 temp;
+      Record temp;
       for (int i = 0; i < node.count; i++) {
         if (igual_igual(key, node.records[i].key)){
           return false;
@@ -617,7 +657,7 @@ private:
       }
       else if(i == (M-1)/2){
         medio = node.keys[i];
-        insertar(pos_padre, false, medio, Record1(),index, data);
+        insertar(pos_padre, false, medio, Record(),index, data);
       }
       else{
         node2.keys[node2.count] = node.keys[i];

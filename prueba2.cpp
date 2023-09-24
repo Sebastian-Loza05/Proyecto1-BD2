@@ -7,7 +7,7 @@
 
 #include <cstring>
 void ingreso(){
-  BPlusFile<long, sizeof(long)> bplus;
+  BPlusFile<char*, 20> bplus;
   // bplus.displayTree();
   // return;
   // BPlusFile<long , sizeof(long)> bplus;
@@ -31,18 +31,18 @@ void ingreso(){
       campos.push_back(campo);
     }
 
-    // char key[20];
-    long key;
+    char key[20];
+    // long key;
     char nombre[20];
     char producto[20];
     char marca[20];
     float precio;
     int cantidad;
     
-    key = stoi(campos[0]);
+    // key = stoi(campos[0]);
     
-    // strncpy(key, campos[0].c_str(), sizeof(key) - 1);
-    // nombre[sizeof(key) - 1 ]= '\0';
+    strncpy(key, campos[0].c_str(), sizeof(key) - 1);
+    nombre[sizeof(key) - 1 ]= '\0';
 
     strncpy(nombre, campos[1].c_str(), sizeof(nombre) - 1);
     nombre[sizeof(nombre) - 1 ]= '\0';
@@ -58,13 +58,13 @@ void ingreso(){
     precio = stof(campos[4]);
     cantidad = stoi(campos[5]);
 
-    Record1 record(key,nombre,producto,marca,precio,cantidad);
+    Record record(key,nombre,producto,marca,precio,cantidad);
     record.print();
     string asd;
     // if (counter > 96)
     // cin >> asd;
-    // bool asd__ = bplus.remove(record.key);
-    bool asd__ = bplus.add(record);
+    bool asd__ = bplus.remove(record.key);
+    // bool asd__ = bplus.add(record);
     // cout<<"counter: "<<counter<<endl;
     counter++;
     bplus.displayTree();
