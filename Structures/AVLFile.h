@@ -12,6 +12,8 @@
 #include <vector>
 using namespace std;
 
+inline int a = 5;
+
 struct NodeBTAVL{
   Record data;
   long left;

@@ -142,13 +142,13 @@ int main (int argc, char *argv[]) {
   //   cin>>metodo;
   // } while ( metodo < 1 || metodo > 3 );
   //
-  MethodSelector *method = nullptr;
+  // MethodSelector *method = nullptr;
   //
   // if (metodo == 1) {
-    method = new AVLFile<char*>(); // STRUCT 1
+    // method = new AVLFile<char*>(); // STRUCT 1
   // }
   
-  ingreso(method);
+  // ingreso(method);
   // SequentialFile<int> *seq = new SequentialFile<int>;
   // ingreso(seq);
   

@@ -78,7 +78,7 @@ public:
   Token::Type search(string lexema){
     auto it = palabras.find(lexema);
     if(it != palabras.end()) return it->second;
-    cout << lexema << endl;
+    //cout << lexema << endl;
     return Token::VALUE;
   }
 };
@@ -155,7 +155,7 @@ public:
         string a = getLexema();
         return new Token(Token::FILENAME,a);
     }
-    else if (strchr("()=,;*\"",c)){
+    else if (strchr("()=,;*'",c)){
       switch (c) {
         case '(': return new Token(Token::LPARENT);
         case ')': return new Token(Token::RPARENT);
@@ -163,7 +163,7 @@ public:
         case ',': return new Token(Token::COLON);
         case ';': return new Token(Token::SEMICOLON);
         case '*': return new Token(Token::ALL);
-        case '"': return new Token(Token::QUOTE);
+        case '\'': return new Token(Token::QUOTE);
         default: cout << "No deberia llegar aca" << endl;
       }
     }
