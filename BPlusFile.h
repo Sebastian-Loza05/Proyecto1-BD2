@@ -8,8 +8,6 @@
 #include <strings.h>
 #include <sys/utsname.h>
 #include "Structures/methods.h"
-#include "methods.h"
-#include "Structures/Record.h"
 #include <unistd.h>
 // #include "structs.h"
 #include <vector>
@@ -224,7 +222,7 @@ public:
     file.close();
   }
 
-  vector<Record> search_range(TK min, TK max) override{
+  vector<Record> rangeSearch(TK min, TK max) override{
     fstream index(this->indexname, ios::binary | ios::in | ios::out);
     if (!index.is_open()) throw ("No se puede abrir el archivo");
 
@@ -267,13 +265,13 @@ public:
 
   } 
 
-  Record search(TK key) override{
+  pair<Record,bool> search(TK key) override{
     Record res;
     fstream index(this->indexname, ios::binary | ios::in | ios::out);
     fstream data(this->indexname, ios::binary | ios::in | ios::out);
     data.seekg(sizeof(long), ios::end);
     if(data.tellg() == sizeof(long))
-      return res;
+      return make_pair(Record(), false);
 
     index.seekg(0, ios::end);
     long pos = sizeof(long);
@@ -294,7 +292,7 @@ public:
     }
     data.close();
     index.close();
-    return res;
+    return make_pair(res, true);
   }
   
   bool add(Record record) override{
@@ -398,7 +396,7 @@ public:
     index.close();
   }
 
-  vector<Record> load() {
+  vector<Record> load() override {
     fstream data(this->filename, ios::binary | ios::in | ios::out);
     fstream index(this->indexname, ios::binary | ios::in | ios::out);
     if(!root_hoja){

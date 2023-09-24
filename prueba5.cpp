@@ -69,16 +69,20 @@ void ingreso(T *method){
     // cout << endl << endl << endl;
       bool inser = 0;
     // method->display_all();
-  // method->display();
-    // cin >> inser;
+    method->display();
+    cin >> inser;
     if (inser) {
-      bool asd__ = method->add(record);
+      cout << "Key: ";
+      char key_del[20];
+      cin >> key_del;
+
+      pair<Record,bool> asd__ = method->search(record);
     }
     else {
-      // cout << "Key: ";
-      // char key_del[20];
-      // cin >> key_del;
-      bool asd___ = method->remove(record.key);
+      cout << "Key: ";
+      char key_del[20];
+      cin >> key_del;
+      bool asd___ = method->remove(key_del);
       cout << "Rpta: " << asd___ << endl;
       method->display();
     }
