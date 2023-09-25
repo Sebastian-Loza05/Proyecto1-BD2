@@ -14,7 +14,8 @@
 #include "Structures/methods.h"
 using namespace std;
 
-inline MethodSelector* method = new MethodSelector();
+
+inline MethodSelector<Record>* method = new MethodSelector<Record>();
 inline vector<Record> records;
 inline string error_message = "";
 inline pair<string, string> tabla;
@@ -371,7 +372,7 @@ private:
   void parseIndexType(string filename, string nombre_tabla){
     if(match(Token::BPLUS)){
       if(match(Token::SEMICOLON)){
-        method = new BPlusFile<int, sizeof(int)>();
+        method = new BPlusFile<Record,int, sizeof(int)>();
         tabla = make_pair(nombre_tabla, "record1");
         tabla = make_pair(nombre_tabla, "record2");
         insertCsv(filename);
@@ -385,7 +386,7 @@ private:
     }
     else if(match(Token::AVL)){
       if(match(Token::SEMICOLON)){
-        method = new AVLFile<int>();
+        method = new AVLFile<Record,int>();
         tabla = make_pair(nombre_tabla, "record1");
         tabla = make_pair(nombre_tabla, "record2");
         insertCsv(filename);
@@ -398,7 +399,7 @@ private:
     }
     else if(match(Token::SEQUENTIAL)){
       if(match(Token::SEMICOLON)){
-        method = new SequentialFile<int>();
+        method = new SequentialFile<Record,int>();
         tabla = make_pair(nombre_tabla, "record1");
         tabla = make_pair(nombre_tabla, "record2");
         insertCsv(filename);
@@ -431,17 +432,28 @@ private:
       bool v = parseEqual();
       if(v){
         cout << previous->lexema << endl;
-        // int value = stoi(previous->lexema);
         if(match(Token::SEMICOLON)){
           records.clear();
+          pair<Record,bool> result;
+          if(value.second == "char"){
+            char key[20];
+            strncpy(key, value.first.c_str(), sizeof(key) - 1);
+            key[sizeof(key) - 1 ]= '\0';
+            pair<Record,bool> result = method->search(key);
+          }else if (value.second == "int"){
+            int key = stoi(value.first);
+            pair<Record,bool> result = method->search(key);
+          }
           // pair<Record,bool> result = method->search(value);
           // cout<<"Busqueda unitaria"<<endl;
-          // if (result.second) {
-          //   records.push_back(result.first);
-          // }
-          // else{
-          //   error_message = "No existe un elemento con la llave buscada";
-          // }
+
+          if (result.second) {
+             records.push_back(result.first);
+          }
+          else{
+             error_message = "No existe un elemento con la llave buscada";
+             return;
+          }
           atributos.clear();
           error_message = "";
           return;
@@ -565,6 +577,9 @@ private:
       if(counter == 2000)
         break;
       counter ++;
+      if(counter==2000){
+        break;
+      }
       campos.clear();
     }
     method->display_all();
