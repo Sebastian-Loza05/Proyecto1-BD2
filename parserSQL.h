@@ -493,11 +493,8 @@ private:
           if(match(Token::SEMICOLON)){
             records.clear(); 
             cout<<"Busqueda por rango"<<endl;
-<<<<<<< HEAD
             error_message = "";
-=======
             records = method->rangeSearch(begin, end);
->>>>>>> e2889f88c842844a429e56aa62b1093212c158a1
             return;
           }
           error_message = "Sintaxis Incorrecta";

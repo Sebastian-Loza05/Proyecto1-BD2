@@ -11,7 +11,8 @@ using namespace std;
 template<typename  T>
 void ingreso(T *method){
   // BPlusFile<long , sizeof(long)> bplus;
-  ifstream archivo("datosprueba.csv");
+  // ifstream archivo("datosprueba.csv");
+  ifstream archivo("datos2.csv");
   cout << "asdasdsa" << endl; 
   if (!archivo.is_open()) {
     cout << "Error al abrir el archivo___" << endl;
@@ -32,38 +33,40 @@ void ingreso(T *method){
     }
 
     // char key[20];
-    int key;
-    char nombre[20];
-    char producto[20];
-    char marca[20];
-    float precio;
-    int cantidad;
-    
-    key = stoi(campos[0]);
+    //
+    // Record
+    // int key;
+    // char nombre[20];
+    // char producto[20];
+    // char marca[20];
+    // float precio;
+    // int cantidad;
+    // 
+    // key = stoi(campos[0]);
+    // strncpy(nombre, campos[1].c_str(), sizeof(nombre) - 1);
+    // nombre[sizeof(nombre) - 1 ]= '\0';
+    //
+    //
+    // strncpy(producto, campos[2].c_str(), sizeof(producto) - 1);
+    // producto[sizeof(producto) - 1 ]= '\0';
+    //
+    // strncpy(marca, campos[3].c_str(), sizeof(marca) - 1);
+    // marca[sizeof(marca) - 1 ]= '\0';
+    //
+    // // cout << campos[4] << endl;
+    // precio = stof(campos[4]);
+    // cantidad = stoi(campos[5]);
     
     // strncpy(key, campos[0].c_str(), sizeof(key) - 1);
     // nombre[sizeof(key) - 1 ]= '\0';
 
-    strncpy(nombre, campos[1].c_str(), sizeof(nombre) - 1);
-    nombre[sizeof(nombre) - 1 ]= '\0';
-
-
-    strncpy(producto, campos[2].c_str(), sizeof(producto) - 1);
-    producto[sizeof(producto) - 1 ]= '\0';
-
-    strncpy(marca, campos[3].c_str(), sizeof(marca) - 1);
-    marca[sizeof(marca) - 1 ]= '\0';
-
-    // cout << campos[4] << endl;
-    precio = stof(campos[4]);
-    cantidad = stoi(campos[5]);
+    // Record record(key,nombre,producto,marca,precio,cantidad);
+    // record.print();
 
     // cout << "---prev---" << endl;
     // method->display_all();
     // cout << "--**----" << endl;
-    Record record(key,nombre,producto,marca,precio,cantidad);
     cout << "Insert: ";
-    record.print();
     string asd;
     // if (counter > 96)
     //   cin >> asd;
@@ -151,7 +154,8 @@ int main (int argc, char *argv[]) {
   // }
   
   // ingreso(method);
-  MethodSelector *seq = new BPlusFile<int, sizeof(int)>();
+  MethodSelector *seq = new BPlusFile<Record, int, sizeof(int)>();
+  // MethodSelector *seq = new SequentialFile<int>();
   ingreso(seq);
   
 

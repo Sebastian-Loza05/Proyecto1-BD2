@@ -31,7 +31,7 @@ struct Bucket{
     page_size -= (sizeof(long) + (2*sizeof(int)));
     this->m = page_size / sizeof(R);
     //this->m = 5;
-    records = vector<Record>(this->m);
+    records = vector<R>(this->m);
     next_del = -1;
     next = -1;
   }
@@ -52,7 +52,7 @@ struct Bucket{
     file.read((char*)(&this->count), sizeof(int));
     file.read((char*)(&this->m), sizeof(int));
     for (int i = 0; i < this->m; i++) {
-      file.read(reinterpret_cast<char* >(&this->records[i]), sizeof(Record));
+      file.read(reinterpret_cast<char* >(&this->records[i]), sizeof(R));
       // file.read((char*)(&this->records[i]), sizeof(Record));
     }
     file.read((char*)(&this->next), sizeof(long));
@@ -62,7 +62,8 @@ struct Bucket{
 };
 
 
-inline ostream& operator<<(ostream& os, Bucket buck){
+template<typename R>
+inline ostream& operator<<(ostream& os, Bucket<R> buck){
   os<<"count: "<<buck.count<<endl;
   os<<"next: "<<buck.next<<endl;
   os<<"m: "<<buck.m<<endl;
@@ -136,7 +137,7 @@ struct Node{
 
 
 
-template<typename TK, size_t N>
+template<typename R, typename TK, size_t N>
 class BPlusFile : public MethodSelector{
   string filename;
   string indexname;
@@ -172,7 +173,7 @@ public:
     //this->M = 5;
     ofstream index(this->indexname, ios::binary | ios::app);
     ofstream file(this->filename, ios::binary | ios::app);
-    cout<<"Se agrego"<<endl;
+    // cout<<"Se agrego"<<endl;
     file.seekp(0,ios::end);
     index.seekp(0,ios::end);
     int tam1 = file.tellp();
@@ -247,7 +248,7 @@ public:
     }
 
     long next_exist = pos;
-    Bucket bucket(page_size);
+    Bucket<R> bucket(page_size);
     
     while (next_exist != -1) {
       data.seekg(next_exist, ios::beg);
@@ -284,7 +285,7 @@ public:
       pos = search_recursive(root, key, index);
     }
     data.seekg(pos, ios::beg);
-    Bucket bucket(page_size);
+    Bucket<R> bucket(page_size);
     bucket.read(data);
     data.close();
     index.close();
@@ -371,7 +372,7 @@ public:
     else{
       data.seekg(sizeof(long), ios::beg);
     }
-    Bucket temp(page_size);
+    Bucket<R> temp(page_size);
     temp.read(data);
     int contador = 0;
     while(temp.next != -1){
@@ -413,7 +414,7 @@ public:
     else{
       data.seekg(sizeof(long), ios::beg);
     }
-    Bucket temp(page_size);
+    Bucket<R> temp(page_size);
     temp.read(data);
     int contador = 0;
     vector<Record> res;
@@ -476,7 +477,7 @@ private:
   
   bool add_recursive(long pos_node, long pos_padre, TK key, Record value, bool leaf, fstream &index, fstream &data){
     if(pos_node == -1){
-      Bucket node(page_size);
+      Bucket<R> node(page_size);
       node.records[0] = value;
       node.count++;
       this->root = sizeof(long);
@@ -486,7 +487,7 @@ private:
     }
     if(leaf){
       bool correcto = insertar(pos_node, true, key, value, index, data);
-      Bucket node(page_size);
+      Bucket<R> node(page_size);
       data.seekg(pos_node, ios::beg);
       node.read(data);
       if(node.count == node.m)
@@ -557,7 +558,7 @@ private:
     }
 
     if (leaf) {
-      Bucket node(page_size);
+      Bucket<R> node(page_size);
       data.seekg(pos_node, ios::beg);
       node.read(data);
       Record temp;
@@ -607,11 +608,11 @@ private:
   }
 
   void split_hoja(long pos_node, long pos_padre, fstream &index, fstream &data){
-    Bucket node1(page_size);
-    Bucket node2(page_size);
+    Bucket<R> node1(page_size);
+    Bucket<R> node2(page_size);
 
     data.seekg(pos_node, ios::beg);
-    Bucket node(page_size);
+    Bucket<R> node(page_size);
     node.read(data);
     
     node2.next = node.next;
@@ -668,7 +669,7 @@ private:
     // exit(0);
   }
 
-  int write_DataDel(Bucket bucket, fstream& data ){
+  int write_DataDel(Bucket<R> bucket, fstream& data ){
     long value;
     data.seekg(0, ios::beg);
     data.read((char*)(&value), sizeof(long));
@@ -681,7 +682,7 @@ private:
       return  tam;
     }
     // Existe header
-    Bucket temp(page_size);
+    Bucket<R> temp(page_size);
     data.seekg(value, ios::beg);
     tam = value;
     temp.read(data);
@@ -752,7 +753,7 @@ private:
     return;
   }
   // unir los buckets
-  void anclar_hojas(Bucket b1, Bucket b2, long pos_node, TK medio, fstream& index, fstream& data){
+  void anclar_hojas(Bucket<R> b1, Bucket<R> b2, long pos_node, TK medio, fstream& index, fstream& data){
     index.seekg(pos_node, ios::beg);
     Node<TK, N> node(M);
     // Node<TK> node(M);
@@ -815,7 +816,7 @@ private:
 
     if (leaf) {
       data.seekg(pos_node, ios::beg);
-      Bucket bucket(page_size);
+      Bucket<R> bucket(page_size);
       bucket.read(data);  
 
       for (int i = 0; i < bucket.count; i++) {
@@ -863,7 +864,7 @@ private:
     }
   }
 
-  void delete_node(Bucket bucket, long pos_node, int pos, fstream &data){
+  void delete_node(Bucket<R> bucket, long pos_node, int pos, fstream &data){
     for (int i = pos; i < bucket.count - 1; i++) {
       bucket.records[i] = bucket.records[i+1];
     }
@@ -880,7 +881,7 @@ private:
         data.seekg(0, ios::beg);
         data.read((char*)(&value), sizeof(long));
         data.seekg(pos_node, ios::beg);
-        Bucket node_root(page_size);
+        Bucket<R> node_root(page_size);
         node_root.read(data);
         node_root.next_del = value;
         data.seekp(0, ios::beg);
@@ -950,8 +951,8 @@ private:
       if(sibling_available) return;
     }
     else{
-      Bucket node_l(page_size);
-      Bucket node_r(page_size);
+      Bucket<R> node_l(page_size);
+      Bucket<R> node_r(page_size);
       if(pos_child > 0){
         left = padre.children[pos_child-1];
         data.seekg(left, ios::beg);
@@ -981,7 +982,7 @@ private:
   }
 
   void unir_en_hoja(long pos_node, long left, long right, long pos_padre, int pos_child, fstream &index, fstream &data){
-    Bucket node(page_size);
+    Bucket<R> node(page_size);
     data.seekg(pos_node, ios::beg);
     node.read(data);
 
@@ -994,7 +995,7 @@ private:
     data.read(reinterpret_cast<char*>(&last_next_del), sizeof(long));
 
     if(left != -1){
-      Bucket node_l(page_size);
+      Bucket<R> node_l(page_size);
       data.seekg(left, ios::beg);
       node_l.read(data);
       int tam = node.count;
@@ -1025,7 +1026,7 @@ private:
       node_l.write(data);
       return;
     }
-    Bucket node_r(page_size);
+    Bucket<R> node_r(page_size);
     data.seekp(right, ios::beg);
     node_r.read(data);
     int tam = node_r.count;
@@ -1214,11 +1215,11 @@ private:
     node_padre.read(index, M);
 
     data.seekp(pos_bucket, ios::beg);
-    Bucket bucket(page_size);
+    Bucket<R> bucket(page_size);
     bucket.read(data);
 
     data.seekg(pos_bucket_prest, ios::beg);
-    Bucket bucket_prest(page_size);
+    Bucket<R> bucket_prest(page_size);
     bucket_prest.read(data);
 
     if (right) {

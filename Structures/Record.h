@@ -35,3 +35,31 @@ struct Record{
 
   }
 };
+
+// Nombre,Género,Profesión,Edad,Sueldo
+ 
+
+struct Record2{
+
+  char key[20]; // Nombre
+  char genero[20];
+  char profesion[20];
+  int edad;
+  float sueldo;
+  
+  
+  Record2(char key_[20], char genero_[20], char profesion_[20], int edad_, float sueldo_ ){
+    strncpy(key, key_, sizeof(key));
+    strncpy(genero, genero_, sizeof(genero));
+    strncpy(profesion, profesion_, sizeof(profesion));
+    this->edad = edad_;
+    this->sueldo = sueldo_;
+  }
+
+  Record2(){};
+
+  void print(){
+    cout << key << "\t" << genero << "\t" << profesion << "\t" << endl;
+  }
+
+};
