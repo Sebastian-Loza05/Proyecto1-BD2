@@ -169,7 +169,7 @@ Si la eliminación causa que el nodo tenga muy pocos registros e incumple las pr
 |--------------|--------------------|--------------------|--------------------|
 | Búsqueda     |    O(log n)        |             |             |
 | Insercción   |    O(log n)        |            |            |
-| Eliminación  |    O(log n)        |             |             |
+| Eliminación  |    O(n log n)        |             |             |
 
 ### Parser SQL:
 
