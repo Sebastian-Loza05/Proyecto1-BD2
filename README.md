@@ -167,9 +167,9 @@ Si la eliminación causa que el nodo tenga muy pocos registros e incumple las pr
 
 | Métodos      |   SequetialFile    |     AVLFile        |   B+ Tree File     |
 |--------------|--------------------|--------------------|--------------------|
-| Búsqueda     |    O(log n)        |    O(log n)        |    O(log n)        |
-| Insercción   |    O(log n)        |    O(log n)        |    O(log n)        |
-| Eliminación  |    O(log n)        |    O(log n)        |    O(log n)        |
+| Búsqueda     |    O(log n)        |             |             |
+| Insercción   |    O(log n)        |            |            |
+| Eliminación  |    O(log n)        |             |             |
 
 ### Parser SQL:
 
