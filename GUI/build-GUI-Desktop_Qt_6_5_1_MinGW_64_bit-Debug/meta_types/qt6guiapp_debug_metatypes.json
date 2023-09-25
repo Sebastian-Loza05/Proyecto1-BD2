@@ -8,17 +8,36 @@
                         "access": "public",
                         "arguments": [
                             {
-                                "name": "filename",
+                                "name": "username",
+                                "type": "QString"
+                            },
+                            {
+                                "name": "password",
                                 "type": "QString"
                             }
                         ],
-                        "name": "getThreeLines",
-                        "returnType": "QStringList"
+                        "name": "verifyLogin",
+                        "returnType": "bool"
+                    },
+                    {
+                        "access": "public",
+                        "name": "getErrorMessage",
+                        "returnType": "QString"
+                    },
+                    {
+                        "access": "public",
+                        "name": "readRecords",
+                        "returnType": "QString"
                     }
                 ],
                 "object": true,
                 "qualifiedClassName": "BridgeClass",
                 "signals": [
+                    {
+                        "access": "public",
+                        "name": "errorOccurred",
+                        "returnType": "void"
+                    },
                     {
                         "access": "public",
                         "name": "dataChanged",

@@ -38,7 +38,9 @@ private:
     QString m_query;
     MethodSelector<Record>* method_global;
     string global_error_message;
-    vector<Record> global_records;
+    vector<Record> global_records1;
+    vector<Record2> global_records2;
+    pair<string,string> tabla_global;
 };
 
 

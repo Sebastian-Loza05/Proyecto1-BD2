@@ -26,10 +26,15 @@ void BridgeClass::runQuery(const QString& query)
             Scanner scanner(querys[i]);
             Parser parser(&scanner);
             parser.parse();
+            this->global_records1=records;
+            this->global_records2=records1;
+            this->tabla_global=tabla;
+            qDebug()<<tabla_global.first;
+            qDebug()<<tabla_global.second;
             this->global_error_message = error_message;
             qDebug()<<global_error_message;
             this->method_global=method;
-            this->global_records=records;
+
         }
         if(records.empty()) {
 
@@ -63,7 +68,7 @@ std::vector<std::string> BridgeClass::input(const string ingreso){
 };
 
 bool BridgeClass::verifyLogin(const QString& username, const QString& password) {
-    QFile file("/home/luisd/UTEC/ciclo_6/BDII/proyecto/Proyecto1-BD2/login.txt");
+    QFile file("E:/BD2/PROYECTO1/login.txt");
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         return false;
 
@@ -86,68 +91,67 @@ QString BridgeClass::getErrorMessage() const {
 }
 
 QString BridgeClass::readRecords() const {
-    /*QString result;
+    QString result;
 
     const int nombreMaxLen = 15; // Define una longitud máxima para cada campo
     const int productoMaxLen = 15;
     const int marcaMaxLen = 15;
+    const int profesionMaxLen =15;
+    const int generoMaxLen = 2;
+    // Creación del header con la misma justificación
+    if(this->tabla_global.second=="record1"){
+        qDebug()<<"IF";
+        QString header = QString("CODIGO\t") +
+                         QString("NOMBRE").leftJustified(nombreMaxLen, ' ') + "\t" +
+                         QString("PRODUCTO").leftJustified(productoMaxLen, ' ') + "\t" +
+                         QString("MARCA").leftJustified(marcaMaxLen, ' ') + "\t" +
+                         QString("PRECIO\t") +
+                         QString("CANTIDAD\n");
 
-    qDebug() << "Recorriendo Records";
+        // Añadir el header al resultado
+        result += header;
 
-    for (const Record &rec : global_records) {
-        QString nombrePadded = QString(rec.nombre).leftJustified(nombreMaxLen, ' '); // Rellena con espacios a la derecha
-        QString productoPadded = QString(rec.producto).leftJustified(productoMaxLen, ' ');
-        QString marcaPadded = QString(rec.marca).leftJustified(marcaMaxLen, ' ');
+        for (const Record &rec : global_records1) {
+            qDebug()<<"Leyendo records";
+            QString nombrePadded = QString(rec.nombre).leftJustified(nombreMaxLen, ' '); // Rellena con espacios a la derecha
+            QString productoPadded = QString(rec.producto).leftJustified(productoMaxLen, ' ');
+            QString marcaPadded = QString(rec.marca).leftJustified(marcaMaxLen, ' ');
 
-        result += QString::number(rec.key) + "\t" +
-                  nombrePadded + "\t" +
-                  productoPadded + "\t" +
-                  marcaPadded + "\t" +
-                  QString::number(rec.precio) + "\t" +
-                  QString::number(rec.cantidad) + "\n";
+            result += QString::number(rec.key) + "\t" +
+                      nombrePadded + "\t" +
+                      productoPadded + "\t" +
+                      marcaPadded + "\t" +
+                      QString::number(rec.precio) + "\t" +
+                      QString::number(rec.cantidad) + "\n";
+        }
+    }else{
+        qDebug()<<"ELSE";
+        QString header = QString("CODIGO\t") +
+                         QString("NOMBRE").leftJustified(nombreMaxLen, ' ') + "\t" +
+                         QString("GENERO").leftJustified(productoMaxLen, ' ') + "\t" +
+                         QString("PROFESION").leftJustified(marcaMaxLen, ' ') + "\t" +
+                         QString("EDAD\t") +
+                         QString("SUELDO\n");
+
+        // Añadir el header al resultado
+        result += header;
+
+        for (const Record2 &rec : global_records2) {
+            qDebug()<<"Leyendo records";
+            QString nombrePadded = QString(rec.key).leftJustified(nombreMaxLen, ' '); // Rellena con espacios a la derecha
+            QString profesionPadded = QString(rec.profesion).leftJustified(profesionMaxLen, ' ');
+            QString generoPadded = QString(rec.genero).leftJustified(generoMaxLen, ' ');
+
+            result += nombrePadded + "\t" +
+                      profesionPadded + "\t" +
+                      generoPadded + "\t" +
+                      QString::number(rec.edad) + "\t" +
+                      QString::number(rec.sueldo) + "\n";
+        }
     }
+
 
     qDebug() << "Se recorrio los records";
 
     return result;
-*/
-
-    QString result;
-
-    int maxKeyLen = 0;
-    int maxNombreLen = 0;
-    int maxProductoLen = 0;
-    int maxMarcaLen = 0;
-    int maxPrecioLen = 0;
-    int maxCantidadLen = 0;
-
-    // Encontrar longitudes máximas
-    for (const Record &rec : global_records) {
-        maxKeyLen = qMax(maxKeyLen, QString::number(rec.key).length());
-        maxNombreLen = qMax(maxNombreLen, QString(rec.nombre).length());
-        maxProductoLen = qMax(maxProductoLen, QString(rec.producto).length());
-        maxMarcaLen = qMax(maxMarcaLen, QString(rec.marca).length());
-        maxPrecioLen = qMax(maxPrecioLen, QString::number(rec.precio).length());
-        maxCantidadLen = qMax(maxCantidadLen, QString::number(rec.cantidad).length());
-    }
-
-    // Construir la cadena con un tabulado correcto
-    for (const Record &rec : global_records) {
-        QString keyPadded = QString::number(rec.key).rightJustified(maxKeyLen, ' ');
-        QString nombrePadded = QString(rec.nombre).leftJustified(maxNombreLen, ' ');
-        QString productoPadded = QString(rec.producto).leftJustified(maxProductoLen, ' ');
-        QString marcaPadded = QString(rec.marca).leftJustified(maxMarcaLen, ' ');
-        QString precioPadded = QString::number(rec.precio).rightJustified(maxPrecioLen, ' ');
-        QString cantidadPadded = QString::number(rec.cantidad).rightJustified(maxCantidadLen, ' ');
-
-        result += keyPadded + "\t" +
-                  nombrePadded + "\t" +
-                  productoPadded + "\t" +
-                  marcaPadded + "\t" +
-                  precioPadded + "\t" +
-                  cantidadPadded + "\n";
-    }
-
-    return result;
 }
-

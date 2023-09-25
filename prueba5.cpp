@@ -85,7 +85,7 @@ void ingreso(T *method){
     //   cin >> asd;
     // cout << endl << endl << endl;
       bool inser = 0;
-    // method->display_all();
+    method->display_all();
     // method->display();
     // vector<Record> vec1 = method->load();
     // 
@@ -93,7 +93,7 @@ void ingreso(T *method){
     //   vec1[i].print();
     //   cout << "-----" << endl;
     // }
-    // cin >> inser;
+    cin >> inser;
     if (inser) {
       cout << "Key: ";
       int key_insert_b, key_insert_e;
