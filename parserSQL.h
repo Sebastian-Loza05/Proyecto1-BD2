@@ -90,15 +90,12 @@ private:
       else{
         char genero[20];
         char profesion[20];
-        char marca[20];
-        int edad = stoi(values[4].first);
-        float sueldo = stof(values[5].first);
+        int edad = stoi(values[3].first);
+        float sueldo = stof(values[4].first);
         strncpy(genero, values[1].first.c_str(), sizeof(genero) - 1);
         genero[sizeof(genero) - 1 ]= '\0';
         strncpy(profesion, values[2].first.c_str(), sizeof(profesion) - 1);
         profesion[sizeof(profesion) - 1 ]= '\0';
-        strncpy(marca, values[3].first.c_str(), sizeof(marca) - 1);
-        marca[sizeof(marca) - 1 ]= '\0';
         char key[20];
         strncpy(key, values[0].first.c_str(), sizeof(key) - 1);
         key[sizeof(key) - 1 ]= '\0';
@@ -280,6 +277,8 @@ private:
             error_message = "No existe la tabla " + nombre_tabla;
             return;
           }
+          cout<<tabla.second<<endl;
+
           if(tabla.second == "record1")
             records = method->load();
           else
@@ -348,6 +347,8 @@ private:
   }
 
   bool match_tabla(string nombre_tabla){
+    cout<<tablas[0].first<<endl;
+    cout<<tablas[1].first<<endl;
     if(nombre_tabla == tablas[0].first){
       tabla = tablas[0];
       return true;
@@ -426,13 +427,15 @@ private:
           method = new BPlusFile<Record,int, sizeof(int)>();
           tablas[0] = make_pair(nombre_tabla, "record1");
           tabla = tablas[0];
+          insertCsv(filename);
         }
         else if(archivo == "datos2.csv"){
-          method1 = new BPlusFile<Record2,int, sizeof(int)>();
+          method1 = new BPlusFile<Record2,char*, 20>();
           tablas[1] = make_pair(nombre_tabla, "record2");
           tabla = tablas[1];
+          insertCsv2(filename);
         }
-        insertCsv(filename);
+
         error_message = "";
         cout<<"Se crea tabla con index bplus"<<endl;
         
@@ -447,13 +450,15 @@ private:
           method = new AVLFile<Record,int>();
           tablas[0] = make_pair(nombre_tabla, "record1");
           tabla = tablas[0];
+          insertCsv(filename);
         }
         else if(archivo == "datos2.csv"){
-          method1 = new AVLFile<Record2,int>();
+          method1 = new AVLFile<Record2,char*>();
           tablas[1] = make_pair(nombre_tabla, "record2");
           tabla = tablas[1];
+          insertCsv2(filename);
         }
-        insertCsv(filename);
+
         cout<<"Se crea tabla con index avl"<<endl;
         error_message = "";
         return;
@@ -467,13 +472,15 @@ private:
           method = new SequentialFile<Record,int>();
           tablas[0] = make_pair(nombre_tabla, "record1");
           tabla = tablas[0];
+          insertCsv(filename);
         }
         else if(archivo == "datos2.csv"){
-          method1 = new SequentialFile<Record2,int>();
+          method1 = new SequentialFile<Record2,char*>();
           tablas[1] = make_pair(nombre_tabla, "record2");
           tabla = tablas[1];
+          insertCsv2(filename);
         }
-        insertCsv(filename);
+
         cout<<"Se crea tabla con index sequential"<<endl;
         error_message = "";
         return;
@@ -504,25 +511,10 @@ private:
       if(v){
         cout << previous->lexema << endl;
         if(match(Token::SEMICOLON)){
-          records.clear();
-          cout<<value.first<<": "<<value.second<<endl;
-          pair<Record,bool> result;
-          if(value.second == "char"){
-            char key[20];
-            strncpy(key, value.first.c_str(), sizeof(key) - 1);
-            key[sizeof(key) - 1 ]= '\0';
-            result = method->search(key);
-          }else if (value.second == "int"){
-            int key = stoi(value.first);
-            result = method->search(key);
-          }
-          // pair<Record,bool> result = method->search(value);
-          // cout<<"Busqueda unitaria"<<endl;
 
-          if (result.second) {
-             records.push_back(result.first);
-          }
-          else{
+          bool s = search_key(nombre_tabla);
+
+          if(!s){
              error_message = "No existe un elemento con la llave buscada";
              return;
           }
@@ -543,6 +535,41 @@ private:
     else
       error_message = "Sintaxis incorrecta";
     return;
+  }
+
+
+bool search_key(string nombre_tabla){
+    try {
+
+      if(tabla.second == "record2"){
+        records1.clear();
+        char key[20];
+        strncpy(key, value.first.c_str(), sizeof(key) - 1);
+        key[sizeof(key) - 1 ]= '\0';
+        pair<Record2,bool> result = method1->search(key);
+        if(!result.second){
+          error_message = "No existe este valor.";
+          return false;
+        }else{
+          records1.push_back(result.first);
+              return true;
+        }
+      }else if (tabla.second == "record1"){
+        records.clear();
+        int key = stoi(value.first);
+        pair<Record,bool> result = method->search(key);
+        if(!result.second){
+          error_message = "No existe este valor.";
+          return false;
+        }else{
+          records.push_back(result.first);
+              return true;
+        }
+      }
+
+    }catch(const std::exception &e){
+      error_message = "Error al eliminar.";
+    }
   }
 
   bool parseEqual(){
@@ -645,8 +672,62 @@ private:
       Record record(key,nombre,producto,marca,precio,cantidad);
       bool asd__ = method->add(record);
       // cout << "---*----" << endl;
+      method->display_all();
+      if(counter == 500)
+        break;
+      counter ++;
+      campos.clear();
+    }
+    // method->display_all();
+  }
+
+  void insertCsv2(string ruta){
+    cout << ruta << endl;
+    ifstream archivo(ruta);
+    cout<<"ruta: "<<ruta<<endl;
+    if (!archivo.is_open()) {
+      error_message = "La ruta del archivo es incorrecta.";
+      return;
+    }
+
+    string linea;
+    vector<string> campos;
+    istringstream lineaStream(linea);
+    int counter = 0;
+    while (getline(archivo, linea)) {
+      istringstream lineaStream(linea);
+      string campo;
+
+      while (getline(lineaStream, campo, ',')) {
+        campos.push_back(campo);
+      }
+
+      char key[20];
+      char genero[20];
+      char profesion[20];
+      int edad;
+      float sueldo;
+
+
+      strncpy(key, campos[0].c_str(), sizeof(key) - 1);
+      key[sizeof(key) - 1 ]= '\0';
+
+      strncpy(genero, campos[1].c_str(), sizeof(genero) - 1);
+      genero[sizeof(genero) - 1 ]= '\0';
+
+      strncpy(profesion, campos[2].c_str(), sizeof(profesion) - 1);
+      profesion[sizeof(profesion) - 1 ]= '\0';
+
+      // cout << campos[4] << endl;
+      edad = stoi(campos[3]);
+      sueldo = stof(campos[4]);
+
+      // cout << "--------" << endl;
+      Record2 record(key,genero,profesion,edad,sueldo);
+      bool asd__ = method1->add(record);
+      // cout << "---*----" << endl;
       // method->display_all();
-      if(counter == 2000)
+      if(counter == 500)
         break;
       counter ++;
       campos.clear();

@@ -377,6 +377,6 @@ E:/BD2/PROYECTO1/GUI/GUI/src/BridgeClass.h
  mdp:E:/BD2/PROYECTO1/Structures/methods.h
  mdp:E:/BD2/PROYECTO1/parserSQL.h
  mdp:E:/BD2/PROYECTO1/tokenSQL.h
-E:/BD2/PROYECTO1/GUI/GUI/src/BridgeClass.cpp
 E:/BD2/PROYECTO1/GUI/build-GUI-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/.rcc/qmlcache/GUIApp_qmlcache_loader.cpp
+E:/BD2/PROYECTO1/GUI/GUI/src/BridgeClass.cpp
 E:/BD2/PROYECTO1/GUI/GUI/src/main.cpp
