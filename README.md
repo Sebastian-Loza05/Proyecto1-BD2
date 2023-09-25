@@ -4,11 +4,11 @@
 
 | Integrante                         | Tareas                 |
 |-----------------------------------|------------------------------|
-| Coorahua Peña, Ruben Aaron        |                              |
-| Golac Córdova, Luis David         |                              |
-| Loza Mendoza, Sebastián           |                              |
-| Pajuelo Reyes, César Eduardo      |                              |
-| Rodríguez Gutiérrez, Gonzalo Alonso|                             |
+| Coorahua Peña, Ruben Aaron        |          UI                    |
+| Golac Córdova, Luis David         |          AVL File - BPlus File                    |
+| Loza Mendoza, Sebastián           |          BPlus File - Parser SQL                    |
+| Pajuelo Reyes, César Eduardo      |            Sequential File - README.md                  |
+| Rodríguez Gutiérrez, Gonzalo Alonso|           Sequential File - README.md                  |
 
 
 ## Introducción
