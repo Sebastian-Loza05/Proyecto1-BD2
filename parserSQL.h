@@ -11,19 +11,20 @@
 #include "tokenSQL.h"
 #include <utility>
 #include <vector>
-#include <unordered_map>
 #include "Structures/methods.h"
 using namespace std;
 
 inline MethodSelector* method = new MethodSelector();
 inline vector<Record> records;
 inline string error_message = "";
+inline pair<string, string> tabla;
 
 class Parser {
   Scanner* scanner;
   Token* current, * previous;
   vector<string> atributos;
   vector<pair<string, string>> values;
+  pair<string, string> value;
 public:
   Parser(Scanner* sc):scanner(sc) {
     previous = current = NULL;
@@ -80,6 +81,7 @@ private:
       if(!added)
         error_message = "Ya existe este elemento";
       cout<<"Insertado"<<endl;
+      error_message = "";
     
     } catch (const std::exception& e){
       error_message = "Valores incorrectos para la tabla";
@@ -122,10 +124,11 @@ private:
   
   void parseStatement(){
     if(match(Token::SELECT)){
-      if(match(Token::ID))
+      if(match(Token::ID)){
         parseExpression();
+      }
       else if(match(Token::ALL))
-        parseTable(nullptr);
+        parseTable(nullptr, "");
       else
         error_message =  "Error esperaba los atributos";
       return;
@@ -134,7 +137,7 @@ private:
       if(match(Token::TABLE)){
         Token* temp = previous; 
         if(match(Token::ID)){
-          parseTable(temp);
+          parseTable(temp, previous->lexema);
           return;
         }
         error_message = "Se esperaba un nombre de tabla";
@@ -146,8 +149,13 @@ private:
     else if(match(Token::INSERT)){
       if(match(Token::INTO)){
         if(match(Token::ID)){
+          string tabla_nombre = previous->lexema;
+          if(tabla_nombre != tabla.first){
+            error_message = "No existe esa tabla";
+            return;
+          }
           if(match(Token::VALUES)){
-            bool res = parseValuesSentence();
+            bool res = parseValuesSentence(tabla_nombre);
             return;
           }
           error_message = "Esperaba la sentencia VALUES";
@@ -165,14 +173,17 @@ private:
     }
     error_message = "Error esperaba una sentencia SQL.";
   }
-  bool parseValuesSentence(){
+  bool parseValuesSentence(string nombre_tabla){
     if(match(Token::LPARENT)){
       bool res = parseValuesList();
       if(!res) return false;
       if(match(Token::RPARENT)){
         if(match(Token::SEMICOLON)){
           //Insertar
-          cout<<"Insertar en la tabla values: "<<endl;
+          if(tabla.first != nombre_tabla){
+            error_message = "No existe la tabla " + nombre_tabla;
+            return false;
+          }
           insertarValues();
           return true;
         }
@@ -236,23 +247,33 @@ private:
       parseExpression();
     }
     else
-      parseTable(nullptr);
+      parseTable(nullptr, "");
   }
   
-  void parseTable(Token* temp){
+  void parseTable(Token* temp, string nombre_tabla){
     if(match(Token::FROM)){
       if(match(Token::ID)){
+        nombre_tabla = previous->lexema;
         if(match(Token::SEMICOLON)){
+          if(nombre_tabla != tabla.first){
+            error_message = "No existe la tabla " + nombre_tabla;
+            return;
+          }
           cout<<"Mostrar tabla"<<endl;
           records = method->load();
           atributos.clear();
+          error_message = "";
           return;
         }
-        parseCondition();
+        if(nombre_tabla != tabla.first){
+          error_message = "No existe la tabla " + nombre_tabla;
+          return;
+        }
+        parseCondition(nombre_tabla);
         return;
       }
       else if(temp!=nullptr && match(Token::FILE)){
-        parseFile();
+        parseFile(nombre_tabla);
         return;
       }
       error_message = "Error de sintaxis.";
@@ -263,7 +284,11 @@ private:
   void parseTableDelete(){
     if(match(Token::FROM)){
       if(match(Token::ID)){
-        bool r = parseConditionDelete();
+        string nombre_table = previous->lexema;
+        if(nombre_table != tabla.first){
+          error_message = "No existe la tabla "+ nombre_table;
+        }
+        bool r = parseConditionDelete(nombre_table);
         return;
       }
       error_message  = "Se esperaba el nombre de la tabla.";
@@ -272,7 +297,7 @@ private:
     error_message = "Se esperaba la sentencia FROM, se obtuvo ";
   }
 
-  bool parseConditionDelete(){
+  bool parseConditionDelete(string nombre_tabla){
     if (match(Token::WHERE)){
       if(match(Token::ID)){
         if(match(Token::EQUAL)){
@@ -280,6 +305,21 @@ private:
           if(r){
             if(match(Token::SEMICOLON)){
               cout<<" Eliminacion"<<endl;
+              bool deleted;
+              if(value.second == "char"){
+                char key[20];
+                strncpy(key, value.first.c_str(), sizeof(key) - 1);
+                key[sizeof(key) - 1 ]= '\0';
+                deleted = method->remove(key);
+              }else if (value.second == "int"){
+                int key = stoi(value.first);
+                deleted = method->remove(key);
+              }
+              if(!deleted){
+                error_message = "No existe este valor.";
+                return false;
+              }
+              error_message = "";
               return true;
             }
             error_message = "Sintaxis incorrecta, se esperaba ;";
@@ -296,13 +336,13 @@ private:
     return false;
   }
 
-  void parseFile(){
+  void parseFile(string nombre_tabla){
     string filename = "";
     if(match(Token::QUOTE)){
       if(match(Token::FILENAME)){
         filename = previous->lexema;
         if(match(Token::QUOTE)){
-          parseIndex(filename);
+          parseIndex(filename, nombre_tabla);
           return;
         }
         error_message = "Se esperaba \"";
@@ -315,10 +355,10 @@ private:
     return;
   }
 
-  void parseIndex(string filename){
+  void parseIndex(string filename, string nombre_tabla){
     if(match(Token::USING)){
       if(match(Token::INDEX)){
-        parseIndexType(filename);
+        parseIndexType(filename, nombre_tabla);
         return;
       }
       error_message = "Sintaxis incorrecta";
@@ -328,11 +368,14 @@ private:
     return;
   }
   
-  void parseIndexType(string filename){
+  void parseIndexType(string filename, string nombre_tabla){
     if(match(Token::BPLUS)){
       if(match(Token::SEMICOLON)){
         method = new BPlusFile<int, sizeof(int)>();
+        tabla = make_pair(nombre_tabla, "record1");
+        tabla = make_pair(nombre_tabla, "record2");
         insertCsv(filename);
+        error_message = "";
         cout<<"Se crea tabla con index bplus"<<endl;
         
         return;
@@ -343,8 +386,11 @@ private:
     else if(match(Token::AVL)){
       if(match(Token::SEMICOLON)){
         method = new AVLFile<int>();
+        tabla = make_pair(nombre_tabla, "record1");
+        tabla = make_pair(nombre_tabla, "record2");
         insertCsv(filename);
         cout<<"Se crea tabla con index avl"<<endl;
+        error_message = "";
         return;
       }
       error_message ="Se esperaba un ;";
@@ -353,8 +399,11 @@ private:
     else if(match(Token::SEQUENTIAL)){
       if(match(Token::SEMICOLON)){
         method = new SequentialFile<int>();
+        tabla = make_pair(nombre_tabla, "record1");
+        tabla = make_pair(nombre_tabla, "record2");
         insertCsv(filename);
         cout<<"Se crea tabla con index sequential"<<endl;
+        error_message = "";
         return;
       }
       error_message = "Se esperaba un ;";
@@ -364,10 +413,10 @@ private:
     return;
   }
 
-  void parseCondition(){
+  void parseCondition(string nombre_tabla){
     if (match(Token::WHERE)){
       if(match(Token::ID)){
-        parseCondition2();
+        parseCondition2(nombre_tabla);
         return;
       }
       error_message = "Se esperaba un id";
@@ -377,7 +426,7 @@ private:
     return;
   }
 
-  void parseCondition2(){
+  void parseCondition2(string nombre_tabla){
     if(match(Token::EQUAL)){
       bool v = parseEqual();
       if(v){
@@ -394,6 +443,7 @@ private:
           //   error_message = "No existe un elemento con la llave buscada";
           // }
           atributos.clear();
+          error_message = "";
           return;
         }
         error_message = "Sintaxis incorrecta";
@@ -404,7 +454,7 @@ private:
     }
     else if(match(Token::BETWEEN)){
       cout<<"Between"<<endl;
-      parse_range();
+      parse_range(nombre_tabla);
     }
     else
       error_message = "Sintaxis incorrecta";
@@ -412,15 +462,18 @@ private:
   }
 
   bool parseEqual(){
-    if(match(Token::NUM) ){
+    if(match(Token::NUM)){
+      value = make_pair(previous->lexema, "int");
       return true;
     }
     else if(match(Token::QUOTE)){
       if(match(Token::ID)){
+        string dato = previous->lexema;
         if(!match(Token::QUOTE)){
           error_message = "Error de sintaxis, esperaba un \"";
           return false;
         }
+        value = make_pair(dato, "char");
         return true;
       }
       error_message = "Sintaxis incorrecta";
@@ -430,7 +483,7 @@ private:
     return false;
   }
 
-  void parse_range(){
+  void parse_range(string nombre_tabla){
     if(match(Token::NUM)){
       int begin = stoi(previous->lexema);
       // cout<"<"numero: "<<previous->lexema<<endl;
@@ -440,6 +493,7 @@ private:
           if(match(Token::SEMICOLON)){
             records.clear(); 
             cout<<"Busqueda por rango"<<endl;
+            error_message = "";
             records = method->rangeSearch(begin, end);
             return;
           }

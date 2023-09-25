@@ -52,6 +52,7 @@ void BridgeClass::runQuery(const QString& query)
         Scanner scanner(querys[i]);
         Parser parser(&scanner);
         parser.parse();
+        cout<<"Error: "<<error_message<<endl;
         this->method_global=method;
     }
 
@@ -107,7 +108,7 @@ std::vector<std::string> BridgeClass::input(const string ingreso){
 };
 
 bool BridgeClass::verifyLogin(const QString& username, const QString& password) {
-    QFile file("/home/luisd/UTEC/ciclo_6/BDII/proyecto/Proyecto1-BD2/login.txt");
+    QFile file("/home/sebastian/Documents/utec/Ciclo6/BD2/Proyecto1-BD2/login.txt");
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         return false;
 

@@ -30,7 +30,7 @@ struct Bucket{
     count = 0;
     page_size -= (sizeof(long) + (2*sizeof(int)));
     this->m = page_size / sizeof(R);
-    //this->m = 5;
+    this->m = 5;
     records = vector<R>(this->m);
     next_del = -1;
     next = -1;
@@ -170,7 +170,7 @@ public:
     int page_s = page_size - sizeof(long) - sizeof(bool) - sizeof(int) + N;
     int X  = (page_s)/(N + sizeof(long)) ;
     this->M = X-1;
-    //this->M = 5;
+    this->M = 5;
     ofstream index(this->indexname, ios::binary | ios::app);
     ofstream file(this->filename, ios::binary | ios::app);
     // cout<<"Se agrego"<<endl;
@@ -272,7 +272,7 @@ public:
   pair<R,bool> search(TK key) override{
     R res;
     fstream index(this->indexname, ios::binary | ios::in | ios::out);
-    fstream data(this->indexname, ios::binary | ios::in | ios::out);
+    fstream data(this->filename, ios::binary | ios::in | ios::out);
     data.seekg(sizeof(long), ios::end);
     if(data.tellg() == sizeof(long))
       return make_pair(R(), false);
@@ -287,8 +287,6 @@ public:
     data.seekg(pos, ios::beg);
     Bucket<R> bucket(page_size);
     bucket.read(data);
-    data.close();
-    index.close();
     for (int i = 0; i < bucket.count; i++) {
       if ( igual_igual(bucket.records[i].key , key) )
       // if(bucket.records[i].key == key)
@@ -1264,12 +1262,9 @@ private:
         break;
       }
     }
-    cout << "Lllego paso "<< endl;
     if(bajada == -1) bajada = node.count;
-    if(node.pre_leaf){
-      cout << "Lllego "<< endl;
+    if(node.pre_leaf)
       return node.children[bajada];
-    }
     return search_recursive(node.children[bajada], key, index);
   }
 

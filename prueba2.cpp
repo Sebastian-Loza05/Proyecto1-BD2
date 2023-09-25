@@ -7,7 +7,14 @@
 
 #include <cstring>
 void ingreso(){
-  BPlusFile<char*, 20> bplus;
+  BPlusFile<Record, int, 4> bplus;
+  // pair<Record, bool> res = bplus.search(31140350);
+  // cout<<res.second<<endl;
+  // if(res.second){
+  //   cout<<"record: "<<endl;
+  //   res.first.print();
+  // }
+  // return;
   // bplus.displayTree();
   // return;
   // BPlusFile<long , sizeof(long)> bplus;
@@ -31,18 +38,18 @@ void ingreso(){
       campos.push_back(campo);
     }
 
-    char key[20];
-    // long key;
+    // char key[20];
+    int key;
     char nombre[20];
     char producto[20];
     char marca[20];
     float precio;
     int cantidad;
     
-    // key = stoi(campos[0]);
+    key = stoi(campos[0]);
     
-    strncpy(key, campos[0].c_str(), sizeof(key) - 1);
-    nombre[sizeof(key) - 1 ]= '\0';
+    // strncpy(key, campos[0].c_str(), sizeof(key) - 1);
+    // nombre[sizeof(key) - 1 ]= '\0';
 
     strncpy(nombre, campos[1].c_str(), sizeof(nombre) - 1);
     nombre[sizeof(nombre) - 1 ]= '\0';
@@ -63,17 +70,17 @@ void ingreso(){
     string asd;
     // if (counter > 96)
     // cin >> asd;
-    bool asd__ = bplus.remove(record.key);
-    // bool asd__ = bplus.add(record);
+    // bool asd__ = bplus.remove(record.key);
+    bool asd__ = bplus.add(record);
     // cout<<"counter: "<<counter<<endl;
     counter++;
-    bplus.displayTree();
+    bplus.display_all();
     //
     // cin >> asd;
-    if(counter == 5000)break;
+    if(counter == 500)break;
     campos.clear();
   }
-  bplus.displayTree();
+  bplus.display_all();
 
   archivo.close();
 
