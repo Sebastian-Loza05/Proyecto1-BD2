@@ -434,6 +434,7 @@ private:
         cout << previous->lexema << endl;
         if(match(Token::SEMICOLON)){
           records.clear();
+          cout<<value.first<<": "<<value.second<<endl;
           pair<Record,bool> result;
           if(value.second == "char"){
             char key[20];
@@ -577,9 +578,6 @@ private:
       if(counter == 2000)
         break;
       counter ++;
-      if(counter==2000){
-        break;
-      }
       campos.clear();
     }
     method->display_all();
