@@ -147,17 +147,30 @@ La eliminación de registro en el AVL File, sigue la misma estructura que la de 
 En un archivo B+ Tree, los nodos hojas contienen referencias directas a los registros reales del archivo de datos y están enlazados de manera similar a una lista enlazada, lo que permite soportar búsquedas individuales y por rango de manera eficiente. Por otro lado, los nodos internos conforman el directorio del índice y no almacenan información del archivo de datos. Cada nodo interno es representado por `Node` y las hojas por el `Bucket`.
 Los nodos internos estan en archivo bplus_datos.dat y las hojas en el archivo bplus_index.dat, cada archivo tiene un header next_del que representa la posición del ultimo elemento eliminado
 
+<p align="center">
+  <img src="Imagenes/Selección_336.png">
+</p>
+
 #### Inserción:
 
 La operación de inserción se encarga de agregar nuevos registros al árbol B+ de manera ordenada. Comienza desde la raíz del árbol y se desplaza hacia abajo siguiendo el camino adecuado según las claves. Si el nodo en el que se encuentra está lleno, se divide en dos nodos más pequeños para mantener el equilibrio del árbol. Se inserta el registro en el nodo adecuado. Si es necesario, se actualiza la clave en el nodo padre para reflejar la nueva clave máxima en el nodo insertado. Este proceso se repite desde la raíz hasta llegar a la hoja adecuada, donde finalmente se agrega el registro. Donde el root a pesar del split que pueda recibir siempre sera la línea cero, y al momento de insertar si hay un elemento eliminado escribirar donde indicar el header.
+
 
 #### Búsqueda de un registro:
 
 La búsqueda de un registro en un B+ Tree comienza desde la raíz y sigue un camino descendente a través del árbol siguiendo las claves. Comienza en la raíz y compara la clave buscada con las claves del nodo para determinar la dirección a seguir. Continúa descendiendo por el árbol, moviéndote al nodo hijo correspondiente en función de las comparaciones de claves. Repite el proceso hasta llegar a una hoja, donde se espera encontrar el registro si existe. Aqui las lecturas varian dependiendo de donde se encuentra actualmente, ya que es diferente un `Bucket` que un `Node`.
 
+<p align="center">
+  <img src="Imagenes/Selección_338.png">
+</p>
+
 #### Búsqueda de un registro por rango:
 
 Iniciamos la búsqueda desde el nodo raíz y descender por el árbol siguiendo las claves para encontrar el primer nodo que está dentro del rango, hasta llegar a un `Bucket` lo que indica que es hoja. A partir de la hoja, recorremos las hojas del árbol en orden, recopilando todos los registros cuyas claves están dentro del rango especificado.
+
+<p align="center">
+  <img src="Imagenes/Selección_337.png">
+</p>
 
 #### Eliminación:
 
