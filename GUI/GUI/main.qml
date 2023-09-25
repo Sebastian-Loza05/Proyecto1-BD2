@@ -19,7 +19,7 @@ ApplicationWindow {
                 height: 720
 
                 Image {
-                    source: "file:/home/sebastian/Documents/utec/Ciclo6/BD2/Proyecto1-BD2//GUI/GUI/images/fondo.jpeg"
+                    source: "file:/home/luisd/UTEC/ciclo_6/BDII/proyecto/Proyecto1-BD2/GUI/GUI/images/fondo.jpeg"
                     fillMode: Image.PreserveAspectCrop
                     anchors.fill: parent
                 }
@@ -39,7 +39,8 @@ ApplicationWindow {
                         spacing: 10
 
                         Image {
-                            source: "file:/home/sebastian/Documents/utec/Ciclo6/BD2/Proyecto1-BD2//GUI/GUI/images/BD.png"
+
+                            source: "file:/home/luisd/UTEC/ciclo_6/BDII/proyecto/Proyecto1-BD2/GUI/GUI/images/BD.png"
                             width: 200
                             height: 200
                             anchors.horizontalCenter: parent.horizontalCenter
@@ -119,7 +120,7 @@ ApplicationWindow {
                 height: 720
 
                 Image {
-                    source: "file:///E:/BD2/PROYECTO1/GUI/GUI/images/fondo.jpeg"
+                    source: "file:/home/luisd/UTEC/ciclo_6/BDII/proyecto/Proyecto1-BD2/GUI/GUI/images/fondo.jpeg"
                     fillMode: Image.PreserveAspectCrop
                     anchors.fill: parent
                 }

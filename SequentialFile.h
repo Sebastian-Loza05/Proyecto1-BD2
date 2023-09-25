@@ -557,7 +557,6 @@ public:
         if (!mainFile.is_open()) throw runtime_error("No se pudo abrir el archivo main");
 
         ifstream auxFile(auxFilename, ios::binary);
-        if (!auxFile.is_open()) throw runtime_error("No se pudo abrir el archivo auxiliar");
 
         Entry<R> record;
         int inicio = 0;
