@@ -73,8 +73,6 @@ La operación de merge es específica para el Sequential File y se utiliza para 
 
 En el caso de la eliminación, los archivos principales y auxiliares se combinan en uno solo para facilitar el acceso al registro anterior y posterior al que se desea eliminar. Al combinarlos, se ordenan completamente los registros, lo que permite encontrar fácilmente el registro anterior al que se va a eliminar. Luego, se realiza una búsqueda binaria basada en el valor clave del registro que se desea eliminar para encontrar su posición en el archivo y, en consecuencia, la posición del registro anterior. Con estas dos posiciones, se actualiza el atributo "nextPF" del registro anterior al que se quiere eliminar con el valor del siguiente registro al que se quiere eliminar. Por último, se actualiza el "nextPF" del registro a eliminar con '-2', lo que indica que el registro ha sido eliminado.
 
-#### Complejidades:
-
 ### AVL File:
 
 El AVL File es un sistema de organización que sigue la estrategia de un árbol binario de búsqueda balanceado. En este tipo de organización cada registro tiene un atributo "left" y "right" de tipo long que indica la posición en el archivo de su nodo izquierdo o derecho respectivamente. En este AVL File el archivo posee dos header, donde uno indica la posición del root y otro guarda la posicion del último eliminado.
@@ -143,19 +141,35 @@ Esta función retoran un `pair<Record,bool` cosa que si en caso no encuentra el 
 
 La eliminación de registro en el AVL File, sigue la misma estructura que la de un AVL Tree. Buscara la posición del record con cierta key que mandemos, comparando la key con la key del nodo actual para movilizarnos hasta la posición. Una vez encontrada el registro se validara los casos de eliminación que existe, si es que tiene un nodo right y left, o solo uno de ambos o ninguno. Al momento de eliminar seguimos la estrategia LIFO para la actualización del next_del del header, cosa que insertemos nuevos valores en la posición del next_del actual.
 
-#### Complejidades:
 
-### B+ Tree:
+### B+ Tree File:
 
-
+En un archivo B+ Tree, los nodos hojas contienen referencias directas a los registros reales del archivo de datos y están enlazados de manera similar a una lista enlazada, lo que permite soportar búsquedas individuales y por rango de manera eficiente. Por otro lado, los nodos internos conforman el directorio del índice y no almacenan información del archivo de datos.
 
 #### Inserción:
 
-#### Búsqueda:
+La operación de inserción se encarga de agregar nuevos registros al árbol B+ de manera ordenada. Comienza desde la raíz del árbol y se desplaza hacia abajo siguiendo el camino adecuado según las claves. Si el nodo en el que se encuentra está lleno, se divide en dos nodos más pequeños para mantener el equilibrio del árbol. Se inserta el registro en el nodo adecuado. Si es necesario, se actualiza la clave en el nodo padre para reflejar la nueva clave máxima en el nodo insertado. Este proceso se repite desde la raíz hasta llegar a la hoja adecuada, donde finalmente se agrega el registro.
+
+#### Búsqueda de un registro:
+
+La búsqueda de un registro en un B+ Tree comienza desde la raíz y sigue un camino descendente a través del árbol siguiendo las claves. Comienza en la raíz y compara la clave buscada con las claves del nodo para determinar la dirección a seguir. Continúa descendiendo por el árbol, moviéndote al nodo hijo correspondiente en función de las comparaciones de claves. Repite el proceso hasta llegar a una hoja, donde se espera encontrar el registro si existe.
+
+#### Búsqueda de un registro:
+
+Iniciamos la búsqueda desde el nodo raíz y descender por el árbol siguiendo las claves para encontrar el primer nodo que está dentro del rango. A partir de ese nodo, recorremos las hojas del árbol en orden, recopilando todos los registros cuyas claves están dentro del rango especificado.
 
 #### Eliminación:
 
-#### Complejidades:
+Comenzamos desde la raíz y descendemos por el árbol para encontrar el nodo que contiene el registro a eliminar. Una vez encontrado, el registro se elimina del nodo.
+Si la eliminación causa que el nodo tenga muy pocos registros e incumple las propiedades del B+ Tree, se realiza redistribución o merge de nodos para mantener la estructura equilibrada.
+
+### Análisis comparativo:
+
+| Métodos      |   SequetialFile    |     AVLFile        |   B+ Tree File     |
+|--------------|--------------------|--------------------|--------------------|
+| Búsqueda     |    O(log n)        |             |             |
+| Insercción   |    O(log n)        |            |            |
+| Eliminación  |    O(log n)        |             |             |
 
 ### Parser SQL:
 
