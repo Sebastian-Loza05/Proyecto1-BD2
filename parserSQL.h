@@ -412,7 +412,7 @@ private:
   }
 
   bool parseEqual(){
-    if(match(Token::NUM) | match(Token::ID) ){
+    if(match(Token::NUM) ){
       return true;
     }
     else if(match(Token::QUOTE)){
