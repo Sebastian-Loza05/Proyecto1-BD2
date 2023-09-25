@@ -74,7 +74,7 @@ private:
 
 public:
     AVLFile(){
-      this->filename = "../../../AVLdata.dat";
+      this->filename = "AVLdata.dat";
       ofstream file(this->filename, ios::binary | ios::app);
       file.close();
 

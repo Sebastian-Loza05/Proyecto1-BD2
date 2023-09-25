@@ -190,10 +190,10 @@ int main (int argc, char *argv[]) {
   // ingreso(method);
   // MethodSelector<Record2> *seq = new BPlusFile<Record2, char*, 20>();
   // MethodSelector<Record> *seq = new BPlusFile<Record, int, sizeof(int)>();
-  // MethodSelector<Record2> *seq = new AVLFile<Record2, char*>;
+  MethodSelector<Record> *seq = new AVLFile<Record, int>;
   // MethodSelector<Record> *seq = new AVLFile<Record, int>;
   // MethodSelector<Record2> *seq = new SequentialFile<Record2, char*>();
-  MethodSelector<Record> *seq = new SequentialFile<Record, int>();
+  // MethodSelector<Record> *seq = new SequentialFile<Record, int>();
   ingreso(seq);
   
 
