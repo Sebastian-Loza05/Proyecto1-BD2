@@ -20,7 +20,7 @@ struct Entry {
     Entry(Record record_){
       this->record = record_;
     }
-
+  public:
     void setData(){
         cout<<"ID:";
         cin>>record.key;
@@ -34,9 +34,11 @@ struct Entry {
         cin>>record.cantidad;
     }
 
-    // void showData(){
-    //         cout<<id<<" - "<<nombre<<" - "<<producto<<" - "<<precio<<" - "<<cantidad<<endl;
-    // }
+    void showData(){
+      cout << nextPF << " " << isMain << endl;
+      record.print();
+    }
+
 };
 
 template <typename T>
@@ -50,9 +52,6 @@ public:
         this->mainFilename = "sequential_datos.dat";
         this->auxFilename = "sequential_aux.dat";
         // ofstream main(this->mainFilename, ios::binary | ios::app);
-        ofstream aux(this->auxFilename, ios::binary | ios::app);
-        // main.close();
-        aux.close();
 
         ifstream mainFile(this->mainFilename, ios::binary);
         if (!mainFile) {
@@ -63,6 +62,7 @@ public:
             newMainFile.write((char*)&isMain, sizeof(bool));
             newMainFile.close();
         }
+        cout << "asd" << endl;
     }
 
     SequentialFile(string mainFilename, string auxFilename) {
@@ -82,8 +82,11 @@ public:
 
 
     bool add(Record Nuevorecord) override {
+        cout << "Insert" << endl;
 
         Entry NuevoEntry(Nuevorecord);
+        
+        NuevoEntry.showData();
 
         ifstream auxp(auxFilename, ios::binary | ios::app);
 
@@ -116,10 +119,13 @@ public:
 
         Entry FirstEntry;
         mainFile.read((char*)&FirstEntry, sizeof(Entry));
+        FirstEntry.showData();
 
+                        cout << "Insert_1111__" << endl;
         if ( menor_igual(NuevoEntry.record.key, FirstEntry.record.key) ) {
         // if(FirstEntry.record.key>=NuevoEntry.record.key){ // FirstEntry.record.key   NuevoEntry <=
 
+                        cout << "Insert___" << endl;
             if(HisMain){
                 NuevoEntry.nextPF=HnextPF;
                 NuevoEntry.isMain=HisMain;
@@ -134,9 +140,12 @@ public:
                 mainFile.write((char*)&HnextPF, sizeof(int));
                 mainFile.write((char*)&HisMain, sizeof(bool));
                 mainFile.close();
+                        cout << "Insert11___" << endl;
             }
 
             else{
+        
+                        cout << "Iasdasnsert___" << endl;
                 Entry PrevioRecord;
                 ifstream auxFile(auxFilename, ios::binary | ios::app);
                 auxFile.seekg(HnextPF*sizeof(Entry));
@@ -153,6 +162,7 @@ public:
                     auxFile.seekg(PrevioRecord.nextPF*sizeof(Entry));
                     auxFile.read((char*)&SPrevioRecord,sizeof(Entry));
                     while ( menor_igual(SPrevioRecord.record.key, NuevoEntry.record.key) and SPrevioRecord.isMain ) {
+                        cout << "Insert___" << endl;
                     // while(SPrevioRecord.record.key<=NuevoEntry.record.key and SPrevioRecord.isMain){
                         posPrevio=PrevioRecord.nextPF;
                         PrevioRecord=SPrevioRecord;
@@ -181,9 +191,12 @@ public:
             return true;
         }
 
+                        cout << "Inseaaaart___" << endl;
         mainFile.seekg(0, ios::end);
 
         if ((int)mainFile.tellg() <= sizeof(int) + sizeof(bool)) {
+                        cout << "Insert_3453__" << endl;
+
             NuevoEntry.nextPF = -1;
             ofstream mainFile(mainFilename, ios::binary | ios::app);
             mainFile.write((char*)&NuevoEntry, sizeof(Entry));
@@ -193,6 +206,7 @@ public:
 
         else {
 
+                        cout << "Insert__12321321312_" << endl;
             int inicio = 0;
             mainFile.seekg(0, ios::end);
             int tamMain = mainFile.tellg() / sizeof(Entry);
@@ -205,6 +219,7 @@ public:
             int pos;
             bool lastMain=true;
             while (inicio <= fin) {
+                        cout << "Insert___" << endl;
                 medio = (inicio + fin) / 2;
                 mainFile.seekg(medio * sizeof(Entry) + sizeof(int) + sizeof(bool));
                 mainFile.read((char *) &record, sizeof(Entry));
@@ -632,4 +647,14 @@ public:
         file.close();
         return result;
     }
+
+
+    void display_all() override {
+      vector<Record>vec = load();
+      for (int i = 0; i < vec.size(); i++) {
+        vec[i].print();
+      }
+      cout << endl;
+      return;
+    };
 };

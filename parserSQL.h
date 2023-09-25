@@ -425,6 +425,7 @@ private:
       if(match(Token::AND)){
         if(match(Token::NUM)){
           if(match(Token::SEMICOLON)){
+            
             cout<<"Busqueda por rango"<<endl;
             return;
           }
@@ -488,9 +489,10 @@ private:
       // cout << campos[4] << endl;
       precio = stof(campos[4]);
       cantidad = stoi(campos[5]);
-
+      cout << "--------" << endl;
       Record record(key,nombre,producto,marca,precio,cantidad);
       bool asd__ = method->add(record);
+      cout << "---*----" << endl;
       method->display_all();
       if(counter == 2000)
         break;

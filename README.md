@@ -84,6 +84,7 @@ El AVL File es un sistema de organización que sigue la estrategia de un árbol 
 |   data-1  |   left-1  |  right-1 |  height-1 |  nex_del-1 |
 |   data-2  |   left-2  |  right-2 |  height-2 |  nex_del-2 |
 |   data-3  |   left-3  |  right-3 |  height-3 |  nex_del-3 |
+|    ...    |    ...    |    ...   |    ...    |     ...    |
 
 #### Inserción:
 
@@ -145,6 +146,8 @@ La eliminación de registro en el AVL File, sigue la misma estructura que la de 
 #### Complejidades:
 
 ### B+ Tree:
+
+
 
 #### Inserción:
 

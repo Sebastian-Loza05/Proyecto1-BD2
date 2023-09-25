@@ -10,10 +10,10 @@ using namespace std;
 template<typename  T>
 void ingreso(T *method){
   // BPlusFile<long , sizeof(long)> bplus;
-  ifstream archivo("datos_prueba.csv");
-  
+  ifstream archivo("datosprueba.csv");
+  cout << "asdasdsa" << endl; 
   if (!archivo.is_open()) {
-    cout << "Error al abrir el archivo" << endl;
+    cout << "Error al abrir el archivo___" << endl;
     return;
   }
 
@@ -30,18 +30,18 @@ void ingreso(T *method){
       campos.push_back(campo);
     }
 
-    char key[20];
-    // long key;
+    // char key[20];
+    int key;
     char nombre[20];
     char producto[20];
     char marca[20];
     float precio;
     int cantidad;
     
-    // key = stoi(campos[0]);
+    key = stoi(campos[0]);
     
-    strncpy(key, campos[0].c_str(), sizeof(key) - 1);
-    nombre[sizeof(key) - 1 ]= '\0';
+    // strncpy(key, campos[0].c_str(), sizeof(key) - 1);
+    // nombre[sizeof(key) - 1 ]= '\0';
 
     strncpy(nombre, campos[1].c_str(), sizeof(nombre) - 1);
     nombre[sizeof(nombre) - 1 ]= '\0';
@@ -69,24 +69,24 @@ void ingreso(T *method){
     // cout << endl << endl << endl;
       bool inser = 0;
     // method->display_all();
-    method->display();
-    vector<Record> vec1 = method->load();
-    
-    for (int i = 0; i < vec1.size(); i++) {
-      vec1[i].print();
-      cout << "-----" << endl;
-    }
+    // method->display();
+    // vector<Record> vec1 = method->load();
+    // 
+    // for (int i = 0; i < vec1.size(); i++) {
+    //   vec1[i].print();
+    //   cout << "-----" << endl;
+    // }
     cin >> inser;
     if (inser) {
       cout << "Key: ";
       char key_insert_b[20], key_insert_e[20];
       cin >> key_insert_b >> key_insert_e;
 
-      vector<Record> vec = method->rangeSearch(key_insert_b, key_insert_e);
-      for (int i = 0; i < vec.size(); i++) {
-        vec[i].print();
-        cout << "-----" << endl;
-      }
+      // vector<Record> vec = method->range;
+      // for (int i = 0; i < vec.size(); i++) {
+      //   vec[i].print();
+      //   cout << "-----" << endl;
+      // }
       // if (asd__.second) {
       //   asd__.first.print();
       // }
@@ -149,8 +149,8 @@ int main (int argc, char *argv[]) {
   // }
   
   // ingreso(method);
-  // SequentialFile<int> *seq = new SequentialFile<int>;
-  // ingreso(seq);
+  SequentialFile<int> *seq = new SequentialFile<int>;
+  ingreso(seq);
   
 
   
