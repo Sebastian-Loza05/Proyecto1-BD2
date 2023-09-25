@@ -292,7 +292,7 @@ private:
       error_message = "Se esperaba un id" ;
       return false;
     }
-    error_message = "Se esperaba un aHERE";
+    error_message = "Se esperaba un WHERE";
     return false;
   }
 
@@ -381,17 +381,18 @@ private:
     if(match(Token::EQUAL)){
       bool v = parseEqual();
       if(v){
-        int value = stoi(previous->lexema);
+        cout << previous->lexema << endl;
+        // int value = stoi(previous->lexema);
         if(match(Token::SEMICOLON)){
           records.clear();
-          pair<Record,bool> result = method->search(value);
-          cout<<"Busqueda unitaria"<<endl;
-          if (result.second) {
-            records.push_back(result.first);
-          }
-          else{
-            error_message = "No existe un elemento con la llave buscada";
-          }
+          // pair<Record,bool> result = method->search(value);
+          // cout<<"Busqueda unitaria"<<endl;
+          // if (result.second) {
+          //   records.push_back(result.first);
+          // }
+          // else{
+          //   error_message = "No existe un elemento con la llave buscada";
+          // }
           atributos.clear();
           return;
         }
@@ -437,7 +438,7 @@ private:
         if(match(Token::NUM)){
           int end = stoi(previous->lexema);
           if(match(Token::SEMICOLON)){
-            
+            records.clear(); 
             cout<<"Busqueda por rango"<<endl;
             records = method->rangeSearch(begin, end);
             return;

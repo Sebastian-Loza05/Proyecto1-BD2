@@ -110,7 +110,6 @@ ApplicationWindow {
                     }
                 }
             }
->>>>>>> c581d16115f41802f3e3fdc0b1a74b2c9f030042
         }
 
         Component {
