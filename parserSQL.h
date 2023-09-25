@@ -14,7 +14,7 @@
 #include "Structures/methods.h"
 using namespace std;
 
-inline MethodSelector* method = nullptr;
+inline MethodSelector* method = new MethodSelector();
 inline vector<Record> records;
 inline string error_message;
 
@@ -265,7 +265,7 @@ private:
       error_message = "Se esperaba un id" ;
       return false;
     }
-    error_message = "Se esperaba un WHERE";
+    error_message = "Se esperaba un aHERE";
     return false;
   }
 
@@ -354,14 +354,24 @@ private:
     if(match(Token::EQUAL)){
       bool v = parseEqual();
       if(v){
+        int value = stoi(previous->lexema);
         if(match(Token::SEMICOLON)){
+          records.clear();
+          pair<Record,bool> result = method->search(value);
           cout<<"Busqueda unitaria"<<endl;
+          if (result.second) {
+            records.push_back(result.first);
+          }
+          else{
+            error_message = "No existe un elemento con la llave buscada";
+          }
           atributos.clear();
           return;
         }
         error_message = "Sintaxis incorrecta";
         return;
       }
+      
       return;
     }
     else if(match(Token::BETWEEN)){
@@ -374,7 +384,7 @@ private:
   }
 
   bool parseEqual(){
-    if(match(Token::NUM)){
+    if(match(Token::NUM) | match(Token::ID) ){
       return true;
     }
     else if(match(Token::QUOTE)){
@@ -394,12 +404,15 @@ private:
 
   void parse_range(){
     if(match(Token::NUM)){
+      int begin = stoi(previous->lexema);
       // cout<"<"numero: "<<previous->lexema<<endl;
       if(match(Token::AND)){
         if(match(Token::NUM)){
+          int end = stoi(previous->lexema);
           if(match(Token::SEMICOLON)){
             
             cout<<"Busqueda por rango"<<endl;
+            records = method->rangeSearch(begin, end);
             return;
           }
           error_message = "Sintaxis Incorrecta";
