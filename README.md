@@ -145,15 +145,26 @@ La eliminación de registro en el AVL File, sigue la misma estructura que la de 
 
 #### Complejidades:
 
-### B+ Tree:
+### B+ Tree File:
 
-
+En un archivo B+ Tree, los nodos hojas contienen referencias directas a los registros reales del archivo de datos y están enlazados de manera similar a una lista enlazada, lo que permite soportar búsquedas individuales y por rango de manera eficiente. Por otro lado, los nodos internos conforman el directorio del índice y no almacenan información del archivo de datos.
 
 #### Inserción:
 
-#### Búsqueda:
+La operación de inserción se encarga de agregar nuevos registros al árbol B+ de manera ordenada. Comienza desde la raíz del árbol y se desplaza hacia abajo siguiendo el camino adecuado según las claves. Si el nodo en el que se encuentra está lleno, se divide en dos nodos más pequeños para mantener el equilibrio del árbol. Se inserta el registro en el nodo adecuado. Si es necesario, se actualiza la clave en el nodo padre para reflejar la nueva clave máxima en el nodo insertado. Este proceso se repite desde la raíz hasta llegar a la hoja adecuada, donde finalmente se agrega el registro.
+
+#### Búsqueda de un registro:
+
+La búsqueda de un registro en un B+ Tree comienza desde la raíz y sigue un camino descendente a través del árbol siguiendo las claves. Comienza en la raíz y compara la clave buscada con las claves del nodo para determinar la dirección a seguir. Continúa descendiendo por el árbol, moviéndote al nodo hijo correspondiente en función de las comparaciones de claves. Repite el proceso hasta llegar a una hoja, donde se espera encontrar el registro si existe.
+
+#### Búsqueda de un registro:
+
+Iniciamos la búsqueda desde el nodo raíz y descender por el árbol siguiendo las claves para encontrar el primer nodo que está dentro del rango. A partir de ese nodo, recorremos las hojas del árbol en orden, recopilando todos los registros cuyas claves están dentro del rango especificado.
 
 #### Eliminación:
+
+Comenzamos desde la raíz y descendemos por el árbol para encontrar el nodo que contiene el registro a eliminar. Una vez encontrado, el registro se elimina del nodo.
+Si la eliminación causa que el nodo tenga muy pocos registros e incumple las propiedades del B+ Tree, se realiza redistribución o merge de nodos para mantener la estructura equilibrada.
 
 #### Complejidades:
 
