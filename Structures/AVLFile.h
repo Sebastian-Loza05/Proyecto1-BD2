@@ -12,7 +12,6 @@
 #include <vector>
 using namespace std;
 
-inline int a = 5;
 
 template<typename R>
 struct NodeBTAVL{
