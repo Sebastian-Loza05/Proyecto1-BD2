@@ -21,10 +21,11 @@ class BridgeClass : public QObject
 
 public:
     explicit BridgeClass(QObject *parent = nullptr);
-    Q_INVOKABLE QStringList getThreeLines(const QString& filename);
-    Q_INVOKABLE QStringList getRecords();
     Q_INVOKABLE bool verifyLogin(const QString& username, const QString& password);
+    Q_INVOKABLE QString getErrorMessage() const;
+    Q_INVOKABLE QString readRecords() const;
 signals:
+    void errorOccurred();
     void dataChanged();
 
 public slots:
@@ -35,18 +36,9 @@ public slots:
 private:
     QString m_method;
     QString m_query;
-    QVector<QVector<QString>> readFirstThreeLines(const QString& filename);
-    MethodSelector* method_global;
-    struct record {
-        QString codigo;
-        QString nombre;
-        QString producto;
-        QString marca;
-        double precio;
-        int cantidad;
-    };
-
-    QVector<record> records;
+    MethodSelector<Record>* method_global;
+    string global_error_message;
+    vector<Record> global_records;
 };
 
 

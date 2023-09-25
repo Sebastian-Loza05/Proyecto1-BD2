@@ -19,7 +19,7 @@ ApplicationWindow {
                 height: 720
 
                 Image {
-                    source: "file:/home/luisd/UTEC/ciclo_6/BDII/proyecto/Proyecto1-BD2/GUI/GUI/images/fondo.jpeg"
+                    source: "file:///E:/BD2/PROYECTO1/GUI/GUI/images/fondo.jpeg"
                     fillMode: Image.PreserveAspectCrop
                     anchors.fill: parent
                 }
@@ -40,14 +40,14 @@ ApplicationWindow {
 
                         Image {
 
-                            source: "file:/home/luisd/UTEC/ciclo_6/BDII/proyecto/Proyecto1-BD2/GUI/GUI/images/BD.png"
+                            source: "file:///E:/BD2/PROYECTO1/GUI/GUI/images/BD.png"
                             width: 200
                             height: 200
                             anchors.horizontalCenter: parent.horizontalCenter
                         }
 
                         Text {
-                            text: "Log In"
+                            text: "Welcome"
                             font.bold: true
                             font.pixelSize: 30
                             color: "white"
@@ -89,7 +89,7 @@ ApplicationWindow {
                         }
 
                         Button {
-                            text: "Entrar"
+                            text: "Log In"
                             onClicked: {
                                 if (bridge.verifyLogin(usernameTextField.text, passwordTextField.text)) {
                                     errorMessage.visible = false;
@@ -150,8 +150,8 @@ ApplicationWindow {
                             clip: true
 
                             ScrollView {
-                                    anchors.fill: parent
-                                    clip: true
+                                anchors.fill: parent
+                                clip: true
                                 TextArea {
                                     id: txtArea
                                     width: parent.width
@@ -164,12 +164,18 @@ ApplicationWindow {
                         Row {
                             spacing: 10
                             Button {
-                                text: "RUN"
+                                text: "Run"
                                 onClicked: {
-                                    outputArea.text = "Consulta: " + txtArea.text;
                                     bridge.runQuery(txtArea.text);
+                                    if(bridge.getErrorMessage() !== "") {
+                                        outputArea.text = "Error: " + bridge.getErrorMessage();
+                                    } else {
+                                        outputArea.text = bridge.readRecords();
+                                    }
                                 }
+
                             }
+
 
                             Button {
                                 text: "Clear"
@@ -177,15 +183,11 @@ ApplicationWindow {
                                     txtArea.text = "";
                                     // Limpia otros elementos si es necesario
                                 }
+
                             }
 
-                            Button {
-                                text: "Show Records"
-                                onClicked: {
-                                    var records = bridge.getRecords();
-                                    outputArea.text = records.join("\n");
-                                }
-                            }
+
+
                         }
 
                         Rectangle {
@@ -195,9 +197,10 @@ ApplicationWindow {
                             border.color: "black"
                             radius: 10
                             clip: true
+
                             ScrollView {
-                                    anchors.fill: parent
-                                    clip: true
+                                anchors.fill: parent
+                                clip: true
                                 TextArea {
                                     id: outputArea
                                     width: parent.width
@@ -209,7 +212,7 @@ ApplicationWindow {
                         }
 
                         Button {
-                            text: "Cerrar Sesión"
+                            text: "Log Out"
                             onClicked: {
                                 stackView.pop();
                             }

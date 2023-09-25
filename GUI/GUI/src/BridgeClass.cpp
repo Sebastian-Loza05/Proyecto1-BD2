@@ -1,88 +1,43 @@
 #include "BridgeClass.h"
 using namespace std;
 
-struct record {
-    QString codigo;
-    QString nombre;
-    QString producto;
-    QString marca;
-    double precio;
-    int cantidad;
-};
+
 
 BridgeClass::BridgeClass(QObject *parent) : QObject(parent) {
-    records.push_back({ "64528587", "Carla", "Reloj de", "Casio", 12.1, 3 });
-    records.push_back({ "75893210", "Luis", "Teléfono", "Samsung", 550.5, 5 });
-    records.push_back({ "47859603", "Jorge", "Teclado", "Logitech", 45.3, 10 });
-    records.push_back({ "23984756", "Sofia", "Audífonos", "Sony", 80.7, 7 });
-    records.push_back({ "58749213", "Juan", "Cámara", "Nikon", 400.8, 3 });
-
 }
-
-QStringList BridgeClass::getRecords() {
-    QString codigo = "codigo";
-    QString nombre = "nombre";
-    QString producto = "produto";
-    QString marca = "marca";
-    QString precio = "precio";
-    QString cantidad = "cantidad";
-    QStringList result;
-
-    result.append(codigo + "\t" + nombre + "\t" + producto + "\t" + marca + "\t" +precio + "\t" +cantidad);
-    for (const record &rec : records) {
-        result.append(rec.codigo + "\t" + rec.nombre + "\t" + rec.producto + "\t" + rec.marca + "\t" + QString::number(rec.precio) + "\t" + QString::number(rec.cantidad));
-    }
-    return result;
-}
-
-//BridgeClass::BridgeClass(QObject *parent) : QObject(parent) {
-//}
 
 void BridgeClass::runQuery(const QString& query)
 {
+    this->global_error_message = "";
+    if (query.isEmpty()) {
+        error_message = "Sintaxis Incorrecta :(";
+        this->global_error_message = error_message;
+        qDebug()<<global_error_message;
+        return;
+    } else {
+        qDebug()<<"Antes: "<<query;
+        std::string m_query = query.toStdString();
 
-    qDebug()<<"Antes: "<<query;
-    std::string m_query = query.toStdString();
+        m_query.erase(std::remove(m_query.begin(), m_query.end(), '\\'), m_query.end());
 
-    m_query.erase(std::remove(m_query.begin(), m_query.end(), '\\'), m_query.end());
+        qDebug() <<"Query: "<< m_query;
+        vector<string> querys = input(m_query);
+        for(int i=0;i<querys.size();i++){
+            Scanner scanner(querys[i]);
+            Parser parser(&scanner);
+            parser.parse();
+            this->global_error_message = error_message;
+            qDebug()<<global_error_message;
+            this->method_global=method;
+            this->global_records=records;
+        }
+        if(records.empty()) {
 
-    qDebug() <<"Query: "<< m_query;
-    vector<string> querys = input(m_query);
-    for(int i=0;i<querys.size();i++){
-        Scanner scanner(querys[i]);
-        Parser parser(&scanner);
-        parser.parse();
-        cout<<"Error: "<<error_message<<endl;
-        this->method_global=method;
+        }
+        readRecords();
+        emit dataChanged();
     }
 
-    emit dataChanged();
-}
-
-
-QStringList BridgeClass::getThreeLines(const QString& filename) {
-    QStringList result;
-    QFile file(filename);
-    if (!file.open(QIODevice::ReadOnly)) {
-        qDebug() << "Could not open file for reading";
-        return result;
-    }
-
-    QTextStream in(&file);
-    int count = 0;
-    static QRegularExpression regex("[,;]");
-    while (!in.atEnd() && count < 3) {
-        QString line = in.readLine();
-        qDebug() << "Original Line:" << line;  // Aquí agregamos un debug para ver la línea original
-        QStringList fields = line.split(regex);
-        QString processedLine = fields.join("\t");
-        qDebug() << "Processed Line:" << processedLine;  // Aquí vemos la línea procesada
-        result.append(processedLine);
-        count++;
-    }
-
-    file.close();
-    return result;
 }
 
 std::vector<std::string> BridgeClass::input(const string ingreso){
@@ -108,7 +63,7 @@ std::vector<std::string> BridgeClass::input(const string ingreso){
 };
 
 bool BridgeClass::verifyLogin(const QString& username, const QString& password) {
-    QFile file("/home/sebastian/Documents/utec/Ciclo6/BD2/Proyecto1-BD2/login.txt");
+    QFile file("E:/BD2/PROYECTO1/login.txt");
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         return false;
 
@@ -125,3 +80,74 @@ bool BridgeClass::verifyLogin(const QString& username, const QString& password) 
     file.close();
     return false;
 }
+
+QString BridgeClass::getErrorMessage() const {
+    return QString::fromStdString(global_error_message);
+}
+
+QString BridgeClass::readRecords() const {
+    /*QString result;
+
+    const int nombreMaxLen = 15; // Define una longitud máxima para cada campo
+    const int productoMaxLen = 15;
+    const int marcaMaxLen = 15;
+
+    qDebug() << "Recorriendo Records";
+
+    for (const Record &rec : global_records) {
+        QString nombrePadded = QString(rec.nombre).leftJustified(nombreMaxLen, ' '); // Rellena con espacios a la derecha
+        QString productoPadded = QString(rec.producto).leftJustified(productoMaxLen, ' ');
+        QString marcaPadded = QString(rec.marca).leftJustified(marcaMaxLen, ' ');
+
+        result += QString::number(rec.key) + "\t" +
+                  nombrePadded + "\t" +
+                  productoPadded + "\t" +
+                  marcaPadded + "\t" +
+                  QString::number(rec.precio) + "\t" +
+                  QString::number(rec.cantidad) + "\n";
+    }
+
+    qDebug() << "Se recorrio los records";
+
+    return result;
+*/
+
+    QString result;
+
+    int maxKeyLen = 0;
+    int maxNombreLen = 0;
+    int maxProductoLen = 0;
+    int maxMarcaLen = 0;
+    int maxPrecioLen = 0;
+    int maxCantidadLen = 0;
+
+    // Encontrar longitudes máximas
+    for (const Record &rec : global_records) {
+        maxKeyLen = qMax(maxKeyLen, QString::number(rec.key).length());
+        maxNombreLen = qMax(maxNombreLen, QString(rec.nombre).length());
+        maxProductoLen = qMax(maxProductoLen, QString(rec.producto).length());
+        maxMarcaLen = qMax(maxMarcaLen, QString(rec.marca).length());
+        maxPrecioLen = qMax(maxPrecioLen, QString::number(rec.precio).length());
+        maxCantidadLen = qMax(maxCantidadLen, QString::number(rec.cantidad).length());
+    }
+
+    // Construir la cadena con un tabulado correcto
+    for (const Record &rec : global_records) {
+        QString keyPadded = QString::number(rec.key).rightJustified(maxKeyLen, ' ');
+        QString nombrePadded = QString(rec.nombre).leftJustified(maxNombreLen, ' ');
+        QString productoPadded = QString(rec.producto).leftJustified(maxProductoLen, ' ');
+        QString marcaPadded = QString(rec.marca).leftJustified(maxMarcaLen, ' ');
+        QString precioPadded = QString::number(rec.precio).rightJustified(maxPrecioLen, ' ');
+        QString cantidadPadded = QString::number(rec.cantidad).rightJustified(maxCantidadLen, ' ');
+
+        result += keyPadded + "\t" +
+                  nombrePadded + "\t" +
+                  productoPadded + "\t" +
+                  marcaPadded + "\t" +
+                  precioPadded + "\t" +
+                  cantidadPadded + "\n";
+    }
+
+    return result;
+}
+
