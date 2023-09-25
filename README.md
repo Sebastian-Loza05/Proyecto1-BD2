@@ -4,7 +4,7 @@
 
 | Integrante                         | Tareas                 |
 |-----------------------------------|------------------------------|
-| Coorahua Peña, Ruben Aaron        |          UI                    |
+| Coorahua Peña, Ruben Aaron        |          Interfaz gráfica                    |
 | Golac Córdova, Luis David         |          AVL File - BPlus File                    |
 | Loza Mendoza, Sebastián           |          BPlus File - Parser SQL                    |
 | Pajuelo Reyes, César Eduardo      |            Sequential File - README.md                  |
