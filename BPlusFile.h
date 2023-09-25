@@ -17,8 +17,10 @@
 //Si usas windows descomenta la linea de abajo y comenta la de arriba.
 //#include <windows.h>
 
+
+template<typename R>
 struct Bucket{
-  vector<Record> records;
+  vector<R> records;
   int count;
   long next;
   int m;
@@ -27,7 +29,7 @@ struct Bucket{
   Bucket(int page_size){
     count = 0;
     page_size -= (sizeof(long) + (2*sizeof(int)));
-    this->m = page_size / sizeof(Record);
+    this->m = page_size / sizeof(R);
     //this->m = 5;
     records = vector<Record>(this->m);
     next_del = -1;
@@ -38,7 +40,7 @@ struct Bucket{
     file.write(reinterpret_cast<char*>(&count), sizeof(int));
     file.write(reinterpret_cast<char*>(&m), sizeof(int));
     for (int i = 0; i < m; i++) {
-      file.write((char*)&records[i], sizeof(Record));
+      file.write((char*)&records[i], sizeof(R));
       // cout << "-----WRITE----"<< endl;
       // records[i].print();
     }

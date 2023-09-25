@@ -14,7 +14,7 @@
 #include "Structures/methods.h"
 using namespace std;
 
-inline MethodSelector* method = nullptr;
+inline MethodSelector* method = new MethodSelector();
 inline vector<Record> records;
 inline string error_message = "";
 inline pair<string, string> tabla;
@@ -430,8 +430,18 @@ private:
     if(match(Token::EQUAL)){
       bool v = parseEqual();
       if(v){
+        cout << previous->lexema << endl;
+        // int value = stoi(previous->lexema);
         if(match(Token::SEMICOLON)){
-          cout<<"Busqueda unitaria"<<endl;
+          records.clear();
+          // pair<Record,bool> result = method->search(value);
+          // cout<<"Busqueda unitaria"<<endl;
+          // if (result.second) {
+          //   records.push_back(result.first);
+          // }
+          // else{
+          //   error_message = "No existe un elemento con la llave buscada";
+          // }
           atributos.clear();
           error_message = "";
           return;
@@ -439,6 +449,7 @@ private:
         error_message = "Sintaxis incorrecta";
         return;
       }
+      
       return;
     }
     else if(match(Token::BETWEEN)){
@@ -474,13 +485,19 @@ private:
 
   void parse_range(string nombre_tabla){
     if(match(Token::NUM)){
+      int begin = stoi(previous->lexema);
       // cout<"<"numero: "<<previous->lexema<<endl;
       if(match(Token::AND)){
         if(match(Token::NUM)){
+          int end = stoi(previous->lexema);
           if(match(Token::SEMICOLON)){
-            
+            records.clear(); 
             cout<<"Busqueda por rango"<<endl;
+<<<<<<< HEAD
             error_message = "";
+=======
+            records = method->rangeSearch(begin, end);
+>>>>>>> e2889f88c842844a429e56aa62b1093212c158a1
             return;
           }
           error_message = "Sintaxis Incorrecta";

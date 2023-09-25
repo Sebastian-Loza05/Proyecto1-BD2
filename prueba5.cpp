@@ -1,9 +1,10 @@
 #include <iostream>
 #include <typeinfo>
 #include <sstream>
-// #include "BPlusFile.h"
+#include "BPlusFile.h"
 #include "SequentialFile.h"
 #include "Structures/AVLFile.h"
+#include "Structures/methods.h"
 
 using namespace std;
 
@@ -104,6 +105,7 @@ void ingreso(T *method){
       // method->display();
     }
     
+    method->display_all();
     // cout << "Rpta: " << asd__ << endl;
     // cout << "Asda" << endl;
     // cout << "Asda" << endl;
@@ -149,7 +151,7 @@ int main (int argc, char *argv[]) {
   // }
   
   // ingreso(method);
-  SequentialFile<int> *seq = new SequentialFile<int>;
+  MethodSelector *seq = new BPlusFile<int, sizeof(int)>();
   ingreso(seq);
   
 
