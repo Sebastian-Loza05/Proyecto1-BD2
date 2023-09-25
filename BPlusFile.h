@@ -138,7 +138,7 @@ struct Node{
 
 
 template<typename R, typename TK, size_t N>
-class BPlusFile : public MethodSelector{
+class BPlusFile : public MethodSelector<R>{
   string filename;
   string indexname;
   long page_size;
@@ -226,27 +226,27 @@ public:
     file.close();
   }
 
-  vector<Record> rangeSearch(TK min, TK max) override{
+  vector<R> rangeSearch(TK min, TK max) override{
     fstream index(this->indexname, ios::binary | ios::in | ios::out);
     if (!index.is_open()) throw ("No se puede abrir el archivo");
 
     fstream data(this->filename, ios::binary | ios::in | ios::out);
     if (!data.is_open()) throw ("No se puede abrir el archivo");
-    vector<Record> res;
+    vector<R> res;
 
     data.seekg(0, ios::end);
-    if(data.tellg() == 0)
+    if(data.tellg() <= sizeof(long))
       // data vacia
       return res;
 
     long pos = sizeof(long);
   
     index.seekg(0, ios::end);
-    if (index.tellg()) {
+    if (index.tellg() > sizeof(long)) {
       index.seekg(sizeof(long), ios::beg);
       pos = search_recursive(root, min, index);
     }
-
+    cout << "Pos: " << pos << endl;
     long next_exist = pos;
     Bucket<R> bucket(page_size);
     
@@ -269,13 +269,13 @@ public:
 
   } 
 
-  pair<Record,bool> search(TK key) override{
-    Record res;
+  pair<R,bool> search(TK key) override{
+    R res;
     fstream index(this->indexname, ios::binary | ios::in | ios::out);
     fstream data(this->indexname, ios::binary | ios::in | ios::out);
     data.seekg(sizeof(long), ios::end);
     if(data.tellg() == sizeof(long))
-      return make_pair(Record(), false);
+      return make_pair(R(), false);
 
     index.seekg(0, ios::end);
     long pos = sizeof(long);
@@ -299,7 +299,7 @@ public:
     return make_pair(res, true);
   }
 
-  bool add(Record record) override{
+  bool add(R record) override{
 
     fstream index(this->indexname, ios::binary | ios::in | ios::out);
     if (!index.is_open()) throw ("No se puede abrir el archivo");
@@ -397,7 +397,7 @@ public:
     index.close();
   }
 
-  vector<Record> load() override {
+  vector<R> load() override {
     fstream data(this->filename, ios::binary | ios::in | ios::out);
     fstream index(this->indexname, ios::binary | ios::in | ios::out);
     if(!root_hoja){
@@ -417,7 +417,7 @@ public:
     Bucket<R> temp(page_size);
     temp.read(data);
     int contador = 0;
-    vector<Record> res;
+    vector<R> res;
     while(temp.next != -1){
       for(int j = 0; j < temp.count; j++ ){
         res.push_back(temp.records[j]);
@@ -475,7 +475,7 @@ public:
 
 private:
   
-  bool add_recursive(long pos_node, long pos_padre, TK key, Record value, bool leaf, fstream &index, fstream &data){
+  bool add_recursive(long pos_node, long pos_padre, TK key, R value, bool leaf, fstream &index, fstream &data){
     if(pos_node == -1){
       Bucket<R> node(page_size);
       node.records[0] = value;
@@ -522,7 +522,7 @@ private:
     return correcto;
   }
 
-  bool insertar(long &pos_node, bool leaf, TK key, Record value, fstream &index, fstream &data){
+  bool insertar(long &pos_node, bool leaf, TK key, R value, fstream &index, fstream &data){
     if (pos_node == -1) {  
       pos_node = sizeof(long);
       // Si es nodo interno 
@@ -561,7 +561,7 @@ private:
       Bucket<R> node(page_size);
       data.seekg(pos_node, ios::beg);
       node.read(data);
-      Record temp;
+      R temp;
       for (int i = 0; i < node.count; i++) {
         if (igual_igual(key, node.records[i].key)){
           return false;
@@ -657,7 +657,7 @@ private:
       }
       else if(i == (M-1)/2){
         medio = node.keys[i];
-        insertar(pos_padre, false, medio, Record(),index, data);
+        insertar(pos_padre, false, medio, R(),index, data);
       }
       else{
         node2.keys[node2.count] = node.keys[i];
@@ -1264,9 +1264,12 @@ private:
         break;
       }
     }
+    cout << "Lllego paso "<< endl;
     if(bajada == -1) bajada = node.count;
-    if(node.pre_leaf)
-      return bajada;
+    if(node.pre_leaf){
+      cout << "Lllego "<< endl;
+      return node.children[bajada];
+    }
     return search_recursive(node.children[bajada], key, index);
   }
 

@@ -41,7 +41,7 @@ struct NodeBTAVL{
 };
 
 template<typename T>
-class AVLFile: public MethodSelector {
+class AVLFile: public MethodSelector<T> {
 private:
     long pos_root;
     string filename;

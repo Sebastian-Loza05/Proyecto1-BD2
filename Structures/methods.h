@@ -4,19 +4,19 @@
 #include <vector>
 
 
-// template<typename TK>
+template<typename R>
 class MethodSelector{
 public:
   MethodSelector(){}
   
-  virtual bool add(Record record){
+  virtual bool add(R record){
     cout<<"add-method"<<endl;
     return false;
   }
 
-  virtual vector<Record> load() {
+  virtual vector<R> load() {
 
-    return vector<Record>();
+    return vector<R>();
   }
 
   virtual void display(){
@@ -28,16 +28,16 @@ public:
     return;
   }
 
-  virtual vector<Record> rangeSearch(int min, int max){
-    return vector<Record>();
+  virtual vector<R> rangeSearch(int min, int max){
+    return vector<R>();
   }
 
-  virtual vector<Record> rangeSearch(long min, long max){
-    return vector<Record>();
+  virtual vector<R> rangeSearch(long min, long max){
+    return vector<R>();
   }
 
-  virtual vector<Record> rangeSearch(char* min, char* max){
-    return vector<Record>();
+  virtual vector<R> rangeSearch(char* min, char* max){
+    return vector<R>();
   }
 
   virtual bool remove( char* key ){
@@ -52,16 +52,16 @@ public:
     return false;
   }
 
-  virtual pair<Record, bool> search(char* key){
-    return make_pair(Record(), false);
+  virtual pair<R, bool> search(char* key){
+    return make_pair(R(), false);
   }
 
-  virtual pair<Record, bool> search(int key){
-    return make_pair(Record(), false);
+  virtual pair<R, bool> search(int key){
+    return make_pair(R(), false);
   }
   
-  virtual pair<Record, bool> search(long key){
-    return make_pair(Record(), false);
+  virtual pair<R, bool> search(long key){
+    return make_pair(R(), false);
   }
   ~MethodSelector(){}
 };
