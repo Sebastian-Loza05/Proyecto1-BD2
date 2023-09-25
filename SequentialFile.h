@@ -43,8 +43,8 @@ struct Entry {
 
 };
 
-template <typename R, typename T>
-class SequentialFile: public MethodSelector {
+template <typename R>
+class SequentialFile: public MethodSelector<R> {
 private:
     string mainFilename;
     string auxFilename;

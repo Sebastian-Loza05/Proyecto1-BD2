@@ -11,8 +11,8 @@ using namespace std;
 template<typename  T>
 void ingreso(T *method){
   // BPlusFile<long , sizeof(long)> bplus;
-  // ifstream archivo("datosprueba.csv");
-  ifstream archivo("datos2.csv");
+  ifstream archivo("datosprueba.csv");
+  // ifstream archivo("datos2.csv");
   cout << "asdasdsa" << endl; 
   if (!archivo.is_open()) {
     cout << "Error al abrir el archivo___" << endl;
@@ -32,42 +32,54 @@ void ingreso(T *method){
       campos.push_back(campo);
     }
 
-    // char key[20];
-    //
-    // Record
-    // int key;
-    // char nombre[20];
-    // char producto[20];
-    // char marca[20];
-    // float precio;
-    // int cantidad;
-    // 
-    // key = stoi(campos[0]);
-    // strncpy(nombre, campos[1].c_str(), sizeof(nombre) - 1);
-    // nombre[sizeof(nombre) - 1 ]= '\0';
-    //
-    //
-    // strncpy(producto, campos[2].c_str(), sizeof(producto) - 1);
-    // producto[sizeof(producto) - 1 ]= '\0';
-    //
-    // strncpy(marca, campos[3].c_str(), sizeof(marca) - 1);
-    // marca[sizeof(marca) - 1 ]= '\0';
-    //
-    // // cout << campos[4] << endl;
-    // precio = stof(campos[4]);
-    // cantidad = stoi(campos[5]);
-    
-    // strncpy(key, campos[0].c_str(), sizeof(key) - 1);
-    // nombre[sizeof(key) - 1 ]= '\0';
+    int key;
+    char nombre[20];
+    char producto[20];
+    char marca[20];
+    float precio;
+    int cantidad;
 
-    // Record record(key,nombre,producto,marca,precio,cantidad);
-    // record.print();
+    key = stoi(campos[0]);
+    strncpy(nombre, campos[1].c_str(), sizeof(nombre) - 1);
+    nombre[sizeof(nombre) - 1 ]= '\0';
+
+
+    strncpy(producto, campos[2].c_str(), sizeof(producto) - 1);
+    producto[sizeof(producto) - 1 ]= '\0';
+
+    strncpy(marca, campos[3].c_str(), sizeof(marca) - 1);
+    marca[sizeof(marca) - 1 ]= '\0';
+
+    // cout << campos[4] << endl;
+    precio = stof(campos[4]);
+    cantidad = stoi(campos[5]);
+    Record record(key,nombre,producto,marca,precio,cantidad);
+    record.print();
 
     // cout << "---prev---" << endl;
     // method->display_all();
     // cout << "--**----" << endl;
     cout << "Insert: ";
     string asd;
+
+
+    // char key[20];
+    // char genero[20];
+    // char profesion[20];
+    // int edad;
+    // float sueldo;
+    //
+    // strncpy(key, campos[0].c_str(), sizeof(key) - 1);
+    // key[sizeof(key) - 1 ]= '\0';
+    // strncpy(genero, campos[1].c_str(), sizeof(genero) - 1);
+    // genero[sizeof(genero) - 1 ]= '\0';
+    // strncpy(profesion, campos[2].c_str(), sizeof(profesion) - 1);
+    // profesion[sizeof(profesion) - 1 ]= '\0';
+    // edad = stoi(campos[3]);
+    // sueldo = stof(campos[4]);
+    // Record2 record(key,genero,profesion,edad,sueldo);
+    // record.print();
+    // Record
     // if (counter > 96)
     //   cin >> asd;
     // cout << endl << endl << endl;
@@ -83,14 +95,16 @@ void ingreso(T *method){
     cin >> inser;
     if (inser) {
       cout << "Key: ";
-      char key_insert_b[20], key_insert_e[20];
+      int key_insert_b, key_insert_e;
+      // char key_insert_b[20], key_insert_e[20];
       cin >> key_insert_b >> key_insert_e;
 
-      // vector<Record> vec = method->range;
-      // for (int i = 0; i < vec.size(); i++) {
-      //   vec[i].print();
-      //   cout << "-----" << endl;
-      // }
+      vector<Record> vec = method->rangeSearch(key_insert_b,key_insert_e);
+      for (int i = 0; i < vec.size(); i++) {
+        vec[i].print();
+      }
+        cout << "-----" << endl;
+
       // if (asd__.second) {
       //   asd__.first.print();
       // }
@@ -154,7 +168,8 @@ int main (int argc, char *argv[]) {
   // }
   
   // ingreso(method);
-  MethodSelector *seq = new BPlusFile<Record, int, sizeof(int)>();
+  // MethodSelector<Record2> *seq = new BPlusFile<Record2, char*, 20>();
+  MethodSelector<Record> *seq = new BPlusFile<Record, int, sizeof(int)>();
   // MethodSelector *seq = new SequentialFile<int>();
   ingreso(seq);
   
