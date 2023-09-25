@@ -14,11 +14,14 @@
 #include "Structures/methods.h"
 using namespace std;
 
-
 inline MethodSelector<Record>* method = new MethodSelector<Record>();
+inline MethodSelector<Record2>* method1 = new MethodSelector<Record2>();
 inline vector<Record> records;
+inline vector<Record2> records1;
 inline string error_message = "";
+inline vector<pair<string,string> > tablas(2);
 inline pair<string, string> tabla;
+
 
 class Parser {
   Scanner* scanner;
@@ -64,26 +67,48 @@ private:
   
   void insertarValues(){
     try{
-      // char key[20];
-      int key = stoi(values[0].first);
-      char nombre[20];
-      char producto[20];
-      char marca[20];
-      float precio = stof(values[4].first);
-      int cantidad = stof(values[5].first);
-      strncpy(nombre, values[1].first.c_str(), sizeof(nombre) - 1);
-      nombre[sizeof(nombre) - 1 ]= '\0';
-      strncpy(producto, values[2].first.c_str(), sizeof(producto) - 1);
-      producto[sizeof(producto) - 1 ]= '\0';
-      strncpy(marca, values[3].first.c_str(), sizeof(marca) - 1);
-      marca[sizeof(marca) - 1 ]= '\0';
-      Record record(key,nombre,producto,marca,precio,cantidad);
-      bool added = method->add(record);
-      if(!added)
-        error_message = "Ya existe este elemento";
-      cout<<"Insertado"<<endl;
-      error_message = "";
-    
+      if(tabla.second == "record1"){
+        char nombre[20];
+        char producto[20];
+        char marca[20];
+        float precio = stof(values[4].first);
+        int cantidad = stof(values[5].first);
+        strncpy(nombre, values[1].first.c_str(), sizeof(nombre) - 1);
+        nombre[sizeof(nombre) - 1 ]= '\0';
+        strncpy(producto, values[2].first.c_str(), sizeof(producto) - 1);
+        producto[sizeof(producto) - 1 ]= '\0';
+        strncpy(marca, values[3].first.c_str(), sizeof(marca) - 1);
+        marca[sizeof(marca) - 1 ]= '\0';
+        int key = stoi(values[0].first);
+        Record record(key,nombre,producto,marca,precio,cantidad);
+        bool added = method->add(record);
+        if(!added)
+          error_message = "Ya existe este elemento";
+        cout<<"Insertado"<<endl;
+        error_message = "";
+      }
+      else{
+        char genero[20];
+        char profesion[20];
+        char marca[20];
+        int edad = stoi(values[4].first);
+        float sueldo = stof(values[5].first);
+        strncpy(genero, values[1].first.c_str(), sizeof(genero) - 1);
+        genero[sizeof(genero) - 1 ]= '\0';
+        strncpy(profesion, values[2].first.c_str(), sizeof(profesion) - 1);
+        profesion[sizeof(profesion) - 1 ]= '\0';
+        strncpy(marca, values[3].first.c_str(), sizeof(marca) - 1);
+        marca[sizeof(marca) - 1 ]= '\0';
+        char key[20];
+        strncpy(key, values[0].first.c_str(), sizeof(key) - 1);
+        key[sizeof(key) - 1 ]= '\0';
+        Record2 record(key,genero,profesion,edad,sueldo);
+        bool added = method1->add(record);
+        if(!added)
+          error_message = "Ya existe este elemento";
+        cout<<"Insertado"<<endl;
+        error_message = "";
+      }
     } catch (const std::exception& e){
       error_message = "Valores incorrectos para la tabla";
     }
@@ -151,7 +176,7 @@ private:
       if(match(Token::INTO)){
         if(match(Token::ID)){
           string tabla_nombre = previous->lexema;
-          if(tabla_nombre != tabla.first){
+          if(!match_tabla(tabla_nombre)){
             error_message = "No existe esa tabla";
             return;
           }
@@ -180,11 +205,6 @@ private:
       if(!res) return false;
       if(match(Token::RPARENT)){
         if(match(Token::SEMICOLON)){
-          //Insertar
-          if(tabla.first != nombre_tabla){
-            error_message = "No existe la tabla " + nombre_tabla;
-            return false;
-          }
           insertarValues();
           return true;
         }
@@ -256,12 +276,14 @@ private:
       if(match(Token::ID)){
         nombre_tabla = previous->lexema;
         if(match(Token::SEMICOLON)){
-          if(nombre_tabla != tabla.first){
+          if(!match_tabla(nombre_tabla)){
             error_message = "No existe la tabla " + nombre_tabla;
             return;
           }
-          cout<<"Mostrar tabla"<<endl;
-          records = method->load();
+          if(tabla.second == "record1")
+            records = method->load();
+          else
+            records1 = method1->load();
           atributos.clear();
           error_message = "";
           return;
@@ -286,8 +308,9 @@ private:
     if(match(Token::FROM)){
       if(match(Token::ID)){
         string nombre_table = previous->lexema;
-        if(nombre_table != tabla.first){
+        if(!match_tabla(nombre_table)){
           error_message = "No existe la tabla "+ nombre_table;
+          return;
         }
         bool r = parseConditionDelete(nombre_table);
         return;
@@ -306,20 +329,7 @@ private:
           if(r){
             if(match(Token::SEMICOLON)){
               cout<<" Eliminacion"<<endl;
-              bool deleted;
-              if(value.second == "char"){
-                char key[20];
-                strncpy(key, value.first.c_str(), sizeof(key) - 1);
-                key[sizeof(key) - 1 ]= '\0';
-                deleted = method->remove(key);
-              }else if (value.second == "int"){
-                int key = stoi(value.first);
-                deleted = method->remove(key);
-              }
-              if(!deleted){
-                error_message = "No existe este valor.";
-                return false;
-              }
+              deleteKey(nombre_tabla);
               error_message = "";
               return true;
             }
@@ -335,6 +345,39 @@ private:
     }
     error_message = "Se esperaba un WHERE";
     return false;
+  }
+
+  bool match_tabla(string nombre_tabla){
+    if(nombre_tabla == tablas[0].first){
+      tabla = tablas[0];
+      return true;
+    }
+    else if(nombre_tabla == tablas[1].first){
+      tabla = tablas[1];
+      return true;
+    }
+    return false;
+  }
+
+  void deleteKey(string nombre_tabla){
+    try {
+      bool deleted;
+      if(tabla.second == "record2"){
+        char key[20];
+        strncpy(key, value.first.c_str(), sizeof(key) - 1);
+        key[sizeof(key) - 1 ]= '\0';
+        deleted = method1->remove(key);
+      }else if (tabla.second == "record1"){
+        int key = stoi(value.first);
+        deleted = method->remove(key);
+      }
+      if(!deleted){
+        error_message = "No existe este valor.";
+        return;
+      }
+    }catch(const std::exception &e){
+      error_message = "Error al eliminar.";
+    }
   }
 
   void parseFile(string nombre_tabla){
@@ -370,11 +413,25 @@ private:
   }
   
   void parseIndexType(string filename, string nombre_tabla){
+    string archivo = "";
+    int i = filename.length()-1;
+    while (filename[i] != '/'){
+      archivo = filename[i] + archivo;
+      i--;
+    }
+    cout<<"archivo: "<<archivo<<endl;
     if(match(Token::BPLUS)){
       if(match(Token::SEMICOLON)){
-        method = new BPlusFile<Record,int, sizeof(int)>();
-        tabla = make_pair(nombre_tabla, "record1");
-        tabla = make_pair(nombre_tabla, "record2");
+        if(archivo == "datos.csv"){
+          method = new BPlusFile<Record,int, sizeof(int)>();
+          tablas[0] = make_pair(nombre_tabla, "record1");
+          tabla = tablas[0];
+        }
+        else if(archivo == "datos2.csv"){
+          method1 = new BPlusFile<Record2,int, sizeof(int)>();
+          tablas[1] = make_pair(nombre_tabla, "record2");
+          tabla = tablas[1];
+        }
         insertCsv(filename);
         error_message = "";
         cout<<"Se crea tabla con index bplus"<<endl;
@@ -386,9 +443,16 @@ private:
     }
     else if(match(Token::AVL)){
       if(match(Token::SEMICOLON)){
-        method = new AVLFile<Record,int>();
-        tabla = make_pair(nombre_tabla, "record1");
-        tabla = make_pair(nombre_tabla, "record2");
+        if(archivo == "datos.csv"){
+          method = new AVLFile<Record,int>();
+          tablas[0] = make_pair(nombre_tabla, "record1");
+          tabla = tablas[0];
+        }
+        else if(archivo == "datos2.csv"){
+          method1 = new AVLFile<Record2,int>();
+          tablas[1] = make_pair(nombre_tabla, "record2");
+          tabla = tablas[1];
+        }
         insertCsv(filename);
         cout<<"Se crea tabla con index avl"<<endl;
         error_message = "";
@@ -399,9 +463,16 @@ private:
     }
     else if(match(Token::SEQUENTIAL)){
       if(match(Token::SEMICOLON)){
-        method = new SequentialFile<Record,int>();
-        tabla = make_pair(nombre_tabla, "record1");
-        tabla = make_pair(nombre_tabla, "record2");
+        if(archivo == "datos.csv"){
+          method = new SequentialFile<Record,int>();
+          tablas[0] = make_pair(nombre_tabla, "record1");
+          tabla = tablas[0];
+        }
+        else if(archivo == "datos2.csv"){
+          method1 = new SequentialFile<Record2,int>();
+          tablas[1] = make_pair(nombre_tabla, "record2");
+          tabla = tablas[1];
+        }
         insertCsv(filename);
         cout<<"Se crea tabla con index sequential"<<endl;
         error_message = "";
@@ -570,17 +641,17 @@ private:
       // cout << campos[4] << endl;
       precio = stof(campos[4]);
       cantidad = stoi(campos[5]);
-      cout << "--------" << endl;
+      // cout << "--------" << endl;
       Record record(key,nombre,producto,marca,precio,cantidad);
       bool asd__ = method->add(record);
-      cout << "---*----" << endl;
+      // cout << "---*----" << endl;
       // method->display_all();
       if(counter == 2000)
         break;
       counter ++;
       campos.clear();
     }
-    method->display_all();
+    // method->display_all();
   }
 };
 
