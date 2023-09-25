@@ -1,3 +1,4 @@
+#include <exception>
 #include <iostream>
 #include <stdlib.h>
 #include <cstring>
@@ -10,19 +11,19 @@
 #include "tokenSQL.h"
 #include <utility>
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include "Structures/methods.h"
 using namespace std;
 
 inline MethodSelector* method = new MethodSelector();
 inline vector<Record> records;
-inline string error_message;
+inline string error_message = "";
 
 class Parser {
   Scanner* scanner;
   Token* current, * previous;
   vector<string> atributos;
-  map<string, string> values;
+  vector<pair<string, string>> values;
 public:
   Parser(Scanner* sc):scanner(sc) {
     previous = current = NULL;
@@ -56,6 +57,32 @@ private:
   void mostrarValues(){
     for(auto it : values){
       cout<<it.first<<": "<<it.second<<endl;
+    }
+  }
+  
+  void insertarValues(){
+    try{
+      // char key[20];
+      int key = stoi(values[0].first);
+      char nombre[20];
+      char producto[20];
+      char marca[20];
+      float precio = stof(values[4].first);
+      int cantidad = stof(values[5].first);
+      strncpy(nombre, values[1].first.c_str(), sizeof(nombre) - 1);
+      nombre[sizeof(nombre) - 1 ]= '\0';
+      strncpy(producto, values[2].first.c_str(), sizeof(producto) - 1);
+      producto[sizeof(producto) - 1 ]= '\0';
+      strncpy(marca, values[3].first.c_str(), sizeof(marca) - 1);
+      marca[sizeof(marca) - 1 ]= '\0';
+      Record record(key,nombre,producto,marca,precio,cantidad);
+      bool added = method->add(record);
+      if(!added)
+        error_message = "Ya existe este elemento";
+      cout<<"Insertado"<<endl;
+    
+    } catch (const std::exception& e){
+      error_message = "Valores incorrectos para la tabla";
     }
   }
 
@@ -146,7 +173,7 @@ private:
         if(match(Token::SEMICOLON)){
           //Insertar
           cout<<"Insertar en la tabla values: "<<endl;
-          mostrarValues();
+          insertarValues();
           return true;
         }
         error_message = "Esperaba ;";
@@ -172,7 +199,7 @@ private:
       if(match(Token::ID)){
         string value = previous->lexema;
         if(match(Token::QUOTE)){
-          values.insert(make_pair(value, "string"));
+          values.push_back(make_pair(value, "string"));
           return true;
         }
         error_message = "Esperaba \"";
@@ -182,19 +209,19 @@ private:
       return false;
     }
     else if(match(Token::NUM)){
-      values.insert(make_pair(previous->lexema, "int"));
+      values.push_back(make_pair(previous->lexema, "int"));
       return true;
     }
     else if(match(Token::FLOAT)){
-      values.insert(make_pair(previous->lexema, "float"));
+      values.push_back(make_pair(previous->lexema, "float"));
       return true;
     }
     else if(match(Token::TRUE)){
-      values.insert(make_pair("true", "bool"));
+      values.push_back(make_pair("true", "bool"));
       return true;
     }
     else if(match(Token::FALSE)){
-      values.insert(make_pair("false", "bool"));
+      values.push_back(make_pair("false", "bool"));
       return true;
     }
     error_message = "Sintaxis incorrecta";

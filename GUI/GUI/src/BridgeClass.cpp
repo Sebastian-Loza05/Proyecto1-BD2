@@ -1,11 +1,42 @@
 #include "BridgeClass.h"
-#include <iostream>
-#include <string>
-#include <QString>
 using namespace std;
 
+struct record {
+    QString codigo;
+    QString nombre;
+    QString producto;
+    QString marca;
+    double precio;
+    int cantidad;
+};
+
 BridgeClass::BridgeClass(QObject *parent) : QObject(parent) {
+    records.push_back({ "64528587", "Carla", "Reloj de", "Casio", 12.1, 3 });
+    records.push_back({ "75893210", "Luis", "Teléfono", "Samsung", 550.5, 5 });
+    records.push_back({ "47859603", "Jorge", "Teclado", "Logitech", 45.3, 10 });
+    records.push_back({ "23984756", "Sofia", "Audífonos", "Sony", 80.7, 7 });
+    records.push_back({ "58749213", "Juan", "Cámara", "Nikon", 400.8, 3 });
+
 }
+
+QStringList BridgeClass::getRecords() {
+    QString codigo = "codigo";
+    QString nombre = "nombre";
+    QString producto = "produto";
+    QString marca = "marca";
+    QString precio = "precio";
+    QString cantidad = "cantidad";
+    QStringList result;
+
+    result.append(codigo + "\t" + nombre + "\t" + producto + "\t" + marca + "\t" +precio + "\t" +cantidad);
+    for (const record &rec : records) {
+        result.append(rec.codigo + "\t" + rec.nombre + "\t" + rec.producto + "\t" + rec.marca + "\t" + QString::number(rec.precio) + "\t" + QString::number(rec.cantidad));
+    }
+    return result;
+}
+
+//BridgeClass::BridgeClass(QObject *parent) : QObject(parent) {
+//}
 
 void BridgeClass::runQuery(const QString& query)
 {
@@ -22,12 +53,9 @@ void BridgeClass::runQuery(const QString& query)
         Parser parser(&scanner);
         parser.parse();
         this->method_global=method;
-    
     }
 
     emit dataChanged();
-    // std::string str = "pipipi";
-    // query = QString::fromUtf8(str.c_str());
 }
 
 
@@ -78,4 +106,21 @@ std::vector<std::string> BridgeClass::input(const string ingreso){
     return vec;
 };
 
+bool BridgeClass::verifyLogin(const QString& username, const QString& password) {
+    QFile file("E:/BD2/PROYECTO1/login.txt");
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return false;
 
+    QTextStream in(&file);
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        qDebug() << "Leído del archivo:" << line; // Agregar esta línea
+        QStringList parts = line.split(';');
+        if(parts.count() == 2 && parts[0].trimmed() == username && parts[1].trimmed() == password) {
+            file.close();
+            return true;
+        }
+    }
+    file.close();
+    return false;
+}

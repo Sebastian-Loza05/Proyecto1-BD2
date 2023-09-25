@@ -1,8 +1,8 @@
-/*#include <iostream>
+#include <iostream>
 // #include "AvlFile.h"
 #include "BPlusFile.h"
 // #include "SequentialFile.h"
-#include "methods.h"
+// #include "methods.h"
 #include "parserSQL.h"
 
 using namespace std;
@@ -26,6 +26,7 @@ int main (int argc, char *argv[]) {
     Scanner scanner(sentencia + " ");
     Parser parser(&scanner);
     parser.parse();
+    cout<<error_message<<endl;
   }
 
 
@@ -40,7 +41,7 @@ int main (int argc, char *argv[]) {
 
   return 0;
 }
-
+/*
 #include <iostream>
 #include <typeinfo>
 #include <sstream>
@@ -142,7 +143,7 @@ int main (int argc, char *argv[]) {
     return 0;
 }
 
-*/
+
 
 #include <GUI/QGui  Application>
 #include <Gui/Gui/QQmlApplicationEngine>
@@ -162,3 +163,4 @@ int main(int argc, char *argv[])
 
     return app.exec();
 }
+*/
