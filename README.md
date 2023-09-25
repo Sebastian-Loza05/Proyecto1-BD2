@@ -144,24 +144,34 @@ La eliminación de registro en el AVL File, sigue la misma estructura que la de 
 
 ### B+ Tree File:
 
-En un archivo B+ Tree, los nodos hojas contienen referencias directas a los registros reales del archivo de datos y están enlazados de manera similar a una lista enlazada, lo que permite soportar búsquedas individuales y por rango de manera eficiente. Por otro lado, los nodos internos conforman el directorio del índice y no almacenan información del archivo de datos.
+En un archivo B+ Tree, los nodos hojas contienen referencias directas a los registros reales del archivo de datos y están enlazados de manera similar a una lista enlazada, lo que permite soportar búsquedas individuales y por rango de manera eficiente. Por otro lado, los nodos internos conforman el directorio del índice y no almacenan información del archivo de datos. Cada nodo interno es representado por `Node` y las hojas por el `Bucket`.
+Los nodos internos estan en archivo bplus_datos.dat y las hojas en el archivo bplus_index.dat, cada archivo tiene un header next_del que representa la posición del ultimo elemento eliminado
 
 #### Inserción:
 
-La operación de inserción se encarga de agregar nuevos registros al árbol B+ de manera ordenada. Comienza desde la raíz del árbol y se desplaza hacia abajo siguiendo el camino adecuado según las claves. Si el nodo en el que se encuentra está lleno, se divide en dos nodos más pequeños para mantener el equilibrio del árbol. Se inserta el registro en el nodo adecuado. Si es necesario, se actualiza la clave en el nodo padre para reflejar la nueva clave máxima en el nodo insertado. Este proceso se repite desde la raíz hasta llegar a la hoja adecuada, donde finalmente se agrega el registro.
+La operación de inserción se encarga de agregar nuevos registros al árbol B+ de manera ordenada. Comienza desde la raíz del árbol y se desplaza hacia abajo siguiendo el camino adecuado según las claves. Si el nodo en el que se encuentra está lleno, se divide en dos nodos más pequeños para mantener el equilibrio del árbol. Se inserta el registro en el nodo adecuado. Si es necesario, se actualiza la clave en el nodo padre para reflejar la nueva clave máxima en el nodo insertado. Este proceso se repite desde la raíz hasta llegar a la hoja adecuada, donde finalmente se agrega el registro. Donde el root a pesar del split que pueda recibir siempre sera la línea cero, y al momento de insertar si hay un elemento eliminado escribirar donde indicar el header.
 
 #### Búsqueda de un registro:
 
-La búsqueda de un registro en un B+ Tree comienza desde la raíz y sigue un camino descendente a través del árbol siguiendo las claves. Comienza en la raíz y compara la clave buscada con las claves del nodo para determinar la dirección a seguir. Continúa descendiendo por el árbol, moviéndote al nodo hijo correspondiente en función de las comparaciones de claves. Repite el proceso hasta llegar a una hoja, donde se espera encontrar el registro si existe.
+La búsqueda de un registro en un B+ Tree comienza desde la raíz y sigue un camino descendente a través del árbol siguiendo las claves. Comienza en la raíz y compara la clave buscada con las claves del nodo para determinar la dirección a seguir. Continúa descendiendo por el árbol, moviéndote al nodo hijo correspondiente en función de las comparaciones de claves. Repite el proceso hasta llegar a una hoja, donde se espera encontrar el registro si existe. Aqui las lecturas varian dependiendo de donde se encuentra actualmente, ya que es diferente un `Bucket` que un `Node`.
 
-#### Búsqueda de un registro:
+#### Búsqueda de un registro por rango:
 
-Iniciamos la búsqueda desde el nodo raíz y descender por el árbol siguiendo las claves para encontrar el primer nodo que está dentro del rango. A partir de ese nodo, recorremos las hojas del árbol en orden, recopilando todos los registros cuyas claves están dentro del rango especificado.
+Iniciamos la búsqueda desde el nodo raíz y descender por el árbol siguiendo las claves para encontrar el primer nodo que está dentro del rango, hasta llegar a un `Bucket` lo que indica que es hoja. A partir de la hoja, recorremos las hojas del árbol en orden, recopilando todos los registros cuyas claves están dentro del rango especificado.
 
 #### Eliminación:
 
 Comenzamos desde la raíz y descendemos por el árbol para encontrar el nodo que contiene el registro a eliminar. Una vez encontrado, el registro se elimina del nodo.
-Si la eliminación causa que el nodo tenga muy pocos registros e incumple las propiedades del B+ Tree, se realiza redistribución o merge de nodos para mantener la estructura equilibrada.
+Si la eliminación causa que el nodo tenga muy pocos registros e incumple las propiedades del B+ Tree, se realiza redistribución o merge de nodos para mantener la estructura equilibrada. Donde la eliminación va depender si el nodo actual es un nodo interno o un nodo hoja, ya que la posicion del registro a eliminar cambiara el next_del de su respectivo archivo
+
+### Análisis comparativo:
+
+| Métodos      |   SequetialFile    |     AVLFile        |   B+ Tree File     |
+|--------------|--------------------|--------------------|--------------------|
+| Búsqueda     |    O(log n)        |             |             |
+| Insercción   |    O(log n)        |            |            |
+| Eliminación  |    O(log n)        |             |             |
+
 
 ### Análisis comparativo:
 
@@ -172,6 +182,11 @@ Si la eliminación causa que el nodo tenga muy pocos registros e incumple las pr
 | Eliminación  |    O(n log n)        |             |             |
 
 ### Parser SQL:
+
+Para este proyecto se implemento el uso de Parser SQL para poder simular en la UI ejecución de código SQL. Para poder ser posible la interpretación de sentencias mediante un input se a tenido que crear tres clase: `Token`, `Scanner` y `Parser`
+
+Donde en la clase `Token` se encarga de establecer las palabras reservadas para el reconocimiento de sintaxis. La clase `Scanner` se encarga de leer todo el input y hacer su respectiva separación de palabras y distribuyendolas segun el `Token` y tener un mejor manejo de la consulta.
+Una vez distribuido por Token, son mandados al `Parser`; el Parser sera el encargado de verificar sintaxis de ingreso y dependiendo de lo ingresado ejecutara ciertas funciónes para las diferentes consultas que podemos realizar.
 
 ## Resultados Experimentales:
 
