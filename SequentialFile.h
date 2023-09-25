@@ -43,7 +43,7 @@ struct Entry {
 
 };
 
-template <typename R>
+template <typename R, typename T>
 class SequentialFile: public MethodSelector<R> {
 private:
     string mainFilename;
@@ -552,7 +552,7 @@ public:
     }
 
     vector<R> rangeSearch(T beginkey, T endkey) override {
-        vector<Record> result;
+        vector<R> result;
         ifstream mainFile(mainFilename, ios::binary);
         if (!mainFile.is_open()) throw runtime_error("No se pudo abrir el archivo main");
 
