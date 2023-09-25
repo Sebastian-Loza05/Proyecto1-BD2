@@ -434,15 +434,16 @@ private:
         cout << previous->lexema << endl;
         if(match(Token::SEMICOLON)){
           records.clear();
+          cout<<value.first<<": "<<value.second<<endl;
           pair<Record,bool> result;
           if(value.second == "char"){
             char key[20];
             strncpy(key, value.first.c_str(), sizeof(key) - 1);
             key[sizeof(key) - 1 ]= '\0';
-            pair<Record,bool> result = method->search(key);
+            result = method->search(key);
           }else if (value.second == "int"){
             int key = stoi(value.first);
-            pair<Record,bool> result = method->search(key);
+            result = method->search(key);
           }
           // pair<Record,bool> result = method->search(value);
           // cout<<"Busqueda unitaria"<<endl;
@@ -577,9 +578,6 @@ private:
       if(counter == 2000)
         break;
       counter ++;
-      if(counter==2000){
-        break;
-      }
       campos.clear();
     }
     method->display_all();
