@@ -4,6 +4,7 @@
 #include "BPlusFile.h"
 #include "SequentialFile.h"
 #include "Structures/AVLFile.h"
+#include "Structures/Record.h"
 #include "Structures/methods.h"
 
 using namespace std;
@@ -11,8 +12,8 @@ using namespace std;
 template<typename  T>
 void ingreso(T *method){
   // BPlusFile<long , sizeof(long)> bplus;
-  ifstream archivo("datosprueba.csv");
-  // ifstream archivo("datos2.csv");
+  // ifstream archivo("datosprueba.csv");
+  ifstream archivo("datos2.csv");
   cout << "asdasdsa" << endl; 
   if (!archivo.is_open()) {
     cout << "Error al abrir el archivo___" << endl;
@@ -32,29 +33,29 @@ void ingreso(T *method){
       campos.push_back(campo);
     }
 
-    int key;
-    char nombre[20];
-    char producto[20];
-    char marca[20];
-    float precio;
-    int cantidad;
-
-    key = stoi(campos[0]);
-    strncpy(nombre, campos[1].c_str(), sizeof(nombre) - 1);
-    nombre[sizeof(nombre) - 1 ]= '\0';
-
-
-    strncpy(producto, campos[2].c_str(), sizeof(producto) - 1);
-    producto[sizeof(producto) - 1 ]= '\0';
-
-    strncpy(marca, campos[3].c_str(), sizeof(marca) - 1);
-    marca[sizeof(marca) - 1 ]= '\0';
-
-    // cout << campos[4] << endl;
-    precio = stof(campos[4]);
-    cantidad = stoi(campos[5]);
-    Record record(key,nombre,producto,marca,precio,cantidad);
-    record.print();
+    // int key;
+    // char nombre[20];
+    // char producto[20];
+    // char marca[20];
+    // float precio;
+    // int cantidad;
+    //
+    // key = stoi(campos[0]);
+    // strncpy(nombre, campos[1].c_str(), sizeof(nombre) - 1);
+    // nombre[sizeof(nombre) - 1 ]= '\0';
+    //
+    //
+    // strncpy(producto, campos[2].c_str(), sizeof(producto) - 1);
+    // producto[sizeof(producto) - 1 ]= '\0';
+    //
+    // strncpy(marca, campos[3].c_str(), sizeof(marca) - 1);
+    // marca[sizeof(marca) - 1 ]= '\0';
+    //
+    // // cout << campos[4] << endl;
+    // precio = stof(campos[4]);
+    // cantidad = stoi(campos[5]);
+    // Record record(key,nombre,producto,marca,precio,cantidad);
+    // record.print();
 
     // cout << "---prev---" << endl;
     // method->display_all();
@@ -63,22 +64,22 @@ void ingreso(T *method){
     string asd;
 
 
-    // char key[20];
-    // char genero[20];
-    // char profesion[20];
-    // int edad;
-    // float sueldo;
-    //
-    // strncpy(key, campos[0].c_str(), sizeof(key) - 1);
-    // key[sizeof(key) - 1 ]= '\0';
-    // strncpy(genero, campos[1].c_str(), sizeof(genero) - 1);
-    // genero[sizeof(genero) - 1 ]= '\0';
-    // strncpy(profesion, campos[2].c_str(), sizeof(profesion) - 1);
-    // profesion[sizeof(profesion) - 1 ]= '\0';
-    // edad = stoi(campos[3]);
-    // sueldo = stof(campos[4]);
-    // Record2 record(key,genero,profesion,edad,sueldo);
-    // record.print();
+    char key[20];
+    char genero[20];
+    char profesion[20];
+    int edad;
+    float sueldo;
+
+    strncpy(key, campos[0].c_str(), sizeof(key) - 1);
+    key[sizeof(key) - 1 ]= '\0';
+    strncpy(genero, campos[1].c_str(), sizeof(genero) - 1);
+    genero[sizeof(genero) - 1 ]= '\0';
+    strncpy(profesion, campos[2].c_str(), sizeof(profesion) - 1);
+    profesion[sizeof(profesion) - 1 ]= '\0';
+    edad = stoi(campos[3]);
+    sueldo = stof(campos[4]);
+    Record2 record(key,genero,profesion,edad,sueldo);
+    record.print();
     // Record
     // if (counter > 96)
     //   cin >> asd;
@@ -99,7 +100,7 @@ void ingreso(T *method){
       // char key_insert_b[20], key_insert_e[20];
       cin >> key_insert_b >> key_insert_e;
 
-      vector<Record> vec = method->rangeSearch(key_insert_b,key_insert_e);
+      vector<Record2> vec = method->rangeSearch(key_insert_b,key_insert_e);
       for (int i = 0; i < vec.size(); i++) {
         vec[i].print();
       }
@@ -169,7 +170,8 @@ int main (int argc, char *argv[]) {
   
   // ingreso(method);
   // MethodSelector<Record2> *seq = new BPlusFile<Record2, char*, 20>();
-  MethodSelector<Record> *seq = new BPlusFile<Record, int, sizeof(int)>();
+  // MethodSelector<Record> *seq = new BPlusFile<Record, int, sizeof(int)>();
+  MethodSelector<Record2> *seq = new AVLFile<Record2, char*>;
   // MethodSelector *seq = new SequentialFile<int>();
   ingreso(seq);
   
