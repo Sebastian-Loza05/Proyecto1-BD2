@@ -164,14 +164,6 @@ Iniciamos la búsqueda desde el nodo raíz y descender por el árbol siguiendo l
 Comenzamos desde la raíz y descendemos por el árbol para encontrar el nodo que contiene el registro a eliminar. Una vez encontrado, el registro se elimina del nodo.
 Si la eliminación causa que el nodo tenga muy pocos registros e incumple las propiedades del B+ Tree, se realiza redistribución o merge de nodos para mantener la estructura equilibrada. Donde la eliminación va depender si el nodo actual es un nodo interno o un nodo hoja, ya que la posicion del registro a eliminar cambiara el next_del de su respectivo archivo
 
-### Análisis comparativo:
-
-| Métodos      |   SequetialFile    |     AVLFile        |   B+ Tree File     |
-|--------------|--------------------|--------------------|--------------------|
-| Búsqueda     |    O(log n)        |             |             |
-| Insercción   |    O(log n)        |            |            |
-| Eliminación  |    O(log n)        |             |             |
-
 
 ### Análisis comparativo:
 
