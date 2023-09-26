@@ -197,4 +197,12 @@ Una vez distribuido por Token, son mandados al `Parser`; el Parser sera el encar
 
 ### Cuadro comparativo:
 
+<p align="center">
+  <img src="Imagenes/TiemposEjecuciones.png">
+</p>
+
+<p align="center">
+  <img src="Imagenes/AccesosMemoria.png">
+</p>
+
 ### Conclusiones:
