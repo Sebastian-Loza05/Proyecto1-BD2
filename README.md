@@ -205,6 +205,10 @@ Una vez distribuido por Token, son mandados al `Parser`; el Parser sera el encar
   <img src="Imagenes/AccesosMemoria.png">
 </p>
 
+### Ejecución
+
+Para ejecutar debe compilar en base al `CMakeList.txt` de la carpeta `/GUI/GUI`, y para un cargo correcto de las imagenes debe cambiar las rutas del archivo `/GUI/GUI/main.qml`. Y para un cargo correcto del login debe modificar la ruta en el archivo `/GUI/GUI/BridgeClass.cpp`, credenciales del Login usuario: `Heider` y contraseña: `123`
+
 ### Conclusiones:
 
 En este proyecto, se exploraron y compararon tres técnicas de organización de archivos en memoria secundaria: Sequential File, AVL File y B+ Tree File. Cada una de estas técnicas tiene sus propias ventajas y desventajas, y su elección depende de los requisitos específicos del sistema y el rendimiento deseado. El Sequential File es una opción sencilla y eficaz para aplicaciones con volúmenes moderados de datos, mientras que el AVL File y el B+ Tree File son ideales cuando se requiere un rendimiento óptimo en operaciones de búsqueda y búsqueda por rango.
