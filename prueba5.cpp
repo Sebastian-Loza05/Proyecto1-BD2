@@ -6,11 +6,14 @@
 #include "Structures/AVLFile.h"
 #include "Structures/Record.h"
 #include "Structures/methods.h"
-
+#include <chrono>
 using namespace std;
 
 template<typename  T>
 void ingreso(T *method){
+  // method->display_all();
+  // int a;
+  // cin >> a;
   // BPlusFile<long , sizeof(long)> bplus;
   ifstream archivo("datos.csv");
   // ifstream archivo("datos2.csv");
@@ -22,6 +25,7 @@ void ingreso(T *method){
 
   string linea;
   vector<string> campos;
+  vector <Record> records_;
 
   istringstream lineaStream(linea);
   int counter = 0;
@@ -55,13 +59,12 @@ void ingreso(T *method){
     precio = stof(campos[4]);
     cantidad = stoi(campos[5]);
     Record record(key,nombre,producto,marca,precio,cantidad);
+    records_.push_back(record);
     // record.print();
 
     // cout << "---prev---" << endl;
     // method->display_all();
     // cout << "--**----" << endl;
-    cout << "Insert: ";
-    string asd;
 
 
     // char key[20];
@@ -84,47 +87,46 @@ void ingreso(T *method){
     // if (counter > 96)
     //   cin >> asd;
     // cout << endl << endl << endl;
-      bool inser = 0;
-    method->display_all();
     // method->display();
     // vector<Record> vec1 = method->load();
     // 
     // for (int i = 0; i < vec1.size(); i++) {
     //   vec1[i].print();
     //   cout << "-----" << endl;
-    // }
-    cin >> inser;
-    if (inser) {
-      cout << "Key: ";
-      int key_insert_b, key_insert_e;
-      // cin >> key_insert_b;
-      // pair<Record,bool> asd = method->search(key_insert_b);
-      // char key_insert_b[20], key_insert_e[20];
-      cin >> key_insert_b >> key_insert_e;
-      //
-      vector<Record> vec = method->rangeSearch(key_insert_b,key_insert_e);
-      for (int i = 0; i < vec.size(); i++) {
-        vec[i].print();
-      }
-        cout << "-----" << endl;
+    //}
 
-      // if (asd.second) {
-      //   asd.first.print();
-      // }
-      // else{
-      //   cout << "No existe este elemento" << endl;
-      // }
-      cin >> key_insert_b;
-    }
-    else {
-      bool asd___ = method->add(record);
-      // cout << "Key: ";
-      // char key_del[20];
-      // cin >> key_del;
-      // bool asd___ = method->remove(key_del);
-      // cout << "Rpta: " << asd___ << endl;
-      // method->display();
-    }
+    // cin >> inser;
+    // if (inser) {
+    //   cout << "Key: ";
+    //   int key_insert_b, key_insert_e;
+    //   // cin >> key_insert_b;
+    //   // pair<Record,bool> asd = method->search(key_insert_b);
+    //   // char key_insert_b[20], key_insert_e[20];
+    //   cin >> key_insert_b >> key_insert_e;
+    //   //
+    //   vector<Record> vec = method->rangeSearch(key_insert_b,key_insert_e);
+    //   for (int i = 0; i < vec.size(); i++) {
+    //     vec[i].print();
+    //   }
+    //     cout << "-----" << endl;
+    //
+    //   // if (asd.second) {
+    //   //   asd.first.print();
+    //   // }
+    //   // else{
+    //   //   cout << "No existe este elemento" << endl;
+    //   // }
+    //   cin >> key_insert_b;
+    // }
+    // else {
+    //   bool asd___ = method->add(record);
+    //   // cout << "Key: ";
+    //   // char key_del[20];
+    //   // cin >> key_del;
+    //   // bool asd___ = method->remove(key_del);
+    //   // cout << "Rpta: " << asd___ << endl;
+    //   // method->display();
+    // }
     
     // method->display_all();
     // cout << "Rpta: " << asd__ << endl;
@@ -134,7 +136,7 @@ void ingreso(T *method){
     //   cout << valor << "\t";
     // }
     // cout << endl;
-    cout<<"counter: "<<counter<<endl;
+    // cout<<"counter: "<<counter<<endl;
     counter++;
     // cout << "--desp----" << endl;
     // method->display_all();
@@ -143,21 +145,7 @@ void ingreso(T *method){
     // bplus.displayTree();
     //
     // cin >> asd;
-    if(counter == 4000){
-    method->display_all();
-      cout << "Key: ";
-      int key_insert_b, key_insert_e;
-      // cin >> key_insert_b;
-      // pair<Record,bool> asd = method->search(key_insert_b);
-      // char key_insert_b[20], key_insert_e[20];
-      cin >> key_insert_b >> key_insert_e;
-      //
-      vector<Record> vec = method->rangeSearch(key_insert_b,key_insert_e);
-        cout << "-----" << endl;
-      for (int i = 0; i < vec.size(); i++) {
-        vec[i].print();
-      }
-        cout << "-----" << endl;
+    if(counter == 10000){
       break;
     }
     campos.clear();
@@ -165,6 +153,18 @@ void ingreso(T *method){
   // bplus.displayTree();
 
   archivo.close();
+  chrono::time_point<std::chrono::system_clock> t_inicio,t_final;
+  t_inicio = chrono::high_resolution_clock::now();
+  
+  for (int i = 0; i < records_.size(); i++) {
+    bool asd = method->add(records_[i]);
+    // records_[i].print();
+  }
+  t_final  = chrono::high_resolution_clock::now(); 
+  std::chrono::duration<double, std::milli> t = t_final - t_inicio;
+  method->display_all();
+  cout << "Tiempo = " << t.count() << "ms" << endl;
+
 
   return;
 }
@@ -195,6 +195,7 @@ int main (int argc, char *argv[]) {
   // MethodSelector<Record2> *seq = new SequentialFile<Record2, char*>();
   // MethodSelector<Record> *seq = new SequentialFile<Record, int>();
   ingreso(seq);
+  
   
 
   

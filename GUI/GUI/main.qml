@@ -19,7 +19,7 @@ ApplicationWindow {
                 height: 720
 
                 Image {
-                    source: "file:///E:/BD2/PROYECTO1/GUI/GUI/images/fondo.jpeg"
+                    source: "file:/home/luisd/UTEC/ciclo_6/BDII/proyecto/Proyecto1-BD2/GUI/GUI/images/fondo.jpeg"
                     fillMode: Image.PreserveAspectCrop
                     anchors.fill: parent
                 }
@@ -40,7 +40,7 @@ ApplicationWindow {
 
                         Image {
 
-                            source: "file:///E:/BD2/PROYECTO1/GUI/GUI/images/BD.png"
+                            source: "file:/home/luisd/UTEC/ciclo_6/BDII/proyecto/Proyecto1-BD2/GUI/GUI/images/BD.png"
                             width: 200
                             height: 200
                             anchors.horizontalCenter: parent.horizontalCenter
@@ -89,13 +89,13 @@ ApplicationWindow {
                         }
 
                         Button {
-                            text: "Log In"
+                            text: "Log In ➡️"
                             onClicked: {
                                 if (bridge.verifyLogin(usernameTextField.text, passwordTextField.text)) {
                                     errorMessage.visible = false;
                                     stackView.push(mainPageComponent.createObject(stackView));
                                 } else {
-                                    errorMessage.visible = true; // Mostrar el mensaje de error
+                                    errorMessage.visible = true;
                                 }
                             }
                             anchors.horizontalCenter: parent.horizontalCenter
@@ -111,7 +111,6 @@ ApplicationWindow {
                 }
             }
         }
-
         Component {
             id: mainPageComponent
 
@@ -120,10 +119,11 @@ ApplicationWindow {
                 height: 720
 
                 Image {
-                    source: "file:///E:/BD2/PROYECTO1/GUI/GUI/images/fondo.jpeg"
+                    source: "file:/home/luisd/UTEC/ciclo_6/BDII/proyecto/Proyecto1-BD2/GUI/GUI/images/fondo.jpeg"
                     fillMode: Image.PreserveAspectCrop
                     anchors.fill: parent
                 }
+
                 anchors.fill: parent
 
                 Item {
@@ -134,7 +134,7 @@ ApplicationWindow {
                         height: parent.height
                         color: "black"
                         opacity: 0.5
-                        z: -1 // Establece un valor de z menor para colocarlo detrás
+                        z: -1
                     }
 
                     Column {
@@ -144,75 +144,198 @@ ApplicationWindow {
                         Rectangle {
                             width: 800
                             height: 200
-                            color: "white"
-                            border.color: "black"
-                            radius: 10
-                            clip: true
+                            color: "transparent"  // Hacemos transparente este Rectangle que actúa como contenedor
 
-                            ScrollView {
+                            Row {
                                 anchors.fill: parent
-                                clip: true
-                                TextArea {
-                                    id: txtArea
-                                    width: parent.width
-                                    height: parent.height
-                                    wrapMode: Text.Wrap
-                                }
-                            }
-                        }
+                                spacing: 10
 
-                        Row {
-                            spacing: 10
-                            Button {
-                                text: "Run"
-                                onClicked: {
-                                    bridge.runQuery(txtArea.text);
-                                    if(bridge.getErrorMessage() !== "") {
-                                        outputArea.text = "Error: " + bridge.getErrorMessage();
-                                    } else {
-                                        outputArea.text = bridge.readRecords();
+                                // Rectangle que envuelve al TextArea
+                                Rectangle {
+                                    width: 600  // Aquí definimos el ancho para el TextArea y su contenedor
+                                    height: parent.height
+                                    color: "white"
+                                    border.color: "black"
+                                    radius: 10
+                                    clip: true
+
+                                    ScrollView {
+                                        anchors.fill: parent
+                                        clip: true
+                                        TextArea {
+                                            id: txtArea
+                                            anchors.fill: parent
+                                            wrapMode: Text.Wrap
+                                        }
                                     }
                                 }
 
+                                // Imagen a la derecha del TextArea
+                                Image {
+                                    width: 200
+                                    height: parent.height
+                                    source: "file:/home/luisd/UTEC/ciclo_6/BDII/proyecto/Proyecto1-BD2/GUI/GUI/images/excel.png"
+                                    fillMode: Image.PreserveAspectFit
+                                }
                             }
+                        }
+                        Row {
+                            spacing: 10
+                            Button {
+                                text: "✅"
+                                onClicked: {
+                                    headersRow.visible = true;
+                                    bridge.runQuery(txtArea.text);
+                                    if(bridge.getErrorMessage() !== "") {
+                                        headersRow.currentHeaders = [bridge.getErrorMessage()];
+                                        recordsListModel1.clear(); // Limpia los registros anteriores
+                                        recordsListModel2.clear(); // Limpia los registros anteriores
 
+                                    } else {
+                                        var M= bridge.getErrorMessage();
+                                        M = "Succesfull";
+                                        headersRow.currentHeaders = [M];
+                                        recordsListModel1.clear();
+                                        recordsListModel2.clear();
+                                        const records = bridge.readRecords();
+                                        if (records.length > 0) {
+                                            if (records[0].headerType === "1") {
+                                                headersRow.currentHeaders = headersRow.headers1;
+                                                for(let i = 0; i < records.length; ++i) {
+                                                    recordsListModel1.append(records[i]);
+                                                }
+                                            } else if (records[0].headerType === "2") {
+                                                headersRow.currentHeaders = headersRow.headers2;
+                                                for(let i = 0; i < records.length; ++i) {
+                                                    recordsListModel2.append(records[i]);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
 
                             Button {
-                                text: "Clear"
+                                text: "🛑"
                                 onClicked: {
                                     txtArea.text = "";
-                                    // Limpia otros elementos si es necesario
+                                    recordsListModel.clear();
+                                    headersRow.visible = false;
                                 }
-
                             }
-
-
-
                         }
 
                         Rectangle {
-                            width: 800
-                            height: 240
+                            width: 805
+                            height: 295
                             color: "white"
                             border.color: "black"
-                            radius: 10
+                            radius: 15
                             clip: true
 
-                            ScrollView {
-                                anchors.fill: parent
-                                clip: true
-                                TextArea {
-                                    id: outputArea
+                            Column {
+                                spacing: 5
+                                anchors.top: parent.top
+                                width: parent.width
+
+                                Row {
+                                    id: headersRow
+                                    visible: false
+                                    spacing: 5
+
+                                    property var headers1: ["Código", "Nombre", "Producto", "Marca", "Precio", "Cantidad"]
+                                    property var headers2: ["Código", "Género", "Profesión", "Edad", "Sueldo"]
+                                    property var currentHeaders: ["Succesfull!"]
+
+                                    Repeater {
+                                        model: headersRow.currentHeaders
+                                        delegate: Rectangle {
+                                            width: index === 0 ? 90 : 140
+                                            height: 30
+                                            color: "transparent"
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: modelData
+                                            }
+                                        }
+                                    }
+                                }
+
+                                ScrollView {
                                     width: parent.width
-                                    height: parent.height
-                                    readOnly: true
-                                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                                    height: 230
+                                    clip: true
+
+                                    TableView {
+                                        width: parent.width
+                                        height: parent.height
+                                        model: headersRow.currentHeaders === headersRow.headers1 ? recordsListModel1 : recordsListModel2
+
+                                        delegate: Row {
+                                            spacing: 5
+                                            Rectangle {
+                                                width: 90
+                                                height: 30
+                                                color: "transparent"
+                                                Text {
+                                                    anchors.centerIn: parent
+                                                    text: model.codigo
+                                                }
+                                            }
+                                            Rectangle {
+                                                width: 140
+                                                height: 30
+                                                color: "transparent"
+                                                Text {
+                                                    anchors.centerIn: parent
+                                                    text: model.nombre || model.genero || ""
+                                                }
+                                            }
+                                            Rectangle {
+                                                width: 140
+                                                height: 30
+                                                color: "transparent"
+                                                Text {
+                                                    anchors.centerIn: parent
+                                                    text: model.producto || model.profesion || ""
+                                                }
+                                            }
+                                            Rectangle {
+                                                width: 140
+                                                height: 30
+                                                color: "transparent"
+                                                Text {
+                                                    anchors.centerIn: parent
+                                                    text: model.marca || model.edad || ""
+                                                }
+                                            }
+                                            Rectangle {
+                                                width: 140
+                                                height: 30
+                                                color: "transparent"
+                                                Text {
+                                                    anchors.centerIn: parent
+                                                    text: model.precio || model.sueldo || ""
+                                                }
+                                            }
+                                            Rectangle {
+                                                width: 140
+                                                height: 30
+                                                color: "transparent"
+                                                Text {
+                                                    anchors.centerIn: parent
+                                                    text: model.cantidad || ""
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
-                        }
 
-                        Button {
-                            text: "Log Out"
+
+                            }
+                            Button {
+                            text: "↩️"
                             onClicked: {
                                 stackView.pop();
                             }
@@ -220,6 +343,12 @@ ApplicationWindow {
                     }
                 }
             }
+        }
+        ListModel {
+            id: recordsListModel1
+        }
+        ListModel {
+            id: recordsListModel2
         }
         initialItem: Item {
             Component.onCompleted: {

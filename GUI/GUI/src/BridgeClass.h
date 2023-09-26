@@ -23,7 +23,7 @@ public:
     explicit BridgeClass(QObject *parent = nullptr);
     Q_INVOKABLE bool verifyLogin(const QString& username, const QString& password);
     Q_INVOKABLE QString getErrorMessage() const;
-    Q_INVOKABLE QString readRecords() const;
+    Q_INVOKABLE QVariantList readRecords() const;
 signals:
     void errorOccurred();
     void dataChanged();

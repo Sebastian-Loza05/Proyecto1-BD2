@@ -74,6 +74,7 @@ private:
 
 public:
     AVLFile(){
+      this->filename = "../../../AVLdata.dat";
       this->filename = "AVLdata.dat";
       ofstream file(this->filename, ios::binary | ios::app);
       file.close();
@@ -511,10 +512,13 @@ private:
           return;
       }
       NodeBTAVL<R> temp;
+      bool is_balance = false; // indica si se realizo balanceo
       data.seekg( pos_node, ios::beg );
       data.read( (char*)(&temp), sizeof(NodeBTAVL<R>) );
       
-      if ( balancingFactor(pos_node, data) == -2 ) {
+      int balancing = balancingFactor(pos_node, data); 
+      if ( balancing == -2 ) {
+        is_balance = true;
         if ( balancingFactor(temp.right, data) == 1 ) {
           NodeBTAVL<R> temp_right;
           data.seekg( temp.right, ios::beg );
@@ -527,7 +531,8 @@ private:
           right_rota(temp, pos_node, is_left, pos_node_prev, data);
         }
       }
-      else if ( balancingFactor(pos_node, data) == 2 ) {
+      else if ( balancing == 2 ) {
+        is_balance = true;
         if ( balancingFactor(temp.left, data) == -1 ) {
           NodeBTAVL<R> temp_left;
           data.seekg( temp.left, ios::beg );
@@ -539,7 +544,10 @@ private:
           left_rota(temp, pos_node, is_left, pos_node_prev, data);
         }
       }
-      updateHeight(pos_node, data);
+
+      if (is_balance) {
+        updateHeight(pos_node, data);
+      }
     };
     int balancingFactor(long pos_node, fstream &data){
       if (pos_node == -1) {
