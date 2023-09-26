@@ -29,7 +29,7 @@ Los objetivos secundarios son diseñar una interfaz de usuario (GUI) que permita
 
 ### Descripción de datos
 
-Para llevar a cabo este proyecto, se han seleccionado dos conjuntos de datos reales de Kaggle, una plataforma que proporciona datos variados. Estos datos representarán el dominio en el que aplicaremos técnicas de indexación para mejorar la eficiencia en la recuperación de información.
+Para llevar a cabo este proyecto, se han seleccionado dos conjuntos de datos generados en python. Estos datos representarán el dominio en el que aplicaremos técnicas de indexación para mejorar la eficiencia en la recuperación de información.
 
 ### Resultados esperados
 
