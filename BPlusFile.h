@@ -289,14 +289,22 @@ public:
     data.seekg(pos, ios::beg);
     Bucket<R> bucket(page_size);
     bucket.read(data);
+    bool find = false;
     for (int i = 0; i < bucket.count; i++) {
-      if ( igual_igual(bucket.records[i].key , key) )
+      if ( igual_igual(bucket.records[i].key , key) ){
       // if(bucket.records[i].key == key)
         res = bucket.records[i];
+        find = true;
+      }
     }
     data.close();
     index.close();
-    return make_pair(res, true);
+    if (find) {
+      return make_pair(res, true);
+    }
+    else{
+      return make_pair(res, false);
+    }
   }
 
   bool add(R record) override{
