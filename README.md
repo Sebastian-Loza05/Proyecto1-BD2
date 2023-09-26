@@ -4,11 +4,11 @@
 
 | Integrante                         | Tareas                 |
 |-----------------------------------|------------------------------|
-| Coorahua Peña, Ruben Aaron        |                              |
-| Golac Córdova, Luis David         |                              |
-| Loza Mendoza, Sebastián           |                              |
-| Pajuelo Reyes, César Eduardo      |                              |
-| Rodríguez Gutiérrez, Gonzalo Alonso|                             |
+| Coorahua Peña, Ruben Aaron        |          Interfaz gráfica                    |
+| Golac Córdova, Luis David         |          AVL File - BPlus File                    |
+| Loza Mendoza, Sebastián           |          BPlus File - Parser SQL                    |
+| Pajuelo Reyes, César Eduardo      |            Sequential File - README.md                  |
+| Rodríguez Gutiérrez, Gonzalo Alonso|           Sequential File - README.md                  |
 
 
 ## Introducción
@@ -197,4 +197,16 @@ Una vez distribuido por Token, son mandados al `Parser`; el Parser sera el encar
 
 ### Cuadro comparativo:
 
+<p align="center">
+  <img src="Imagenes/TiemposEjecuciones.png">
+</p>
+
+<p align="center">
+  <img src="Imagenes/AccesosMemoria.png">
+</p>
+
 ### Conclusiones:
+
+En este proyecto, se exploraron y compararon tres técnicas de organización de archivos en memoria secundaria: Sequential File, AVL File y B+ Tree File. Cada una de estas técnicas tiene sus propias ventajas y desventajas, y su elección depende de los requisitos específicos del sistema y el rendimiento deseado. El Sequential File es una opción sencilla y eficaz para aplicaciones con volúmenes moderados de datos, mientras que el AVL File y el B+ Tree File son ideales cuando se requiere un rendimiento óptimo en operaciones de búsqueda y búsqueda por rango.
+
+Además de las técnicas de organización de archivos, se desarrolló una interfaz de usuario (GUI) que permite a los usuarios interactuar con las estructuras de indexación a través de consultas SQL. Esta interfaz proporciona una manera conveniente y accesible de gestionar los datos almacenados en las diferentes estructuras de archivo, lo que facilita su implementación y uso en aplicaciones del mundo real.
